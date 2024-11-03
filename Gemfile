@@ -19,5 +19,7 @@ group :jekyll_plugins do
     gem 'htmlbeautifier'
     gem "faraday-retry"
     gem "jekyll-scholar"
+    gem 'uri', '0.10.1'
+
 
 end
