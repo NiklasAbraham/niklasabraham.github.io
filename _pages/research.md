@@ -11,10 +11,6 @@ My research focuses on bridging the gap between established computer science and
 ### Publications
 Below is a list of my publications in reversed chronological order. 
 
-“Design and Realization of a Fast Optimal Transform”; as part of studies, at the Institute of Numerical Mechanics,
-supervised by Tom Könecke and Lennart Frie; University of Stuttgart; April 2024
-
-
 <div class="publications">
 
 <br/>
