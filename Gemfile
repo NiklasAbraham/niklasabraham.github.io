@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 group :jekyll_plugins do
     gem 'uri', '0.10.1'
     gem 'jekyll'
-    gem "github-pages",
+    gem 'github-pages'
     gem 'jekyll-archives'
     gem 'jekyll-diagrams'
     gem 'jekyll-email-protect'
