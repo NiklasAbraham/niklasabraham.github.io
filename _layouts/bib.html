@@ -20,7 +20,7 @@
 
         <!-- Entry bib key -->
         <div id="{{entry.key}}" class="col-sm-8">
-        {% if entry.type == "thesis" -%}
+        {% if entry.type == "thesis" or entry.type == "mastersthesis" -%}
           {{reference}}
         {%- else %}
           <!-- Title -->
