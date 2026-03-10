@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-# Wrapper to run bundler with current Ruby (avoids broken /usr/local/bin/bundle shebang)
-ENV["BUNDLER_VERSION"] = "2.4.19"
-require "rubygems"
-load Gem.bin_path("bundler", "bundle", "2.4.19")
