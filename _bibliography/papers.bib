@@ -1,12 +1,21 @@
 ---
 ---
 
-@article{niklas_seminar,
-    title={Design and Realization of a Fast Optimal Transform},
-    author={
-Niklas Abraham},
-    year={2024},
-    code={https://github.tik.uni-stuttgart.de/tkoenecke/optimal},
+@inproceedings{quast2026converting,
+    title={Converting diffusions to flows accelerates sampling and suggests over-conditioning of co-folding models on sequence},
+    author={Quast, Nele P. and Abraham, Niklas and Schöne, Aaron and Imrie, Fergus and Raybould, Matthew I. J. and Teh, Yee Whye and Deane, Charlotte},
+    booktitle={ICLR 2026 Workshop on Learning Meaningful Representations of Life (LMRL)},
+    year={2026},
+    abbr={LMRL @ ICLR},
+    abstract={We convert stochastic diffusion sampling to a deterministic flow process; pre-trained diffusion-based structure predictors used as probability-flow ODEs give equivalent FoldBench performance with a 20x sampling speed-up and show strong conditioning on sequence and MSA.},
     selected={true},
-    preview={seminar.png},
-} 
+}
+
+@article{runge2025geometric,
+    title={Geometric encoding of enzymatic mechanism in protein language model representations},
+    author={Runge, Jan and Abraham, Niklas and Pleiss, Jürgen},
+    journal={Manuscript in preparation},
+    year={2025},
+    abstract={Functionally critical residues form a directional outlier subspace in ESM-2 last-layer representations; +14 percentage points on EC sub-subclass classification vs. mean pooling, validated on ligand-binding sites (median AUC 0.755) and ProteinGym fitness assays without alignments or structural data.},
+    selected={true},
+}

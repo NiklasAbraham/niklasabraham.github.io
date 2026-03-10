@@ -2,11 +2,11 @@
 layout: page
 permalink: /research/
 title: Research
-years: [2024]
+years: [2026, 2025]
 nav: true
 sort_menu: 1
 ---
-My research focuses on bridging the gap between established computer science and mathematical methods and their real-world applications in bioinformatics.
+My research focuses on generative modelling for structural biology and machine learning methods for bioinformatics. Current interests include score-based diffusion, flow-matching, and protein language model representations, with the broader goal of accelerating computational tools for protein engineering and drug discovery.
 
 ### Publications
 Below is a list of my publications in reversed chronological order. 

@@ -1,8 +1,7 @@
 ---
 layout: post
-date: 2024-10-31 10:00:00-0100
+date: 2026-02-01 10:00:00+0100
 inline: true
 ---
 
-Attended "SAM-Enzyme conference" at the University of Stuttgart.
-Here, I had my first interaction with many experimental biochemists and learned firsthand about the problems of research software development.
+Our paper "Converting diffusions to flows accelerates sampling and suggests over-conditioning of co-folding models on sequence" has been accepted as a poster at the ICLR 2026 Workshop on Learning Meaningful Representations of Life (LMRL).

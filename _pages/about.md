@@ -2,7 +2,7 @@
 layout: about
 permalink: /
 title: <strong>Niklas</strong> Abraham
-subtitle: Simulation Technology Student @ University of Stuttgart
+subtitle: Machine Learning Student @ University of Tübingen
 
 profile:
   align: right
@@ -20,10 +20,10 @@ social: true
 selected_papers: true
 ---
 
-I am a bachelor's student in Simulation Technology at the University of Stuttgart. As part of my studies, I have taken various modules in mathematics, including Calculus 1, 2, and 3, functional calculus, and numerical mathematics. In physics, I have completed courses in experimental physics and an introduction to quantum physics, among others. For my electives, I have focused on AI and bioinformatics courses.
+I am an MSc student in Machine Learning at the University of Tübingen (current grade average: 1.0), where my studies are embedded within one of Europe's leading ML research hubs through links with the Max Planck Institutes and Cyber Valley. My coursework focuses on deep learning, statistical machine learning, and probabilistic inference. I completed my BSc in Simulation Technology at the University of Stuttgart in 2025 (grade 1.9, 5th in cohort of 22), with an elected focus on AI and bioinformatics. I am a scholarship holder of the German Scholarship Foundation ([Studienstiftung des Deutschen Volkes](https://www.studienstiftung.de/)).
 
-Currently, I am working as a research student at the Institute of Biochemistry and Technical Biochemistry, under the supervision of [Prof. Jürgen Pleiss](https://www.ibtb.uni-stuttgart.de/institut/team/Pleiss-00001/). My work involves the [Python Enzyme Engineering Database](https://github.com/PyEED/pyeed?tab=readme-ov-file) (PyEED), a Python package we are developing for protein analysis. PyEED is built on Neo4J and facilitates the creation of networks for proteins, DNA, and ontologies. Currently, I am using PyEED to investigate TEM-Lactamase proteins.
+My research interests center on advanced generative modelling (score-based diffusion, flow-matching), non-convex optimisation in deep learning, and reinforcement learning for sequential decision-making, with applications in structural biology and bioinformatics. Most recently, our work on converting diffusion-based co-folding models to deterministic probability-flow ODEs was accepted as a poster at the [ICLR 2026 Workshop on Learning Meaningful Representations of Life](research/), achieving a 20x sampling speed-up on FoldBench.
 
-In my future [research](../research/), I hope to continue studying TEM proteins and further explore the use of graph databases and vector embeddings for ontologies in bioinformatics.
+Previously, I worked as a research student at the Institute of Biochemistry and Technical Biochemistry (University of Stuttgart) under the supervision of [Prof. Jürgen Pleiss](https://www.ibtb.uni-stuttgart.de/institut/team/Pleiss-00001/), where I developed machine-learning frameworks integrating large protein language models (ESM-2, ESM-C) with curated biological databases to predict β-lactamase resistance phenotypes, and contributed to the [Python Enzyme Engineering Database](https://github.com/PyEED/pyeed?tab=readme-ov-file) (PyEED). In October 2025, I won the Speed-Up Challenge at the Merck M-Boltz Hackathon by developing a fast deterministic flow-matching framework for accelerated protein structure generation. Starting April 2026, I will join Merck KGaA's Group Science & Technology Office for a six-month internship.
 
-Outside my academic work, I am an indoor climbing instructor at a local climbing gym and enjoy training for upcoming triathlon events, which I am very passionate about. In my remaining free time, I read extensively and try to consume as much non-fiction as possible.
+Outside my academic work, I train for triathlon (next up: a 70.3 Ironman), coach climbing for children at KiSS e.V. twice a week, and read as much non-fiction as I can find.
