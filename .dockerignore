@@ -1,0 +1,9 @@
+.git
+_site
+vendor
+.bundle
+.jekyll-cache
+.jekyll-metadata
+.sass-cache
+node_modules
+*.log

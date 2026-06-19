@@ -11,8 +11,9 @@ footer_text: >
 
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: 🔥 # the emoji used as the favicon
-url: https://niklasabraham.github.io #the base hostname & protocol for your site
-baseurl: # the subpath of your site, e.g. /blog/
+url: https://niklas-abraham.de #the base hostname & protocol for your site
+baseurl: "" # the subpath of your site, e.g. /blog/ (explicit empty string so jekyll-github-metadata doesn't override it)
+repository: NiklasAbraham/niklasabraham.github.io # used by jekyll-github-metadata when building outside GitHub Actions
 last_updated: false # set to true if you want to display last updated in the footer
 impressum_path:  # set to path to include impressum link in the footer, use the same path as permalink in a page, helps to conform with EU GDPR
 
@@ -129,6 +130,10 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - vendor
+  - Dockerfile
+  - docker-compose.yml
+  - nginx.conf
+  - .dockerignore
 keep_files:
   - CNAME
   - .nojekyll
