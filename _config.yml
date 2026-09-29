@@ -4,9 +4,11 @@
 
 name: Niklas Abraham
 title: Niklas Abraham
+first_name: Niklas
+last_name: Abraham
 email: niklas.cv.abraham@gmail.com
 description: > # this means to ignore newlines until "url:"
-  A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+  Niklas Abraham: machine learning for structural biology. MSc Machine Learning (Tübingen), Recognised Student at the University of Oxford (OPIG).
 footer_text: >
 
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
@@ -28,10 +30,10 @@ impressum_path:  # set to path to include impressum link in the footer, use the 
 # -----------------------------------------------------------------------------
 
 navbar_fixed: true
-footer_fixed: true
+footer_fixed: false
 
 # Dimensions
-max_width: 800px
+max_width: 880px
 
 # TODO: add layout settings (single page vs. multi-page)
 

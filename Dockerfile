@@ -6,7 +6,10 @@ WORKDIR /srv/jekyll
 # System deps:
 #  - build-essential / git: compile native gems, jekyll-github-metadata
 #  - imagemagick + libmagickwand-dev: jekyll-imagemagick responsive images
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Debian bullseye (the base of ruby:3.0) is end of life: its security repo 404s,
+# the main suite lives on archive.debian.org
+RUN sed -i '/bullseye-security/d; /bullseye-updates/d; s|deb.debian.org|archive.debian.org|' /etc/apt/sources.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         git \
         imagemagick \
