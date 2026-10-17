@@ -1,0 +1,40 @@
+{
+ "label": "Fourier embedding of the noise level",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "How the noise level enters the AF3 denoiser (SI Algorithms 21 and 22)",
+  "caption": "256 random Fourier features, frozen before training. The derivation of the similarity uses w, b ~ N(0, 1); with 256 features the empirical similarity scatters by about ±0.06 around it.",
+  "main_latex": "s_i \\leftarrow s_i + W\\,\\mathrm{LN}\\big(\\cos(2\\pi(u\\,w + b))\\big), \\qquad u = \\tfrac14 \\ln(\\hat t/\\sigma_\\text{data})",
+  "steps": [
+   {
+    "latex": "u = \\tfrac14 \\ln(\\hat t / 16\\ \\text{Å}) \\in [-1.96,\\ 1.27]",
+    "explanation": "Put the noise level on a log scale centred on σ_data. The whole schedule, 2560 Å down to 0.0064 Å, a factor of 400,000, becomes a short interval of length 3.2. This is EDM's c_noise."
+   },
+   {
+    "latex": "w, b \\sim \\mathcal N(0, I_{256}), \\text{ drawn once and frozen}",
+    "explanation": "256 random frequencies and phases. They are never trained; only the layers after them are."
+   },
+   {
+    "latex": "n_k(u) = \\cos\\big(2\\pi(w_k u + b_k)\\big), \\qquad k = 1, \\dots, 256",
+    "explanation": "Each feature is a wave in u. Small |w_k| gives a slow wave that separates high from low noise; large |w_k| gives fast waves that separate neighbouring noise levels."
+   },
+   {
+    "latex": "n_k(u)\\,n_k(u') = \\tfrac12\\cos\\big(2\\pi w_k (u - u')\\big) + \\tfrac12\\cos\\big(2\\pi(w_k(u + u') + 2b_k)\\big)",
+    "explanation": "Product to sum. The second term averages out over the random phases (its expectation carries a factor e^{-8π²} ≈ 10⁻³⁴)."
+   },
+   {
+    "latex": "\\mathbb E_w\\big[\\cos(2\\pi w\\,\\Delta)\\big] = e^{-2\\pi^2 \\Delta^2} \\;\\Rightarrow\\; \\frac{n(u)^\\top n(u')}{\\|n(u)\\|\\,\\|n(u')\\|} \\approx e^{-2\\pi^2 (u - u')^2}",
+    "explanation": "The average of a cosine over Gaussian frequencies is the Gaussian's characteristic function: the code's similarity is a Gaussian kernel in u."
+   },
+   {
+    "latex": "\\sigma' = r\\,\\sigma: \\quad \\text{similarity} \\approx e^{-\\pi^2 (\\ln r)^2 / 8} = 0.5 \\text{ at } r \\approx 2.1,\\ < 0.01 \\text{ at } r = 10",
+    "explanation": "In noise-level units: two levels a factor of two apart get half-similar codes, a factor of ten apart nearly unrelated ones. The network can treat about a dozen noise regimes along the schedule differently, without being told any boundaries."
+   },
+   {
+    "latex": "s_i \\leftarrow s_i + W\\,\\mathrm{LN}(n), \\quad \\text{then } \\mathrm{AdaLN}(a, s) \\text{ in all 24 token blocks}",
+    "explanation": "The code is added to every token's single conditioning, and through adaptive LayerNorm it sets the scale, shift and gates of every layer: one network, told at every step which regime it is in."
+   }
+  ]
+ }
+}

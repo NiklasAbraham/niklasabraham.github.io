@@ -1,0 +1,32 @@
+{
+ "label": "The EDM denoiser and its loss",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "The denoiser, its loss, and what it learns",
+  "caption": "EDM notation (Karras et al. 2022). Data at σ = 0; σ is the standard deviation of the added noise.",
+  "main_latex": "D_\\theta(x, \\sigma \\mid c) = c_\\text{skip}(\\sigma)\\, x + c_\\text{out}(\\sigma)\\, F_\\theta\\big(c_\\text{in}(\\sigma)\\, x,\\ c_\\text{noise}(\\sigma) \\mid c\\big)",
+  "steps": [
+   {
+    "latex": "x_\\sigma = x_0 + \\sigma\\,\\varepsilon, \\qquad \\varepsilon \\sim \\mathcal N(0, I)",
+    "explanation": "Corrupt a data sample x₀ with Gaussian noise of standard deviation σ."
+   },
+   {
+    "latex": "\\mathcal L(\\theta) = \\mathbb E_{x_0,\\,\\sigma,\\,\\varepsilon}\\Big[\\lambda(\\sigma)\\,\\big\\|D_\\theta(x_\\sigma, \\sigma \\mid c) - x_0\\big\\|^2\\Big]",
+    "explanation": "Train the denoiser to recover x₀ from x_σ, at every noise level at once."
+   },
+   {
+    "latex": "D^\\star(x, \\sigma \\mid c) = \\mathbb E\\big[x_0 \\mid x_\\sigma = x,\\ c\\big]",
+    "explanation": "The minimiser of a squared error is a conditional mean: the optimal denoiser returns the average of all clean samples consistent with x."
+   },
+   {
+    "latex": "\\nabla_x \\log p_\\sigma(x \\mid c) = \\frac{D^\\star(x, \\sigma \\mid c) - x}{\\sigma^2}",
+    "explanation": "Tweedie's formula: the denoiser gives the score of the noised distribution, which is all a sampler needs."
+   },
+   {
+    "latex": "c_\\text{skip} = \\frac{\\sigma_\\text{data}^2}{\\sigma^2 + \\sigma_\\text{data}^2},\\quad c_\\text{out} = \\frac{\\sigma\\,\\sigma_\\text{data}}{\\sqrt{\\sigma^2 + \\sigma_\\text{data}^2}},\\quad c_\\text{in} = \\frac{1}{\\sqrt{\\sigma^2 + \\sigma_\\text{data}^2}},\\quad c_\\text{noise} = \\tfrac14 \\ln \\sigma",
+    "explanation": "Preconditioning keeps the network's input and its training target at unit variance for every σ. AlphaFold 3 uses exactly this with σ_data = 16 Å."
+   }
+  ]
+ }
+}

@@ -1,0 +1,40 @@
+{
+ "label": "Triangle multiplication",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "Triangle multiplication, line by line (AF3 SI Algorithms 12 and 13)",
+  "caption": "N tokens, 128 channels. Outgoing combines the edges leaving i and j, incoming the edges arriving at them. Every weight matrix W acts on one pair vector at a time; only the sum over k mixes different pairs.",
+  "main_latex": "z_{ij} \\leftarrow z_{ij} + g_{ij} \\odot W_o\\,\\mathrm{LN}\\Big(\\sum_{k=1}^{N} a_{ik} \\odot b_{jk}\\Big)",
+  "steps": [
+   {
+    "latex": "\\bar z_{ij} = \\mathrm{LN}(z_{ij})",
+    "explanation": "Normalise every pair vector on its own."
+   },
+   {
+    "latex": "a_{ij} = \\sigma(W_1 \\bar z_{ij}) \\odot W_2 \\bar z_{ij}, \\qquad b_{ij} = \\sigma(W_3 \\bar z_{ij}) \\odot W_4 \\bar z_{ij}",
+    "explanation": "Two gated projections of each pair, 128 channels each. a_ik is what the edge i→k contributes, b_jk what the edge j→k contributes; the sigmoid gates let the network silence edges it does not trust."
+   },
+   {
+    "latex": "\\Big(\\sum_k a_{ik} \\odot b_{jk}\\Big)_c = \\sum_k A^{(c)}_{ik} B^{(c)}_{jk} = \\big(A^{(c)} B^{(c)\\top}\\big)_{ij}",
+    "explanation": "Channel by channel this is an ordinary N × N matrix product. Entry (i, j) is the dot product of row i of A and row j of B: large when i and j say similar things about the same third tokens k."
+   },
+   {
+    "latex": "g_{ij} = \\sigma(W_g \\bar z_{ij}), \\qquad z_{ij} \\leftarrow z_{ij} + g_{ij} \\odot W_o\\,\\mathrm{LN}(\\cdot)",
+    "explanation": "Normalise the summed message, project it back, gate it with the pair's own gate and add it to the pair as a residual update."
+   },
+   {
+    "latex": "\\text{incoming: } \\sum_k a_{ki} \\odot b_{kj} = \\big(A^{(c)\\top} B^{(c)}\\big)_{ij}",
+    "explanation": "The second variant uses columns instead of rows: the edges k→i and k→j that arrive at i and j from a common k. It is the outgoing update applied to the transposed pair tensor."
+   },
+   {
+    "latex": "\\text{cost: } N^2 \\text{ pairs} \\times N \\text{ third tokens} \\times 128 \\text{ channels} = \\mathcal O(N^3)",
+    "explanation": "Every pair looks at every third token, which is why the Pairformer, not the denoiser, dominates the cost of large complexes."
+   },
+   {
+    "latex": "d_{ij} \\le \\min_k \\big(d_{ik} + d_{kj}\\big)",
+    "explanation": "The intuition. Replace (sum, product) by (min, sum) and the same pattern becomes the triangle inequality: two short edges through k force the third edge to be short. The network learns its own soft version of this rule, in 128 channels and with learned gates."
+   }
+  ]
+ }
+}

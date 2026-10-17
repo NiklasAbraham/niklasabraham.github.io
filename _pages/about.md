@@ -8,7 +8,7 @@ profile:
   align: right
   image: niklas.jpg
 
-news: true
+news: false
 social: true
 selected_papers: true
 ---

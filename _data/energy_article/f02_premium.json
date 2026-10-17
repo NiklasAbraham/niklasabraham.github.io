@@ -1,0 +1,32 @@
+{
+ "label": "Sliding market premium",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "How a wind or solar plant is paid under the EEG",
+  "main_latex": "\\text{revenue per MWh} \\;=\\; p_t \\;+\\; \\max\\big(0,\\ \\mathrm{AW} - \\mathrm{MW}_{m}\\big)",
+  "steps": [
+   {
+    "latex": "p_t",
+    "explanation": "The plant (or its direct marketer) sells every MWh on the market at the price of that quarter-hour."
+   },
+   {
+    "latex": "\\mathrm{MW}_m = \\frac{\\sum_{t \\in m} p_t\\, q_t}{\\sum_{t \\in m} q_t}",
+    "explanation": "The monthly market value of the technology: the price averaged with the weight of all solar (or wind) output in Germany in month m. It is computed by the TSOs and published on netztransparenz.de."
+   },
+   {
+    "latex": "\\max\\big(0,\\ \\mathrm{AW} - \\mathrm{MW}_m\\big)",
+    "explanation": "The market premium tops the plant up to its 'applicable value' AW, the price it bid in the auction. If the market value is above AW, the premium is zero and the plant keeps the upside (a one-sided, not a two-sided contract for difference)."
+   },
+   {
+    "latex": "p_t < 0 \\;\\Rightarrow\\; \\text{premium} = 0",
+    "explanation": "§ 51 EEG: no premium in quarter-hours with a negative price. Since the Solarspitzengesetz of 25 February 2025 this applies to every new plant from the first negative quarter-hour; the lost periods are added to the end of the 20-year support period."
+   },
+   {
+    "latex": "\\text{June 2025, solar: } \\mathrm{MW} \\approx 20 \\text{ vs. base } 64\\ \\text{EUR/MWh}",
+    "explanation": "From the Energy-Charts data: weighted by solar output, June 2025 paid about 20 EUR/MWh while the average hour paid 64. The premium covers the difference up to AW, which is why the EEG account is paid from the federal budget."
+   }
+  ],
+  "caption": "Simplified from § 20, § 23a and Annex 1 EEG 2023; small plants under 100 kW get a fixed feed-in tariff instead."
+ }
+}

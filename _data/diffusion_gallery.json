@@ -1,0 +1,3247 @@
+[
+ {
+  "id": "ddpm",
+  "name": "DDPM",
+  "year": 2020,
+  "org": "UC Berkeley",
+  "domain": "image",
+  "paper": "Ho, Jain, Abbeel · NeurIPS 2020",
+  "url": "https://arxiv.org/abs/2006.11239",
+  "space": "pixels",
+  "backbone": "U-Net (PixelCNN++ / Wide ResNet blocks)",
+  "params": "35.7 M (CIFAR-10)",
+  "params_m": 35.7,
+  "conditioning": "none (unconditional); time t added in every ResBlock",
+  "objective": "ε-prediction, simple MSE",
+  "steps": "1000 (ancestral)",
+  "novelty": "The template: a convolutional U-Net with one attention level predicts the noise.",
+  "notes": [
+   "Four resolutions at 32²: two ResBlocks per level going down, three coming up; channel multipliers (1, 2, 2, 2) in the released code.",
+   "Self-attention only at 16² and in the bottleneck; the time step is added in every ResBlock.",
+   "Linear β schedule from 10⁻⁴ to 0.02 over T = 1000 steps."
+  ],
+  "vs": null,
+  "blocks": {
+   "noisy-image-x-t": {
+    "title": "noisy image x<sub>t</sub>",
+    "sub": "3 × 32 × 32",
+    "role": "io",
+    "dims": "3 × 32 × 32 (CIFAR-10) · 3 × 256 × 256 (LSUN, CelebA-HQ)",
+    "text": "x<sub>t</sub> = √ᾱ<sub>t</sub> x<sub>0</sub> + √(1 − ᾱ<sub>t</sub>) ε. During training x<sub>0</sub> is a data image and t is uniform on {1, …, 1000}; during sampling it is the current state of the reverse chain, which starts from pure Gaussian noise at t = T.",
+    "refs": [
+     {
+      "label": "Ho et al. 2020 · DDPM",
+      "url": "https://arxiv.org/abs/2006.11239"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise ε̂",
+    "sub": "3 × 32 × 32",
+    "role": "io",
+    "dims": "3 × 32 × 32",
+    "text": "The predicted noise. The reverse-step mean is μ<sub>θ</sub> = (x<sub>t</sub> − β<sub>t</sub> / √(1 − ᾱ<sub>t</sub>) · ε̂) / √α<sub>t</sub>; the variance is fixed to β<sub>t</sub>, not learned.",
+    "refs": [
+     {
+      "label": "Ho et al. 2020 · DDPM",
+      "url": "https://arxiv.org/abs/2006.11239"
+     }
+    ]
+   },
+   "enc0": {
+    "title": "Encoder level 1",
+    "sub": "32² · 128 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "128 × 32 × 32",
+    "text": "ResBlock ×2 at 32 × 32 with 128 channels. The output of every ResBlock is kept for a skip to decoder level 1, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "dec0": {
+    "title": "Decoder level 1",
+    "sub": "32² · 128 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "128 × 32 × 32 (input: upsampled features ‖ skip from encoder level 1)",
+    "text": "ResBlock ×3 at 32 × 32, one more than the encoder level; a skip from encoder level 1 is concatenated on the channel axis before each ResBlock. Then the output head. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "enc1": {
+    "title": "Encoder level 2",
+    "sub": "16² · 256 ch · ResBlock ×2 · self-attn",
+    "role": "conv",
+    "dims": "256 × 16 × 16",
+    "text": "ResBlock ×2 at 16 × 16 with 256 channels, self-attn. The output of every ResBlock is kept for a skip to decoder level 2, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "dec1": {
+    "title": "Decoder level 2",
+    "sub": "16² · 256 ch · ResBlock ×3 · self-attn",
+    "role": "conv",
+    "dims": "256 × 16 × 16 (input: upsampled features ‖ skip from encoder level 2)",
+    "text": "ResBlock ×3 at 16 × 16, one more than the encoder level; a skip from encoder level 2 is concatenated on the channel axis before each ResBlock; self-attn. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "enc2": {
+    "title": "Encoder level 3",
+    "sub": "8² · 256 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "256 × 8 × 8",
+    "text": "ResBlock ×2 at 8 × 8 with 256 channels. The output of every ResBlock is kept for a skip to decoder level 3, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "dec2": {
+    "title": "Decoder level 3",
+    "sub": "8² · 256 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "256 × 8 × 8 (input: upsampled features ‖ skip from encoder level 3)",
+    "text": "ResBlock ×3 at 8 × 8, one more than the encoder level; a skip from encoder level 3 is concatenated on the channel axis before each ResBlock. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "enc3": {
+    "title": "Encoder level 4",
+    "sub": "4² · 256 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "256 × 4 × 4",
+    "text": "ResBlock ×2 at 4 × 4 with 256 channels. The output of every ResBlock is kept for a skip to decoder level 4, then passed to the bottleneck. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "dec3": {
+    "title": "Decoder level 4",
+    "sub": "4² · 256 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "256 × 4 × 4 (input: upsampled features ‖ skip from encoder level 4)",
+    "text": "ResBlock ×3 at 4 × 4, one more than the encoder level; a skip from encoder level 4 is concatenated on the channel axis before each ResBlock. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → dropout 0.1 → 3×3 conv, plus the residual.",
+    "refs": []
+   },
+   "mid": {
+    "title": "bottleneck · 4²",
+    "sub": "ResBlock · self-attn · ResBlock",
+    "role": "conv",
+    "dims": "256 × 4 × 4",
+    "text": "ResBlock → single-head self-attention → ResBlock at the lowest resolution: besides 16², the only place where every position sees every other.",
+    "refs": [
+     {
+      "label": "Vaswani et al. 2017 · Attention is all you need",
+      "url": "https://arxiv.org/abs/1706.03762"
+     }
+    ]
+   },
+   "time-t": {
+    "title": "time t",
+    "sub": "sinusoidal → MLP",
+    "role": "cond",
+    "dims": "t ∈ {1…1000} → 128-d sinusoidal → Dense 512 → SiLU → Dense 512",
+    "text": "Each ResBlock projects this 512-d vector to its own channel count and adds it to the feature map after the first convolution, a per-channel bias that tells the block how noisy its input is.",
+    "refs": [
+     {
+      "label": "Vaswani et al. 2017 · Attention is all you need",
+      "url": "https://arxiv.org/abs/1706.03762"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "DDPM fixes a forward process that adds Gaussian noise over T = 1000 steps with a linear β schedule and trains a network ε<sub>θ</sub>(x<sub>t</sub>, t) to predict the noise that was added. With this parameterisation the variational bound reduces, up to its weighting, to a plain mean-squared error on ε, the L<sub>simple</sub> objective, which gave better samples than the full bound.",
+   "The network is a PixelCNN++-style U-Net: four resolutions from 32² down to 4², two Wide-ResNet blocks per resolution, GroupNorm and SiLU throughout, and one self-attention layer at 16². The time step enters every ResBlock as a projected sinusoidal embedding that is added to the feature map. Nothing else conditions the network.",
+   "Sampling runs the learned reverse chain for all 1000 steps, one network call each. DDIM and the later ODE solvers cut that to tens of steps on the same trained network."
+  ],
+  "flow": [
+   {
+    "stage": "noisy image x<sub>t</sub>",
+    "shape": "3 × 32 × 32"
+   },
+   {
+    "stage": "t → sinusoidal → MLP",
+    "shape": "128 → 512"
+   },
+   {
+    "stage": "stem 3×3 conv",
+    "shape": "128 × 32 × 32"
+   },
+   {
+    "stage": "encoder",
+    "shape": "128 · 32² → 256 · 16² → 256 · 8² → 256 · 4²"
+   },
+   {
+    "stage": "bottleneck",
+    "shape": "256 × 4 × 4"
+   },
+   {
+    "stage": "decoder, skips concatenated",
+    "shape": "256 · 4² → … → 128 · 32²"
+   },
+   {
+    "stage": "GroupNorm · SiLU · 3×3 conv",
+    "shape": "ε̂: 3 × 32 × 32"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · arXiv 2006.11239",
+    "url": "https://arxiv.org/abs/2006.11239"
+   },
+   {
+    "label": "Code · TensorFlow (official)",
+    "url": "https://github.com/hojonathanho/diffusion"
+   },
+   {
+    "label": "Lilian Weng · What are diffusion models?",
+    "url": "https://lilianweng.github.io/posts/2021-07-11-diffusion-models/"
+   }
+  ]
+ },
+ {
+  "id": "adm",
+  "name": "ADM",
+  "year": 2021,
+  "org": "OpenAI",
+  "domain": "image",
+  "paper": "Dhariwal & Nichol · NeurIPS 2021",
+  "url": "https://arxiv.org/abs/2105.05233",
+  "space": "pixels",
+  "backbone": "U-Net, attention at three resolutions",
+  "params": "554 M (ImageNet 256)",
+  "params_m": 554,
+  "conditioning": "class + time via adaptive GroupNorm; classifier guidance",
+  "objective": "ε and Σ (hybrid loss)",
+  "steps": "250 (DDPM) / 25 (DDIM)",
+  "novelty": "Architecture search on the U-Net: more heads, attention at 32/16/8, AdaGN, guidance.",
+  "notes": [
+   "Channel multipliers (1, 1, 2, 2, 4, 4) at 256², base width 256.",
+   "AdaGN: GroupNorm whose scale and shift come from the time and class embedding.",
+   "A separate noise-aware classifier steers sampling by ∇ log p(y | x_t)."
+  ],
+  "vs": "DDPM",
+  "blocks": {
+   "noisy-image-x-t": {
+    "title": "noisy image x<sub>t</sub>",
+    "sub": "3 × 256 × 256",
+    "role": "io",
+    "dims": "3 × 256 × 256 (ImageNet 256 model)",
+    "text": "Same forward process as DDPM; the cosine schedule of Improved DDPM is used for the smaller ImageNet models.",
+    "refs": [
+     {
+      "label": "Nichol & Dhariwal 2021 · Improved DDPM (learned Σ)",
+      "url": "https://arxiv.org/abs/2102.09672"
+     }
+    ]
+   },
+   "and": {
+    "title": "ε̂ and Σ̂",
+    "sub": "6 × 256 × 256",
+    "role": "io",
+    "dims": "6 × 256 × 256 = 3 for ε̂ + 3 for v",
+    "text": "Σ<sub>θ</sub> = exp(v log β<sub>t</sub> + (1 − v) log β̃<sub>t</sub>): a learned per-pixel interpolation between the two analytic variances. Learning Σ is what allows sampling with 25–250 steps instead of 1000.",
+    "refs": [
+     {
+      "label": "Nichol & Dhariwal 2021 · Improved DDPM (learned Σ)",
+      "url": "https://arxiv.org/abs/2102.09672"
+     }
+    ]
+   },
+   "enc0": {
+    "title": "Encoder level 1",
+    "sub": "256² · 256 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "256 × 256 × 256",
+    "text": "ResBlock ×2 at 256 × 256 with 256 channels. The output of every ResBlock is kept for a skip to decoder level 1, then downsampled 2× for the next level. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "dec0": {
+    "title": "Decoder level 1",
+    "sub": "256² · 256 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "256 × 256 × 256 (input: upsampled features ‖ skip from encoder level 1)",
+    "text": "ResBlock ×3 at 256 × 256, one more than the encoder level; a skip from encoder level 1 is concatenated on the channel axis before each ResBlock. Then the output head. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "enc1": {
+    "title": "Encoder level 2",
+    "sub": "128² · 256 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "256 × 128 × 128",
+    "text": "ResBlock ×2 at 128 × 128 with 256 channels. The output of every ResBlock is kept for a skip to decoder level 2, then downsampled 2× for the next level. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "dec1": {
+    "title": "Decoder level 2",
+    "sub": "128² · 256 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "256 × 128 × 128 (input: upsampled features ‖ skip from encoder level 2)",
+    "text": "ResBlock ×3 at 128 × 128, one more than the encoder level; a skip from encoder level 2 is concatenated on the channel axis before each ResBlock. Then upsampled 2×. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "enc2": {
+    "title": "Encoder level 3",
+    "sub": "64² · 512 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "512 × 64 × 64",
+    "text": "ResBlock ×2 at 64 × 64 with 512 channels. The output of every ResBlock is kept for a skip to decoder level 3, then downsampled 2× for the next level. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "dec2": {
+    "title": "Decoder level 3",
+    "sub": "64² · 512 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "512 × 64 × 64 (input: upsampled features ‖ skip from encoder level 3)",
+    "text": "ResBlock ×3 at 64 × 64, one more than the encoder level; a skip from encoder level 3 is concatenated on the channel axis before each ResBlock. Then upsampled 2×. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "enc3": {
+    "title": "Encoder level 4",
+    "sub": "32² · 512 ch · ResBlock ×2 · MHA · 64 ch/head",
+    "role": "conv",
+    "dims": "512 × 32 × 32",
+    "text": "ResBlock ×2 at 32 × 32 with 512 channels, MHA · 64 ch/head. The output of every ResBlock is kept for a skip to decoder level 4, then downsampled 2× for the next level. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "dec3": {
+    "title": "Decoder level 4",
+    "sub": "32² · 512 ch · ResBlock ×3 · MHA · 64 ch/head",
+    "role": "conv",
+    "dims": "512 × 32 × 32 (input: upsampled features ‖ skip from encoder level 4)",
+    "text": "ResBlock ×3 at 32 × 32, one more than the encoder level; a skip from encoder level 4 is concatenated on the channel axis before each ResBlock; MHA · 64 ch/head. Then upsampled 2×. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "enc4": {
+    "title": "Encoder level 5",
+    "sub": "16² · 1024 ch · ResBlock ×2 · MHA · 64 ch/head",
+    "role": "conv",
+    "dims": "1024 × 16 × 16",
+    "text": "ResBlock ×2 at 16 × 16 with 1024 channels, MHA · 64 ch/head. The output of every ResBlock is kept for a skip to decoder level 5, then downsampled 2× for the next level. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "dec4": {
+    "title": "Decoder level 5",
+    "sub": "16² · 1024 ch · ResBlock ×3 · MHA · 64 ch/head",
+    "role": "conv",
+    "dims": "1024 × 16 × 16 (input: upsampled features ‖ skip from encoder level 5)",
+    "text": "ResBlock ×3 at 16 × 16, one more than the encoder level; a skip from encoder level 5 is concatenated on the channel axis before each ResBlock; MHA · 64 ch/head. Then upsampled 2×. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "enc5": {
+    "title": "Encoder level 6",
+    "sub": "8² · 1024 ch · ResBlock ×2 · MHA · 64 ch/head",
+    "role": "conv",
+    "dims": "1024 × 8 × 8",
+    "text": "ResBlock ×2 at 8 × 8 with 1024 channels, MHA · 64 ch/head. The output of every ResBlock is kept for a skip to decoder level 6, then passed to the bottleneck. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "dec5": {
+    "title": "Decoder level 6",
+    "sub": "8² · 1024 ch · ResBlock ×3 · MHA · 64 ch/head",
+    "role": "conv",
+    "dims": "1024 × 8 × 8 (input: upsampled features ‖ skip from encoder level 6)",
+    "text": "ResBlock ×3 at 8 × 8, one more than the encoder level; a skip from encoder level 6 is concatenated on the channel axis before each ResBlock; MHA · 64 ch/head. Then upsampled 2×. ResBlock: BigGAN residual block: GroupNorm → SiLU → 3×3 conv → AdaGN(t, y) → SiLU → dropout → 3×3 conv, plus the residual; resampling happens inside the block.",
+    "refs": []
+   },
+   "mid": {
+    "title": "bottleneck · 8²",
+    "sub": "ResBlock · MHA · ResBlock",
+    "role": "conv",
+    "dims": "1024 × 8 × 8",
+    "text": "ResBlock → multi-head attention (16 heads × 64) → ResBlock.",
+    "refs": []
+   },
+   "time-t-class-y": {
+    "title": "time t + class y",
+    "sub": "embed → AdaGN",
+    "role": "cond",
+    "dims": "t → sinusoidal 256 → MLP → 1024 · y → embedding 1000 × 1024 · summed",
+    "text": "Each ResBlock projects the 1024-d vector to 2C numbers, a scale and a shift per channel, applied after GroupNorm (AdaGN). This is the convolutional ancestor of DiT&#x27;s adaLN.",
+    "refs": [
+     {
+      "label": "Dhariwal & Nichol 2021 · Diffusion beats GANs",
+      "url": "https://arxiv.org/abs/2105.05233"
+     },
+     {
+      "label": "Perez et al. 2018 · FiLM",
+      "url": "https://arxiv.org/abs/1709.07871"
+     }
+    ]
+   },
+   "noisy-classifier-p-y-x-t": {
+    "title": "noisy classifier p(y | x<sub>t</sub>)",
+    "sub": "∇ log p shifts each step",
+    "role": "cond",
+    "dims": "encoder half of the U-Net + attention pooling at 8² → 1000 logits",
+    "text": "Trained on noised ImageNet images at every t. At sampling time its gradient shifts each reverse step: μ ← μ + s Σ ∇<sub>x_t</sub> log p<sub>φ</sub>(y | x<sub>t</sub>) (ADM Algorithm 1). Classifier-free guidance later removed the classifier.",
+    "refs": [
+     {
+      "label": "Dhariwal & Nichol 2021 · Diffusion beats GANs",
+      "url": "https://arxiv.org/abs/2105.05233"
+     },
+     {
+      "label": "Ho & Salimans 2022 · Classifier-free guidance",
+      "url": "https://arxiv.org/abs/2207.12598"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "ADM, the &#x27;ablated diffusion model&#x27;, is the DDPM U-Net after a systematic architecture search on ImageNet: more width, attention at 32², 16² and 8² with 64 channels per head, and BigGAN-style residual blocks that do the up- and downsampling themselves.",
+   "Class and time enter through adaptive group normalisation, AdaGN(h, y) = y<sub>s</sub> · GroupNorm(h) + y<sub>b</sub>, where (y<sub>s</sub>, y<sub>b</sub>) is a linear projection of the summed time and class embedding. Following Improved DDPM the network also predicts how to interpolate the reverse-step variance between β<sub>t</sub> and β̃<sub>t</sub>, trained with the hybrid loss L<sub>simple</sub> + λ L<sub>vlb</sub>.",
+   "Classifier guidance adds s · Σ ∇<sub>x_t</sub> log p<sub>φ</sub>(y | x<sub>t</sub>) to the mean of every reverse step, where p<sub>φ</sub> is a separate classifier trained on noisy images. The guidance scale s trades diversity for fidelity; this is the paper in which diffusion first beat BigGAN on ImageNet FID."
+  ],
+  "flow": [
+   {
+    "stage": "noisy image x<sub>t</sub>",
+    "shape": "3 × 256 × 256"
+   },
+   {
+    "stage": "t + y → embedding",
+    "shape": "1024"
+   },
+   {
+    "stage": "stem 3×3 conv",
+    "shape": "256 × 256 × 256"
+   },
+   {
+    "stage": "encoder, mult (1, 1, 2, 2, 4, 4)",
+    "shape": "256 · 256² → 256 · 128² → 512 · 64² → 512 · 32² → 1024 · 16² → 1024 · 8²"
+   },
+   {
+    "stage": "bottleneck",
+    "shape": "1024 × 8 × 8"
+   },
+   {
+    "stage": "decoder, skips concatenated",
+    "shape": "back to 256 × 256 × 256"
+   },
+   {
+    "stage": "output conv",
+    "shape": "ε̂ and v: 6 × 256 × 256"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · arXiv 2105.05233",
+    "url": "https://arxiv.org/abs/2105.05233"
+   },
+   {
+    "label": "Code · guided-diffusion",
+    "url": "https://github.com/openai/guided-diffusion"
+   },
+   {
+    "label": "Improved DDPM (learned Σ)",
+    "url": "https://arxiv.org/abs/2102.09672"
+   }
+  ]
+ },
+ {
+  "id": "sd1",
+  "name": "Latent Diffusion / SD 1",
+  "year": 2022,
+  "org": "LMU Munich · Runway · Stability",
+  "domain": "image",
+  "paper": "Rombach et al. · CVPR 2022",
+  "url": "https://arxiv.org/abs/2112.10752",
+  "space": "VAE latent, f = 8",
+  "backbone": "U-Net + transformer blocks",
+  "params": "860 M U-Net + 123 M text encoder",
+  "params_m": 860,
+  "conditioning": "cross-attention to frozen CLIP ViT-L/14 tokens",
+  "objective": "ε-prediction",
+  "steps": "≈ 50 (PNDM / DDIM) + CFG",
+  "novelty": "Diffuse in a compressed latent, read the prompt through cross-attention.",
+  "notes": [
+   "512² images become 4 × 64 × 64 latents.",
+   "Every attention level is a transformer block: self-attn → cross-attn(text) → FFN.",
+   "Classifier-free guidance replaces the separate classifier."
+  ],
+  "vs": "ADM",
+  "blocks": {
+   "image-x": {
+    "title": "image x",
+    "sub": "3 × 512 × 512",
+    "role": "io",
+    "dims": "3 × 512 × 512",
+    "text": "Only used in training: the encoder turns it into the clean latent z<sub>0</sub>.",
+    "refs": []
+   },
+   "image": {
+    "title": "image",
+    "sub": "3 × 512 × 512",
+    "role": "io",
+    "dims": "3 × 512 × 512",
+    "text": "The decoded sample. The VAE decoder runs once, after the last denoising step.",
+    "refs": []
+   },
+   "vae-encoder": {
+    "title": "VAE encoder",
+    "sub": "f = 8",
+    "role": "latent",
+    "dims": "3 × 512² → mean and log-variance 2 × 4 × 64² → sample 4 × 64 × 64",
+    "text": "A convolutional encoder trained with L1 + LPIPS + patch-GAN losses and a small KL penalty. The latent is multiplied by 0.18215 so that it has roughly unit variance.",
+    "refs": [
+     {
+      "label": "Rombach et al. 2022 · Latent diffusion",
+      "url": "https://arxiv.org/abs/2112.10752"
+     }
+    ]
+   },
+   "vae-decoder": {
+    "title": "VAE decoder",
+    "sub": "",
+    "role": "latent",
+    "dims": "4 × 64 × 64 → 3 × 512 × 512",
+    "text": "About 50 M parameters; ResBlocks with one attention layer at the lowest resolution.",
+    "refs": [
+     {
+      "label": "Rombach et al. 2022 · Latent diffusion",
+      "url": "https://arxiv.org/abs/2112.10752"
+     }
+    ]
+   },
+   "noisy-latent-z-t": {
+    "title": "noisy latent z<sub>t</sub>",
+    "sub": "4 × 64 × 64",
+    "role": "io",
+    "dims": "4 × 64 × 64",
+    "text": "z<sub>t</sub> = √ᾱ<sub>t</sub> z<sub>0</sub> + √(1 − ᾱ<sub>t</sub>) ε with a scaled-linear β schedule, T = 1000.",
+    "refs": [
+     {
+      "label": "Rombach et al. 2022 · Latent diffusion",
+      "url": "https://arxiv.org/abs/2112.10752"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise ε̂",
+    "sub": "4 × 64 × 64",
+    "role": "io",
+    "dims": "4 × 64 × 64",
+    "text": "ε-prediction in latent space.",
+    "refs": []
+   },
+   "enc0": {
+    "title": "Encoder level 1",
+    "sub": "64² · 320 ch · ResBlock ×2 · 1 transformer each",
+    "role": "conv",
+    "dims": "320 × 64 × 64",
+    "text": "ResBlock ×2 at 64 × 64 with 320 channels, 1 transformer each. The output of every ResBlock is kept for a skip to decoder level 1, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "dec0": {
+    "title": "Decoder level 1",
+    "sub": "64² · 320 ch · ResBlock ×3 · 1 transformer each",
+    "role": "conv",
+    "dims": "320 × 64 × 64 (input: upsampled features ‖ skip from encoder level 1)",
+    "text": "ResBlock ×3 at 64 × 64, one more than the encoder level; a skip from encoder level 1 is concatenated on the channel axis before each ResBlock; 1 transformer each. Then the output head. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "enc1": {
+    "title": "Encoder level 2",
+    "sub": "32² · 640 ch · ResBlock ×2 · 1 transformer each",
+    "role": "conv",
+    "dims": "640 × 32 × 32",
+    "text": "ResBlock ×2 at 32 × 32 with 640 channels, 1 transformer each. The output of every ResBlock is kept for a skip to decoder level 2, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "dec1": {
+    "title": "Decoder level 2",
+    "sub": "32² · 640 ch · ResBlock ×3 · 1 transformer each",
+    "role": "conv",
+    "dims": "640 × 32 × 32 (input: upsampled features ‖ skip from encoder level 2)",
+    "text": "ResBlock ×3 at 32 × 32, one more than the encoder level; a skip from encoder level 2 is concatenated on the channel axis before each ResBlock; 1 transformer each. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "enc2": {
+    "title": "Encoder level 3",
+    "sub": "16² · 1280 ch · ResBlock ×2 · 1 transformer each",
+    "role": "conv",
+    "dims": "1280 × 16 × 16",
+    "text": "ResBlock ×2 at 16 × 16 with 1280 channels, 1 transformer each. The output of every ResBlock is kept for a skip to decoder level 3, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "dec2": {
+    "title": "Decoder level 3",
+    "sub": "16² · 1280 ch · ResBlock ×3 · 1 transformer each",
+    "role": "conv",
+    "dims": "1280 × 16 × 16 (input: upsampled features ‖ skip from encoder level 3)",
+    "text": "ResBlock ×3 at 16 × 16, one more than the encoder level; a skip from encoder level 3 is concatenated on the channel axis before each ResBlock; 1 transformer each. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "enc3": {
+    "title": "Encoder level 4",
+    "sub": "8² · 1280 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "1280 × 8 × 8",
+    "text": "ResBlock ×2 at 8 × 8 with 1280 channels. The output of every ResBlock is kept for a skip to decoder level 4, then passed to the bottleneck. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "dec3": {
+    "title": "Decoder level 4",
+    "sub": "8² · 1280 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "1280 × 8 × 8 (input: upsampled features ‖ skip from encoder level 4)",
+    "text": "ResBlock ×3 at 8 × 8, one more than the encoder level; a skip from encoder level 4 is concatenated on the channel axis before each ResBlock. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + time embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then a spatial transformer where marked.",
+    "refs": []
+   },
+   "mid": {
+    "title": "bottleneck · 8²",
+    "sub": "ResBlock · transformer · ResBlock",
+    "role": "conv",
+    "dims": "1280 × 8 × 8",
+    "text": "ResBlock → spatial transformer → ResBlock.",
+    "refs": []
+   },
+   "clip-vit-l-14-frozen": {
+    "title": "CLIP ViT-L/14 (frozen)",
+    "sub": "prompt → 77 × 768 tokens",
+    "role": "cond",
+    "dims": "prompt → 77 BPE tokens → 12-layer text transformer → 77 × 768 (123 M)",
+    "text": "The last hidden layer is used as the cross-attention context. In every transformer block the latent positions give the queries and the 77 text tokens the keys and values: softmax(Q Kᵀ / √d) V, 8 heads.",
+    "refs": [
+     {
+      "label": "Radford et al. 2021 · CLIP",
+      "url": "https://arxiv.org/abs/2103.00020"
+     },
+     {
+      "label": "Rombach et al. 2022 · Latent diffusion",
+      "url": "https://arxiv.org/abs/2112.10752"
+     }
+    ]
+   },
+   "time-t": {
+    "title": "time t",
+    "sub": "sinusoidal → MLP",
+    "role": "cond",
+    "dims": "t → sinusoidal 320 → MLP → 1280",
+    "text": "Projected and added inside every ResBlock.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "Latent diffusion splits generation in two. A KL-regularised autoencoder, trained once with perceptual and adversarial losses, compresses a 512² image to a 4 × 64 × 64 latent (downsampling factor f = 8). The diffusion model only ever sees that latent, so it no longer spends capacity on pixel-level detail that the decoder can restore.",
+   "The denoiser is an ADM-style U-Net with 320, 640, 1280 and 1280 channels and a spatial transformer after the ResBlocks at 64², 32² and 16². Each transformer block runs self-attention over the latent positions, then cross-attention whose keys and values are the 77 × 768 token features of a frozen CLIP ViT-L/14 text encoder, then a GEGLU feed-forward.",
+   "Time enters each ResBlock additively, as in DDPM. Sampling uses about 50 PNDM or DDIM steps with classifier-free guidance (scale ≈ 7.5), which needs a conditional and an unconditional (empty prompt) prediction at every step."
+  ],
+  "flow": [
+   {
+    "stage": "image x",
+    "shape": "3 × 512 × 512"
+   },
+   {
+    "stage": "VAE encoder, × 0.18215",
+    "shape": "z: 4 × 64 × 64"
+   },
+   {
+    "stage": "prompt → CLIP ViT-L/14",
+    "shape": "77 × 768"
+   },
+   {
+    "stage": "input 3×3 conv",
+    "shape": "320 × 64 × 64"
+   },
+   {
+    "stage": "encoder",
+    "shape": "320 · 64² → 640 · 32² → 1280 · 16² → 1280 · 8²"
+   },
+   {
+    "stage": "decoder, skips concatenated",
+    "shape": "back to 320 × 64 × 64"
+   },
+   {
+    "stage": "output 3×3 conv",
+    "shape": "ε̂: 4 × 64 × 64"
+   },
+   {
+    "stage": "VAE decoder (after the last step)",
+    "shape": "3 × 512 × 512"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · arXiv 2112.10752",
+    "url": "https://arxiv.org/abs/2112.10752"
+   },
+   {
+    "label": "Code · CompVis/stable-diffusion",
+    "url": "https://github.com/CompVis/stable-diffusion"
+   },
+   {
+    "label": "Code · CompVis/latent-diffusion",
+    "url": "https://github.com/CompVis/latent-diffusion"
+   },
+   {
+    "label": "Jay Alammar · The Illustrated Stable Diffusion",
+    "url": "https://jalammar.github.io/illustrated-stable-diffusion/"
+   }
+  ]
+ },
+ {
+  "id": "sdxl",
+  "name": "SDXL",
+  "year": 2023,
+  "org": "Stability AI",
+  "domain": "image",
+  "paper": "Podell et al. · ICLR 2024",
+  "url": "https://arxiv.org/abs/2307.01952",
+  "space": "VAE latent, f = 8",
+  "backbone": "U-Net, transformer depth 0 / 2 / 10",
+  "params": "2.6 B U-Net",
+  "params_m": 2600,
+  "conditioning": "two text encoders (2048-d context) + size / crop conditioning",
+  "objective": "ε-prediction",
+  "steps": "≈ 40–50 + optional refiner",
+  "novelty": "Same U-Net idea, three times larger, compute moved to the low resolutions.",
+  "notes": [
+   "The 128² level has no attention; the 64² level runs 2 transformer blocks after every ResBlock, the 32² level 10.",
+   "Original size, crop offsets and target size are Fourier-embedded (256 per number) and, with the pooled bigG embedding, form a 2816-d vector that is added to the time embedding.",
+   "A second refiner model polishes the last noise levels (SDEdit-style)."
+  ],
+  "vs": "SD 1",
+  "blocks": {
+   "image-x": {
+    "title": "image x",
+    "sub": "3 × 1024 × 1024",
+    "role": "io",
+    "dims": "3 × 1024 × 1024 (multi-aspect buckets)",
+    "text": "Training images are bucketed by aspect ratio; the bucket size is part of the conditioning.",
+    "refs": []
+   },
+   "image": {
+    "title": "image",
+    "sub": "→ refiner (optional)",
+    "role": "io",
+    "dims": "3 × 1024 × 1024",
+    "text": "Optionally passed to the refiner, which re-noises it slightly and denoises the last noise levels again.",
+    "refs": [
+     {
+      "label": "Meng et al. 2022 · SDEdit",
+      "url": "https://arxiv.org/abs/2108.01073"
+     }
+    ]
+   },
+   "vae-encoder": {
+    "title": "VAE encoder",
+    "sub": "f = 8",
+    "role": "latent",
+    "dims": "3 × 1024² → 4 × 128 × 128",
+    "text": "Same architecture as SD 1, retrained with a larger batch and EMA weights for sharper reconstructions.",
+    "refs": [
+     {
+      "label": "Podell et al. 2023 · SDXL",
+      "url": "https://arxiv.org/abs/2307.01952"
+     }
+    ]
+   },
+   "vae-decoder": {
+    "title": "VAE decoder",
+    "sub": "",
+    "role": "latent",
+    "dims": "4 × 128 × 128 → 3 × 1024 × 1024",
+    "text": "Runs once after sampling.",
+    "refs": []
+   },
+   "noisy-latent-z-t": {
+    "title": "noisy latent z<sub>t</sub>",
+    "sub": "4 × 128 × 128",
+    "role": "io",
+    "dims": "4 × 128 × 128",
+    "text": "ε-prediction with the SD 1 noise schedule.",
+    "refs": []
+   },
+   "noise": {
+    "title": "noise ε̂",
+    "sub": "4 × 128 × 128",
+    "role": "io",
+    "dims": "4 × 128 × 128",
+    "text": "",
+    "refs": []
+   },
+   "enc0": {
+    "title": "Encoder level 1",
+    "sub": "128² · 320 ch · ResBlock ×2",
+    "role": "conv",
+    "dims": "320 × 128 × 128",
+    "text": "ResBlock ×2 at 128 × 128 with 320 channels. The output of every ResBlock is kept for a skip to decoder level 1, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + vector embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then the marked number of transformer blocks.",
+    "refs": []
+   },
+   "dec0": {
+    "title": "Decoder level 1",
+    "sub": "128² · 320 ch · ResBlock ×3",
+    "role": "conv",
+    "dims": "320 × 128 × 128 (input: upsampled features ‖ skip from encoder level 1)",
+    "text": "ResBlock ×3 at 128 × 128, one more than the encoder level; a skip from encoder level 1 is concatenated on the channel axis before each ResBlock. Then the output head. ResBlock: GroupNorm → SiLU → 3×3 conv → + vector embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then the marked number of transformer blocks.",
+    "refs": []
+   },
+   "enc1": {
+    "title": "Encoder level 2",
+    "sub": "64² · 640 ch · ResBlock ×2 · 2 transformers each",
+    "role": "conv",
+    "dims": "640 × 64 × 64",
+    "text": "ResBlock ×2 at 64 × 64 with 640 channels, 2 transformers each. The output of every ResBlock is kept for a skip to decoder level 2, then downsampled 2× for the next level. ResBlock: GroupNorm → SiLU → 3×3 conv → + vector embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then the marked number of transformer blocks.",
+    "refs": []
+   },
+   "dec1": {
+    "title": "Decoder level 2",
+    "sub": "64² · 640 ch · ResBlock ×3 · 2 transformers each",
+    "role": "conv",
+    "dims": "640 × 64 × 64 (input: upsampled features ‖ skip from encoder level 2)",
+    "text": "ResBlock ×3 at 64 × 64, one more than the encoder level; a skip from encoder level 2 is concatenated on the channel axis before each ResBlock; 2 transformers each. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + vector embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then the marked number of transformer blocks.",
+    "refs": []
+   },
+   "enc2": {
+    "title": "Encoder level 3",
+    "sub": "32² · 1280 ch · ResBlock ×2 · 10 transformers each",
+    "role": "conv",
+    "dims": "1280 × 32 × 32",
+    "text": "ResBlock ×2 at 32 × 32 with 1280 channels, 10 transformers each. The output of every ResBlock is kept for a skip to decoder level 3, then passed to the bottleneck. ResBlock: GroupNorm → SiLU → 3×3 conv → + vector embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then the marked number of transformer blocks.",
+    "refs": []
+   },
+   "dec2": {
+    "title": "Decoder level 3",
+    "sub": "32² · 1280 ch · ResBlock ×3 · 10 transformers each",
+    "role": "conv",
+    "dims": "1280 × 32 × 32 (input: upsampled features ‖ skip from encoder level 3)",
+    "text": "ResBlock ×3 at 32 × 32, one more than the encoder level; a skip from encoder level 3 is concatenated on the channel axis before each ResBlock; 10 transformers each. Then upsampled 2×. ResBlock: GroupNorm → SiLU → 3×3 conv → + vector embedding → GroupNorm → SiLU → 3×3 conv, plus the residual; then the marked number of transformer blocks.",
+    "refs": []
+   },
+   "mid": {
+    "title": "bottleneck · 32²",
+    "sub": "ResBlock · 10 transformers · ResBlock",
+    "role": "conv",
+    "dims": "1280 × 32 × 32",
+    "text": "ResBlock → 10 transformer blocks → ResBlock: the most expensive part of the network.",
+    "refs": []
+   },
+   "clip-vit-l-openclip-bigg": {
+    "title": "CLIP ViT-L + OpenCLIP bigG",
+    "sub": "tokens concatenated → 77 × 2048",
+    "role": "cond",
+    "dims": "77 × 768 ‖ 77 × 1280 → 77 × 2048",
+    "text": "Both encoders are frozen; their penultimate hidden layers are concatenated per token and used as keys and values in every cross-attention. Head dimension 64.",
+    "refs": [
+     {
+      "label": "OpenCLIP (LAION)",
+      "url": "https://github.com/mlfoundations/open_clip"
+     },
+     {
+      "label": "Radford et al. 2021 · CLIP",
+      "url": "https://arxiv.org/abs/2103.00020"
+     }
+    ]
+   },
+   "vector-t-pooled-bigg": {
+    "title": "vector: t + pooled bigG",
+    "sub": "+ size, crop, target size · (Fourier features)",
+    "role": "cond",
+    "dims": "pooled bigG 1280 + 6 numbers × 256 Fourier features = 2816 → MLP → 1280",
+    "text": "The six micro-conditioning numbers are original height and width, crop top and left, target height and width (<code>adm_in_channels: 2816</code> in the released config). The vector is added to the time embedding and so enters every ResBlock.",
+    "refs": [
+     {
+      "label": "Podell et al. 2023 · SDXL",
+      "url": "https://arxiv.org/abs/2307.01952"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "SDXL keeps the latent-diffusion recipe and scales the U-Net to 2.6 B parameters, but it moves the compute: the 128² level has no attention at all, the 64² level two transformer blocks per stage, the 32² level ten. Most of the parameters sit at low resolution, where attention is cheap, and there are three levels instead of four.",
+   "Text comes from two frozen encoders, OpenCLIP ViT-bigG/14 and CLIP ViT-L/14. Their penultimate-layer token features are concatenated channel-wise into a 77 × 2048 cross-attention context, and the pooled bigG embedding joins the time embedding.",
+   "Micro-conditioning: the original image size, the crop offsets and the target size are Fourier-embedded and added to the time embedding, so the model can train on small and cropped images without learning to produce small or cropped images. An optional refiner, a second latent model specialised on low noise levels, polishes details SDEdit-style."
+  ],
+  "flow": [
+   {
+    "stage": "image x",
+    "shape": "3 × 1024 × 1024"
+   },
+   {
+    "stage": "VAE encoder",
+    "shape": "z: 4 × 128 × 128"
+   },
+   {
+    "stage": "two text encoders, concatenated",
+    "shape": "77 × (1280 + 768) = 77 × 2048"
+   },
+   {
+    "stage": "vector: pooled + micro-conditioning",
+    "shape": "1280 + 6 × 256 = 2816 → 1280"
+   },
+   {
+    "stage": "encoder",
+    "shape": "320 · 128² → 640 · 64² → 1280 · 32²"
+   },
+   {
+    "stage": "bottleneck",
+    "shape": "1280 × 32 × 32, 10 transformer blocks"
+   },
+   {
+    "stage": "output 3×3 conv",
+    "shape": "ε̂: 4 × 128 × 128"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · arXiv 2307.01952",
+    "url": "https://arxiv.org/abs/2307.01952"
+   },
+   {
+    "label": "Code · Stability-AI/generative-models",
+    "url": "https://github.com/Stability-AI/generative-models"
+   },
+   {
+    "label": "Weights · stable-diffusion-xl-base-1.0",
+    "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"
+   }
+  ]
+ },
+ {
+  "id": "dit",
+  "name": "DiT",
+  "year": 2023,
+  "org": "UC Berkeley · NYU",
+  "domain": "image",
+  "paper": "Peebles & Xie · ICCV 2023",
+  "url": "https://arxiv.org/abs/2212.09748",
+  "space": "VAE latent, f = 8",
+  "backbone": "plain transformer on 2×2 latent patches",
+  "params": "675 M (DiT-XL/2)",
+  "params_m": 675,
+  "conditioning": "adaLN-Zero from time + class",
+  "objective": "ε and Σ",
+  "steps": "250 (DDPM) + CFG",
+  "novelty": "Drop the U-Net: a ViT on latent patches, conditioned by adaptive LayerNorm.",
+  "notes": [
+   "28 blocks, width 1152, 16 heads; 256 tokens for a 256² image.",
+   "adaLN-Zero regresses scale, shift and a gate per sub-layer; gates start at zero.",
+   "Quality tracks GFLOPs: the scaling argument that moved the field to transformers."
+  ],
+  "vs": "the latent U-Net of SD 1",
+  "blocks": {
+   "noisy-latent-z-t": {
+    "title": "noisy latent z<sub>t</sub>",
+    "sub": "4 × 32 × 32 (256² image)",
+    "role": "io",
+    "dims": "4 × 32 × 32 (256² image, SD VAE f = 8)",
+    "text": "Same VAE as Stable Diffusion; the diffusion process is the ADM one with learned Σ.",
+    "refs": [
+     {
+      "label": "Rombach et al. 2022 · Latent diffusion",
+      "url": "https://arxiv.org/abs/2112.10752"
+     }
+    ]
+   },
+   "patchify-p-2": {
+    "title": "patchify, p = 2",
+    "sub": "→ 256 tokens · + sin-cos pos.",
+    "role": "embed",
+    "dims": "4 × 32 × 32 → (32/2)² = 256 tokens × (2 · 2 · 4) → linear → 256 × 1152",
+    "text": "Patch size sets the token count: p = 8, 4, 2 give 16, 64, 256 tokens. Halving p quadruples the GFLOPs at almost the same parameter count.",
+    "refs": [
+     {
+      "label": "Dosovitskiy et al. 2021 · ViT",
+      "url": "https://arxiv.org/abs/2010.11929"
+     },
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     }
+    ]
+   },
+   "layernorm": {
+    "title": "LayerNorm · γ, β",
+    "sub": "",
+    "role": "norm",
+    "dims": "256 × 1152, no learned affine",
+    "text": "h ← LN(h) · (1 + γ) + β, with γ, β ∈ ℝ<sup>1152</sup> regressed from c. Every token gets the same modulation: the condition rescales features, it does not add tokens.",
+    "refs": [
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     },
+     {
+      "label": "Perez et al. 2018 · FiLM",
+      "url": "https://arxiv.org/abs/1709.07871"
+     }
+    ]
+   },
+   "multi-head-self-attention": {
+    "title": "multi-head self-attention",
+    "sub": "16 heads · d = 1152",
+    "role": "attn",
+    "dims": "256 × 1152 → 16 heads × 72 → 256 × 1152",
+    "text": "Full attention over all 256 patches; no causal mask, no relative positions.",
+    "refs": [
+     {
+      "label": "Vaswani et al. 2017 · Attention is all you need",
+      "url": "https://arxiv.org/abs/1706.03762"
+     }
+    ]
+   },
+   "scale": {
+    "title": "scale α",
+    "sub": "",
+    "role": "norm",
+    "dims": "α ∈ ℝ<sup>1152</sup>, zero at initialisation",
+    "text": "h ← h + α ⊙ sublayer(h). With α = 0 the residual branch is switched off at the start, which made large DiTs train stably.",
+    "refs": [
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     }
+    ]
+   },
+   "pointwise-mlp": {
+    "title": "pointwise MLP",
+    "sub": "1152 → 4608 → 1152",
+    "role": "mlp",
+    "dims": "1152 → 4608 → 1152, GELU (tanh)",
+    "text": "Applied to each token independently.",
+    "refs": []
+   },
+   "layernorm-linear-unpatchify": {
+    "title": "LayerNorm · linear · unpatchify",
+    "sub": "",
+    "role": "embed",
+    "dims": "256 × 1152 → 256 × 32 → 8 × 32 × 32",
+    "text": "A final adaLN (shift and scale only) and a zero-initialised linear layer.",
+    "refs": []
+   },
+   "noise-and": {
+    "title": "noise ε̂ and Σ̂",
+    "sub": "8 × 32 × 32",
+    "role": "io",
+    "dims": "8 × 32 × 32 = 4 for ε̂ + 4 for Σ",
+    "text": "Trained with the Improved-DDPM hybrid loss.",
+    "refs": [
+     {
+      "label": "Nichol & Dhariwal 2021 · Improved DDPM (learned Σ)",
+      "url": "https://arxiv.org/abs/2102.09672"
+     }
+    ]
+   },
+   "time-t": {
+    "title": "time t",
+    "sub": "sinusoidal → MLP",
+    "role": "cond",
+    "dims": "t → 256-d sinusoidal → MLP → 1152",
+    "text": "",
+    "refs": []
+   },
+   "class-y": {
+    "title": "class y",
+    "sub": "embedding table",
+    "role": "cond",
+    "dims": "embedding table 1001 × 1152",
+    "text": "1000 ImageNet classes plus a null class. Labels are dropped 10 % of the time so the same network gives the unconditional prediction for classifier-free guidance.",
+    "refs": [
+     {
+      "label": "Ho & Salimans 2022 · Classifier-free guidance",
+      "url": "https://arxiv.org/abs/2207.12598"
+     }
+    ]
+   },
+   "mlp-6-vectors": {
+    "title": "MLP → 6 vectors",
+    "sub": "γ₁ β₁ α₁ γ₂ β₂ α₂",
+    "role": "cond",
+    "dims": "c → SiLU → linear 1152 → 6 × 1152, one per block",
+    "text": "Regresses (γ₁, β₁, α₁) for attention and (γ₂, β₂, α₂) for the MLP. Initialised to zero.",
+    "refs": [
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "DiT replaces the U-Net with a plain Vision Transformer. The 4 × 32 × 32 latent of a 256² image is cut into 2 × 2 patches, giving 256 tokens of width 1152 with fixed 2D sin-cos positional embeddings. 28 identical blocks process the sequence, and a final linear layer maps each token back to a 2 × 2 patch with 8 channels.",
+   "Conditioning is adaptive LayerNorm. The time and class embeddings are summed into one vector c; in every block an MLP regresses six vectors from c: a shift β and scale γ applied after each of the two LayerNorms, and a gate α on each residual branch. The gates are zero-initialised (adaLN-Zero), so every block starts as the identity. In the paper&#x27;s ablation this beat in-context tokens and cross-attention.",
+   "The main result is a scaling law: FID falls steadily with forward-pass GFLOPs, whether the GFLOPs come from a larger model or smaller patches. DiT-XL/2 reaches FID 2.27 on class-conditional ImageNet 256 with classifier-free guidance."
+  ],
+  "flow": [
+   {
+    "stage": "noisy latent z<sub>t</sub>",
+    "shape": "4 × 32 × 32"
+   },
+   {
+    "stage": "patchify p = 2",
+    "shape": "256 tokens × 16 values"
+   },
+   {
+    "stage": "linear + 2D sin-cos pos.",
+    "shape": "256 × 1152"
+   },
+   {
+    "stage": "c = MLP(t) + emb(y)",
+    "shape": "1152"
+   },
+   {
+    "stage": "28 DiT blocks",
+    "shape": "256 × 1152"
+   },
+   {
+    "stage": "adaLN + linear",
+    "shape": "256 × (2 · 2 · 8) = 256 × 32"
+   },
+   {
+    "stage": "unpatchify",
+    "shape": "ε̂ and Σ̂: 8 × 32 × 32"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · arXiv 2212.09748",
+    "url": "https://arxiv.org/abs/2212.09748"
+   },
+   {
+    "label": "Code · facebookresearch/DiT",
+    "url": "https://github.com/facebookresearch/DiT"
+   },
+   {
+    "label": "Project page",
+    "url": "https://www.wpeebles.com/DiT"
+   }
+  ]
+ },
+ {
+  "id": "uvit",
+  "name": "U-ViT",
+  "year": 2023,
+  "org": "Tsinghua",
+  "domain": "image",
+  "paper": "Bao et al. · CVPR 2023",
+  "url": "https://arxiv.org/abs/2209.12152",
+  "space": "pixels or latent",
+  "backbone": "ViT with long skip connections",
+  "params": "501 M (U-ViT-H/2)",
+  "params_m": 501,
+  "conditioning": "time and condition as input tokens",
+  "objective": "ε-prediction",
+  "steps": "50 (DPM-Solver) + CFG",
+  "novelty": "Everything is a token; the U-Net survives only as long skips.",
+  "notes": [
+   "Time, class or text tokens are simply prepended to the patch sequence.",
+   "U-ViT-H/2: 14 shallow blocks, 1 middle block, 14 deep blocks; shallow block i is joined to deep block i by concatenation + linear.",
+   "An optional 3×3 convolution after unpatchify smooths patch borders; the ImageNet-256 U-ViT-H/2 model runs without it."
+  ],
+  "vs": "DiT",
+  "blocks": {
+   "time-t": {
+    "title": "time t",
+    "sub": "",
+    "role": "cond",
+    "dims": "t → sinusoidal → 1 token × 1152",
+    "text": "A token like any other; attention decides how much each patch reads from it.",
+    "refs": []
+   },
+   "condition-c": {
+    "title": "condition c",
+    "sub": "",
+    "role": "cond",
+    "dims": "class: 1 token · text: 77 CLIP tokens",
+    "text": "Class-conditional ImageNet uses one label token; text-to-image on MS-COCO uses the 77 CLIP ViT-L/14 token features, projected to the width.",
+    "refs": [
+     {
+      "label": "Radford et al. 2021 · CLIP",
+      "url": "https://arxiv.org/abs/2103.00020"
+     }
+    ]
+   },
+   "noisy-patches-x-t": {
+    "title": "noisy patches x<sub>t</sub>",
+    "sub": "image or latent, patch 2",
+    "role": "io",
+    "dims": "pixels (CIFAR-10, CelebA) or a 4 × 32 × 32 SD latent",
+    "text": "Works in either space; the headline ImageNet numbers are in latent space.",
+    "refs": []
+   },
+   "linear-embed-pos-embed": {
+    "title": "linear embed + pos. embed",
+    "sub": "one sequence: [t, c, x₁ … x<sub>L</sub>]",
+    "role": "embed",
+    "dims": "258 × 1152",
+    "text": "Learned positional embedding over the whole sequence.",
+    "refs": [
+     {
+      "label": "Dosovitskiy et al. 2021 · ViT",
+      "url": "https://arxiv.org/abs/2010.11929"
+     }
+    ]
+   },
+   "in-block": {
+    "title": "in-block 1",
+    "sub": "self-attn + MLP",
+    "role": "attn",
+    "dims": "258 × 1152 → 258 × 1152",
+    "text": "Pre-norm transformer block: LN → self-attention (16 heads) → LN → MLP (4608). Its output is kept for the long skip.",
+    "refs": [
+     {
+      "label": "Vaswani et al. 2017 · Attention is all you need",
+      "url": "https://arxiv.org/abs/1706.03762"
+     }
+    ]
+   },
+   "mid-block": {
+    "title": "mid-block",
+    "sub": "self-attn + MLP",
+    "role": "attn",
+    "dims": "258 × 1152",
+    "text": "The one block without a skip partner.",
+    "refs": []
+   },
+   "out-block": {
+    "title": "out-block 14",
+    "sub": "self-attn + MLP",
+    "role": "attn",
+    "dims": "concat(h, skip) 258 × 2304 → linear → 1152 → transformer block",
+    "text": "The long skip from the matching in-block is concatenated per token and projected back before the block runs.",
+    "refs": [
+     {
+      "label": "Bao et al. 2023 · U-ViT",
+      "url": "https://arxiv.org/abs/2209.12152"
+     }
+    ]
+   },
+   "linear-unpatchify": {
+    "title": "linear · unpatchify",
+    "sub": "+ 3×3 conv (optional)",
+    "role": "embed",
+    "dims": "256 × 1152 → 256 × 16 → 4 × 32 × 32",
+    "text": "An optional 3 × 3 convolution after unpatchify removes visible patch borders. The ablation favours it on CIFAR-10, but the ImageNet-256 headline model (FID 2.29) is trained without it (<code>conv=False</code>).",
+    "refs": [
+     {
+      "label": "Bao et al. 2023 · U-ViT",
+      "url": "https://arxiv.org/abs/2209.12152"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise ε̂",
+    "sub": "",
+    "role": "io",
+    "dims": "4 × 32 × 32",
+    "text": "ε-prediction; sampled with DPM-Solver in 50 steps.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "U-ViT treats everything as a token. The time step, the condition (a class label, or 77 CLIP text tokens) and the noisy image patches are embedded and concatenated into one sequence, and a ViT processes it with plain self-attention. There is no adaptive normalisation and no cross-attention.",
+   "What survives of the U-Net is the long skip. The blocks are split into a shallow half, one middle block and a deep half; the output of shallow block i is concatenated with the input of the matching deep block and projected back to the model width by a linear layer. The paper finds the long skips essential and the down- and upsampling unnecessary.",
+   "After the last block the time and condition tokens are dropped, the patch tokens are put back on the image grid, and an optional 3 × 3 convolution smooths the patch borders (the ImageNet-256 U-ViT-H/2 config runs without it). U-ViT-H/2 has 14 + 1 + 14 blocks of width 1152 (29 in Table 2 of the paper); the drawing shows blocks 1, 2 and 14 of each half."
+  ],
+  "flow": [
+   {
+    "stage": "noisy latent x<sub>t</sub>",
+    "shape": "4 × 32 × 32 (ImageNet 256)"
+   },
+   {
+    "stage": "patchify p = 2 + linear",
+    "shape": "256 × 1152"
+   },
+   {
+    "stage": "[t ; c ; patches] + learned pos.",
+    "shape": "258 × 1152"
+   },
+   {
+    "stage": "14 in-blocks · mid · 14 out-blocks",
+    "shape": "258 × 1152"
+   },
+   {
+    "stage": "drop t, c · linear",
+    "shape": "256 × 16"
+   },
+   {
+    "stage": "unpatchify (· 3×3 conv, optional)",
+    "shape": "ε̂: 4 × 32 × 32"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · arXiv 2209.12152",
+    "url": "https://arxiv.org/abs/2209.12152"
+   },
+   {
+    "label": "Code · baofff/U-ViT",
+    "url": "https://github.com/baofff/U-ViT"
+   }
+  ]
+ },
+ {
+  "id": "sd3",
+  "name": "SD3 · MMDiT",
+  "year": 2024,
+  "org": "Stability AI",
+  "domain": "image",
+  "paper": "Esser et al. · ICML 2024",
+  "url": "https://arxiv.org/abs/2403.03206",
+  "space": "VAE latent, 16 channels",
+  "backbone": "MMDiT: two weight sets, one joint attention",
+  "params": "2 B – 8 B",
+  "params_m": 8000,
+  "conditioning": "text tokens in the sequence; pooled CLIP + t via adaLN",
+  "objective": "rectified flow (velocity), logit-normal t",
+  "steps": "28 (Euler, Medium)",
+  "novelty": "Text and image get their own weights but attend jointly in both directions.",
+  "notes": [
+   "Three text encoders: CLIP-L and OpenCLIP bigG (77 × 2048, zero-padded to 4096 channels) and T5-XXL (77 × 4096).",
+   "Width 64 · depth; depth 24 in SD3 Medium, 38 in the 8 B model.",
+   "RMSNorm on Q and K keeps the attention logits bounded; the paper adds it for stable mixed-precision training at high resolution."
+  ],
+  "vs": "DiT",
+  "blocks": {
+   "text-tokens": {
+    "title": "text tokens",
+    "sub": "CLIP-L ‖ bigG (padded) + T5-XXL · 154 × 4096",
+    "role": "cond",
+    "dims": "77 CLIP (768 ‖ 1280, zero-padded) + 77 T5-XXL × 4096 = 154 × 4096",
+    "text": "T5 can be dropped at inference for lower memory at some cost in text rendering.",
+    "refs": [
+     {
+      "label": "Radford et al. 2021 · CLIP",
+      "url": "https://arxiv.org/abs/2103.00020"
+     },
+     {
+      "label": "OpenCLIP (LAION)",
+      "url": "https://github.com/mlfoundations/open_clip"
+     },
+     {
+      "label": "Raffel et al. 2020 · T5",
+      "url": "https://arxiv.org/abs/1910.10683"
+     }
+    ]
+   },
+   "noisy-latent-x-t": {
+    "title": "noisy latent x<sub>t</sub>",
+    "sub": "16 ch · patch 2",
+    "role": "io",
+    "dims": "16 × 128 × 128 for 1024²",
+    "text": "A 16-channel VAE (instead of 4) preserves more detail and pays off once the model is large.",
+    "refs": [
+     {
+      "label": "Esser et al. 2024 · SD3 / MMDiT",
+      "url": "https://arxiv.org/abs/2403.03206"
+     }
+    ]
+   },
+   "linear": {
+    "title": "linear",
+    "sub": "",
+    "role": "embed",
+    "dims": "154 × 4096 → 154 × 1536",
+    "text": "Projects the text features to the model width.",
+    "refs": []
+   },
+   "patchify-pos-embed": {
+    "title": "patchify + pos. embed",
+    "sub": "",
+    "role": "embed",
+    "dims": "16 × 128² → 4096 tokens × 64 → 4096 × 1536",
+    "text": "2D positional embedding, cropped to the image size for multi-aspect training.",
+    "refs": []
+   },
+   "vector-y": {
+    "title": "vector y",
+    "sub": "pooled CLIP · + time t · → MLP",
+    "role": "cond",
+    "dims": "pooled CLIP-L 768 + bigG 1280 = 2048 → MLP · t → 256-d sinusoidal → MLP · summed → 1536",
+    "text": "The only global conditioning; it reaches every block through adaLN.",
+    "refs": []
+   },
+   "adaln-modulation": {
+    "title": "adaLN modulation",
+    "sub": "",
+    "role": "norm",
+    "dims": "y → SiLU → linear → 6 × 1536, separate for each stream",
+    "text": "Shift, scale and gate for the attention and MLP sub-layers, as in DiT, but with different weights for text and image tokens.",
+    "refs": [
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     }
+    ]
+   },
+   "q-k-v-text-weights": {
+    "title": "Q K V · text weights",
+    "sub": "",
+    "role": "attn",
+    "dims": "154 × 1536 → Q, K, V each 154 × 24 heads × 64",
+    "text": "RMSNorm on Q and K per head.",
+    "refs": [
+     {
+      "label": "Dehghani et al. 2023 · ViT-22B (QK-norm, parallel layers)",
+      "url": "https://arxiv.org/abs/2302.05442"
+     }
+    ]
+   },
+   "q-k-v-image-weights": {
+    "title": "Q K V · image weights",
+    "sub": "",
+    "role": "attn",
+    "dims": "4096 × 1536 → Q, K, V each 4096 × 24 heads × 64",
+    "text": "RMSNorm on Q and K per head.",
+    "refs": [
+     {
+      "label": "Dehghani et al. 2023 · ViT-22B (QK-norm, parallel layers)",
+      "url": "https://arxiv.org/abs/2302.05442"
+     }
+    ]
+   },
+   "joint-attention": {
+    "title": "joint attention",
+    "sub": "one softmax over [text ; image]",
+    "role": "attn",
+    "dims": "4250 queries × 4250 keys × 24 heads",
+    "text": "Q, K, V of both streams are concatenated along the sequence; one softmax runs over all tokens, so image tokens attend to text and text tokens to the image. The outputs are split back by stream.",
+    "refs": [
+     {
+      "label": "Esser et al. 2024 · SD3 / MMDiT",
+      "url": "https://arxiv.org/abs/2403.03206"
+     }
+    ]
+   },
+   "out-proj-gate": {
+    "title": "out proj · gate ⊕",
+    "sub": "",
+    "role": "attn",
+    "dims": "per stream: 1536 → 1536, × gate, + residual",
+    "text": "",
+    "refs": []
+   },
+   "mlp-gate": {
+    "title": "MLP · gate ⊕",
+    "sub": "",
+    "role": "mlp",
+    "dims": "per stream: 1536 → 6144 → 1536, GELU, × gate, + residual",
+    "text": "",
+    "refs": []
+   },
+   "adaln-linear-unpatchify": {
+    "title": "adaLN · linear · unpatchify",
+    "sub": "",
+    "role": "embed",
+    "dims": "4096 × 1536 → 4096 × 64 → 16 × 128 × 128",
+    "text": "Text tokens are discarded.",
+    "refs": []
+   },
+   "velocity-v": {
+    "title": "velocity v̂",
+    "sub": "rectified flow",
+    "role": "io",
+    "dims": "16 × 128 × 128",
+    "text": "v = ε − x<sub>0</sub>. Sampled with 28 Euler steps on the ODE dx/dt = v̂ from t = 1 to t = 0, with a resolution-dependent time shift.",
+    "refs": [
+     {
+      "label": "Liu et al. 2023 · Rectified flow",
+      "url": "https://arxiv.org/abs/2209.03003"
+     },
+     {
+      "label": "Lipman et al. 2023 · Flow matching",
+      "url": "https://arxiv.org/abs/2210.02747"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "SD3 trains a rectified flow: x<sub>t</sub> = (1 − t) x<sub>0</sub> + t ε on a straight path from data (t = 0) to noise (t = 1), and the network predicts the velocity v = ε − x<sub>0</sub>. Training times are drawn from a logit-normal distribution, which concentrates training on the middle of the path, where the prediction is hardest.",
+   "The backbone, MMDiT, keeps two token streams, text and image, each with its own QKV projections, MLPs and adaLN modulation. Inside every block the queries, keys and values of both streams are concatenated and a single attention runs over the joint sequence. A model of depth d has width 64 · d and d heads: SD3 Medium has d = 24 (2 B parameters), the largest model d = 38 (8 B).",
+   "Text conditioning uses three frozen encoders: CLIP-L and OpenCLIP bigG token features (77 tokens, zero-padded to 4096 channels) and T5-XXL (77 tokens), 154 tokens in all. The pooled CLIP vectors join the time embedding in a global vector y that drives the modulation of both streams. RMSNorm on Q and K keeps the attention logits bounded at large scale."
+  ],
+  "flow": [
+   {
+    "stage": "image 1024² → VAE",
+    "shape": "x<sub>0</sub>: 16 × 128 × 128"
+   },
+   {
+    "stage": "patchify p = 2 + linear",
+    "shape": "4096 × 1536 (d = 24)"
+   },
+   {
+    "stage": "CLIP-L ‖ bigG ‖ T5 → linear",
+    "shape": "154 × 1536"
+   },
+   {
+    "stage": "y = MLP(t) + MLP(pooled 2048)",
+    "shape": "1536"
+   },
+   {
+    "stage": "24 MMDiT blocks",
+    "shape": "(154 + 4096) × 1536"
+   },
+   {
+    "stage": "image stream: adaLN + linear",
+    "shape": "4096 × 64"
+   },
+   {
+    "stage": "unpatchify",
+    "shape": "v̂: 16 × 128 × 128"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · arXiv 2403.03206",
+    "url": "https://arxiv.org/abs/2403.03206"
+   },
+   {
+    "label": "Code · Stability-AI/sd3.5 (reference)",
+    "url": "https://github.com/Stability-AI/sd3.5"
+   },
+   {
+    "label": "Weights · stable-diffusion-3-medium",
+    "url": "https://huggingface.co/stabilityai/stable-diffusion-3-medium"
+   }
+  ]
+ },
+ {
+  "id": "flux",
+  "name": "FLUX.1",
+  "year": 2024,
+  "org": "Black Forest Labs",
+  "domain": "image",
+  "paper": "BFL model release · FLUX.1 Kontext report 2025",
+  "url": "https://arxiv.org/abs/2506.15742",
+  "space": "VAE latent, 16 channels",
+  "backbone": "19 double-stream + 38 single-stream blocks",
+  "params": "12 B",
+  "params_m": 12000,
+  "conditioning": "T5 tokens in sequence; CLIP pooled + t + guidance via adaLN",
+  "objective": "rectified flow (velocity), guidance-distilled [dev]",
+  "steps": "28–50",
+  "novelty": "MMDiT first, then cheaper single-stream blocks with parallel attention and MLP.",
+  "notes": [
+   "Hidden width 3072, 24 heads of 128; RoPE on Q and K over three axes of 16 + 56 + 56 channels.",
+   "2×2 latent patches are packed into 64-channel tokens.",
+   "[dev] takes the guidance scale as an input instead of running CFG twice."
+  ],
+  "vs": "SD3",
+  "blocks": {
+   "text-tokens": {
+    "title": "text tokens",
+    "sub": "T5-XXL · up to 512 × 4096",
+    "role": "cond",
+    "dims": "T5-XXL: up to 512 × 4096 ([dev]), 256 ([schnell])",
+    "text": "Only T5 tokens enter the sequence; CLIP contributes only its pooled vector.",
+    "refs": [
+     {
+      "label": "Raffel et al. 2020 · T5",
+      "url": "https://arxiv.org/abs/1910.10683"
+     }
+    ]
+   },
+   "noisy-latent-x-t": {
+    "title": "noisy latent x<sub>t</sub>",
+    "sub": "16 ch, 2×2 packed → 64",
+    "role": "io",
+    "dims": "16 × 128 × 128 → 2 × 2 packing → 4096 × 64",
+    "text": "Packing replaces a patchify convolution.",
+    "refs": []
+   },
+   "linear-3072": {
+    "title": "linear → 3072",
+    "sub": "",
+    "role": "embed",
+    "dims": "text 4096 → 3072 · image 64 → 3072",
+    "text": "One linear layer per stream.",
+    "refs": []
+   },
+   "linear-img": {
+    "title": "linear → 3072",
+    "sub": "",
+    "role": "embed",
+    "dims": "",
+    "text": "",
+    "refs": []
+   },
+   "vector": {
+    "title": "vector",
+    "sub": "pooled CLIP-L · + time t · + guidance g · → MLP",
+    "role": "cond",
+    "dims": "CLIP-L pooled 768 → MLP · t → 256 → MLP · g → 256 → MLP · summed → 3072",
+    "text": "g is the guidance strength that [dev] was distilled to accept.",
+    "refs": [
+     {
+      "label": "Meng et al. 2023 · Distillation of guided diffusion",
+      "url": "https://arxiv.org/abs/2210.03142"
+     },
+     {
+      "label": "Radford et al. 2021 · CLIP",
+      "url": "https://arxiv.org/abs/2103.00020"
+     }
+    ]
+   },
+   "adaln-modulation": {
+    "title": "adaLN modulation",
+    "sub": "",
+    "role": "norm",
+    "dims": "vector → SiLU → linear → 6 × 3072 per stream",
+    "text": "",
+    "refs": [
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     }
+    ]
+   },
+   "q-k-v-text-weights": {
+    "title": "Q K V · text weights",
+    "sub": "",
+    "role": "attn",
+    "dims": "512 × 3072 → 24 heads × 128, RMSNorm on Q, K",
+    "text": "",
+    "refs": [
+     {
+      "label": "Dehghani et al. 2023 · ViT-22B (QK-norm, parallel layers)",
+      "url": "https://arxiv.org/abs/2302.05442"
+     }
+    ]
+   },
+   "q-k-v-image-weights": {
+    "title": "Q K V · image weights",
+    "sub": "",
+    "role": "attn",
+    "dims": "4096 × 3072 → 24 heads × 128, RMSNorm on Q, K",
+    "text": "",
+    "refs": [
+     {
+      "label": "Dehghani et al. 2023 · ViT-22B (QK-norm, parallel layers)",
+      "url": "https://arxiv.org/abs/2302.05442"
+     }
+    ]
+   },
+   "joint-attention": {
+    "title": "joint attention",
+    "sub": "24 heads · RoPE on Q, K",
+    "role": "attn",
+    "dims": "4608 × 4608 × 24 heads; RoPE on Q, K (axes 16 + 56 + 56 = 128)",
+    "text": "Q, K, V of both streams are concatenated along the sequence; one softmax runs over all tokens, so image tokens attend to text and text tokens to the image. The outputs are split back by stream.",
+    "refs": [
+     {
+      "label": "Esser et al. 2024 · SD3 / MMDiT",
+      "url": "https://arxiv.org/abs/2403.03206"
+     },
+     {
+      "label": "Su et al. 2021 · RoFormer (RoPE)",
+      "url": "https://arxiv.org/abs/2104.09864"
+     }
+    ]
+   },
+   "out-proj-gate": {
+    "title": "out proj · gate ⊕",
+    "sub": "",
+    "role": "attn",
+    "dims": "per stream: 3072 → 3072, gated residual",
+    "text": "",
+    "refs": []
+   },
+   "mlp-gate": {
+    "title": "MLP · gate ⊕",
+    "sub": "",
+    "role": "mlp",
+    "dims": "per stream: 3072 → 12288 → 3072, GELU (tanh)",
+    "text": "",
+    "refs": []
+   },
+   "concat": {
+    "title": "concat",
+    "sub": "",
+    "role": "embed",
+    "dims": "[text ; image] 4608 × 3072",
+    "text": "From here on both kinds of token share weights.",
+    "refs": []
+   },
+   "adaln-single": {
+    "title": "adaLN modulation",
+    "sub": "",
+    "role": "norm",
+    "dims": "vector → linear → 3 × 3072",
+    "text": "Shift, scale and a single gate: the attention and MLP branches are added to the residual together.",
+    "refs": []
+   },
+   "attention": {
+    "title": "attention",
+    "sub": "RoPE",
+    "role": "attn",
+    "dims": "fused linear 3072 → 3 · 3072 (QKV) + 12288 (MLP in)",
+    "text": "Attention over the full 4608-token sequence, with RoPE.",
+    "refs": [
+     {
+      "label": "Su et al. 2021 · RoFormer (RoPE)",
+      "url": "https://arxiv.org/abs/2104.09864"
+     },
+     {
+      "label": "Dehghani et al. 2023 · ViT-22B (QK-norm, parallel layers)",
+      "url": "https://arxiv.org/abs/2302.05442"
+     }
+    ]
+   },
+   "mlp": {
+    "title": "MLP",
+    "sub": "in parallel",
+    "role": "mlp",
+    "dims": "12288, GELU (tanh)",
+    "text": "Reads the same normalised input as attention, in parallel rather than after it.",
+    "refs": [
+     {
+      "label": "Dehghani et al. 2023 · ViT-22B (QK-norm, parallel layers)",
+      "url": "https://arxiv.org/abs/2302.05442"
+     }
+    ]
+   },
+   "linear-fused-gate": {
+    "title": "linear (fused) · gate ⊕",
+    "sub": "",
+    "role": "attn",
+    "dims": "concat(attn 3072, MLP 12288) → 3072",
+    "text": "One output projection for both branches.",
+    "refs": []
+   },
+   "image-tokens-linear": {
+    "title": "image tokens → linear",
+    "sub": "",
+    "role": "embed",
+    "dims": "4096 × 3072 → adaLN → 4096 × 64",
+    "text": "Text tokens are dropped.",
+    "refs": []
+   },
+   "velocity-v": {
+    "title": "velocity v̂",
+    "sub": "rectified flow",
+    "role": "io",
+    "dims": "4096 × 64 → unpack → 16 × 128 × 128",
+    "text": "Rectified-flow velocity, Euler steps with a time shift that grows with the image size.",
+    "refs": [
+     {
+      "label": "Liu et al. 2023 · Rectified flow",
+      "url": "https://arxiv.org/abs/2209.03003"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "FLUX.1 extends MMDiT into a hybrid stack: 19 double-stream blocks, in which text and image tokens keep separate weights as in SD3, then 38 single-stream blocks that process the concatenated sequence with shared weights. A single-stream block runs attention and the MLP in parallel from one fused input projection, as in ViT-22B.",
+   "Width is 3072 with 24 heads of 128 channels. Positions are rotary: every token carries a 3-axis index (the latent row and column for image tokens, zeros for text; the first axis separates reference images in Kontext), and RoPE rotates Q and K by it, so no positional embedding is added to the tokens. The 16-channel latent is packed in 2 × 2 patches into 64-channel tokens; a 1024² image gives 4096 tokens.",
+   "T5-XXL tokens (up to 512) form the text stream. The pooled CLIP-L vector, the time and, in FLUX.1 [dev], the guidance scale are embedded and summed into the vector that drives every adaLN. [dev] is guidance-distilled, so one forward pass replaces the two of classifier-free guidance; [schnell] is step-distilled to 1–4 steps."
+  ],
+  "flow": [
+   {
+    "stage": "image 1024² → VAE",
+    "shape": "16 × 128 × 128"
+   },
+   {
+    "stage": "pack 2 × 2 → linear",
+    "shape": "4096 × 64 → 4096 × 3072"
+   },
+   {
+    "stage": "T5-XXL → linear",
+    "shape": "512 × 4096 → 512 × 3072"
+   },
+   {
+    "stage": "vector: CLIP + t + g",
+    "shape": "3072"
+   },
+   {
+    "stage": "19 double-stream blocks",
+    "shape": "512 + 4096 tokens × 3072"
+   },
+   {
+    "stage": "38 single-stream blocks",
+    "shape": "4608 × 3072"
+   },
+   {
+    "stage": "image tokens: adaLN + linear",
+    "shape": "4096 × 64"
+   },
+   {
+    "stage": "unpack",
+    "shape": "v̂: 16 × 128 × 128"
+   }
+  ],
+  "links": [
+   {
+    "label": "FLUX.1 Kontext paper · arXiv 2506.15742",
+    "url": "https://arxiv.org/abs/2506.15742"
+   },
+   {
+    "label": "Code · black-forest-labs/flux",
+    "url": "https://github.com/black-forest-labs/flux"
+   },
+   {
+    "label": "Weights · FLUX.1-dev",
+    "url": "https://huggingface.co/black-forest-labs/FLUX.1-dev"
+   }
+  ]
+ },
+ {
+  "id": "rfdiffusion",
+  "name": "RFdiffusion",
+  "year": 2023,
+  "org": "Baker lab, UW",
+  "domain": "bio",
+  "paper": "Watson et al. · Nature 2023",
+  "url": "https://www.nature.com/articles/s41586-023-06415-8",
+  "space": "residue frames (Cα + orientation)",
+  "backbone": "RoseTTAFold, fine-tuned (three tracks)",
+  "params": "not stated in the paper",
+  "params_m": null,
+  "conditioning": "motif, binder hotspots, symmetry; self-conditioning on previous x̂₀",
+  "objective": "x̂₀-prediction on frames",
+  "steps": "200 in the paper, 50 in the released config",
+  "novelty": "A structure predictor turned into a denoiser of backbone frames for design.",
+  "notes": [
+   "Translations are noised with Gaussians, rotations with IGSO(3).",
+   "36 three-track blocks and 4 SE(3) refinement blocks (released config); x_t enters as 3D-track coordinates.",
+   "The network predicts the clean structure; the loss is an unaligned frame MSE, not FAPE; its previous prediction is fed back as a template.",
+   "Conditioning is mostly by fixing parts of the input (motifs) rather than by a separate encoder."
+  ],
+  "vs": null,
+  "blocks": {
+   "noised-residue-frames-x-t": {
+    "title": "noised residue frames x<sub>t</sub>",
+    "sub": "Cα: Gaussian · rotation: IGSO(3)",
+    "role": "io",
+    "dims": "L × (3 + 3 × 3): Cα translation and rotation per residue",
+    "text": "Sequence is masked; the model generates backbone geometry only. x<sub>t</sub> enters the 3D track as coordinates; the time step is a per-residue 1D feature, 1 − t/T (1 for fixed motif residues).",
+    "refs": [
+     {
+      "label": "Yim et al. 2023 · SE(3) diffusion (FrameDiff)",
+      "url": "https://arxiv.org/abs/2302.02277"
+     },
+     {
+      "label": "Watson et al. 2023 · RFdiffusion",
+      "url": "https://www.nature.com/articles/s41586-023-06415-8"
+     }
+    ]
+   },
+   "motif-hotspots": {
+    "title": "motif · hotspots",
+    "sub": "symmetry",
+    "role": "cond",
+    "dims": "fixed residues · per-residue hotspot flags · symmetry group",
+    "text": "Motif residues are kept at their true coordinates and are not noised; hotspots mark target residues the binder should contact.",
+    "refs": [
+     {
+      "label": "Watson et al. 2023 · RFdiffusion",
+      "url": "https://www.nature.com/articles/s41586-023-06415-8"
+     }
+    ]
+   },
+   "previous-x": {
+    "title": "previous x̂₀",
+    "sub": "self-conditioning",
+    "role": "cond",
+    "dims": "L frames, used as a template",
+    "text": "Self-conditioning: the last prediction enters the next step through the template features (as a distogram and anglegram). Supplied on half of the training examples; Extended Data Fig. 1e shows it raises the in silico success rate.",
+    "refs": [
+     {
+      "label": "Chen, Zhang & Hinton 2023 · Analog Bits (self-conditioning)",
+      "url": "https://arxiv.org/abs/2208.04202"
+     },
+     {
+      "label": "Watson et al. 2023 · RFdiffusion",
+      "url": "https://www.nature.com/articles/s41586-023-06415-8"
+     }
+    ]
+   },
+   "msa-attention": {
+    "title": "MSA attention",
+    "sub": "",
+    "role": "embed",
+    "dims": "1 × L × 256 (the single masked sequence)",
+    "text": "Row and column attention in the 1D track, biased by the pair features and the current 3D structure.",
+    "refs": [
+     {
+      "label": "Baek et al. 2021 · RoseTTAFold",
+      "url": "https://doi.org/10.1126/science.abj8754"
+     }
+    ]
+   },
+   "transition": {
+    "title": "transition",
+    "sub": "",
+    "role": "embed",
+    "dims": "per residue MLP",
+    "text": "",
+    "refs": []
+   },
+   "pair-update": {
+    "title": "pair update",
+    "sub": "",
+    "role": "pair",
+    "dims": "L × L × 128",
+    "text": "Updates pair features from the 1D track (outer products) and from current 3D distances.",
+    "refs": [
+     {
+      "label": "Baek et al. 2021 · RoseTTAFold",
+      "url": "https://doi.org/10.1126/science.abj8754"
+     }
+    ]
+   },
+   "biaxial-attention": {
+    "title": "biaxial attention",
+    "sub": "",
+    "role": "pair",
+    "dims": "L × L × 128",
+    "text": "Tied, gated row- and column-wise attention on the pair map, with projected Cα–Cα distances of the current structure as bias (Supplementary Methods 1.2).",
+    "refs": [
+     {
+      "label": "Baek et al. 2021 · RoseTTAFold",
+      "url": "https://doi.org/10.1126/science.abj8754"
+     }
+    ]
+   },
+   "se-3-transformer": {
+    "title": "SE(3)-transformer",
+    "sub": "",
+    "role": "attn",
+    "dims": "L nodes, edges from the pair track",
+    "text": "Equivariant attention on the residue graph; rotating the input rotates the output.",
+    "refs": [
+     {
+      "label": "Fuchs et al. 2020 · SE(3)-Transformers",
+      "url": "https://arxiv.org/abs/2006.10503"
+     }
+    ]
+   },
+   "frame-update": {
+    "title": "frame update",
+    "sub": "",
+    "role": "attn",
+    "dims": "L × (Δt, ΔR)",
+    "text": "Applies the predicted rigid updates to each frame.",
+    "refs": []
+   },
+   "structure-refinement": {
+    "title": "structure refinement",
+    "sub": "4 SE(3)-transformer blocks",
+    "role": "attn",
+    "dims": "L frames · 4 blocks",
+    "text": "Four final SE(3)-transformer layers that refine the coordinates from the 1D and 2D features (Supplementary Methods 1.2.5).",
+    "refs": [
+     {
+      "label": "Fuchs et al. 2020 · SE(3)-Transformers",
+      "url": "https://arxiv.org/abs/2006.10503"
+     }
+    ]
+   },
+   "predicted-x": {
+    "title": "predicted x̂₀",
+    "sub": "clean frames, not ε",
+    "role": "io",
+    "dims": "L frames",
+    "text": "Loss: an unaligned frame MSE on Cα positions and rotations (deliberately not FAPE, so the global frame stays continuous between steps) plus a distogram term. The next state takes a Gaussian step toward x̂<sub>0</sub> for translations and a geodesic step on SO(3) for rotations. The paper samples with T = 200; the released config defaults to 50, and 15 steps already give over 60 % in silico success for a 100-residue design.",
+    "refs": [
+     {
+      "label": "Watson et al. 2023 · RFdiffusion",
+      "url": "https://www.nature.com/articles/s41586-023-06415-8"
+     },
+     {
+      "label": "Yim et al. 2023 · SE(3) diffusion (FrameDiff)",
+      "url": "https://arxiv.org/abs/2302.02277"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "RFdiffusion fine-tunes RoseTTAFold, a protein structure predictor, into a denoiser of protein backbones. The state is one rigid frame per residue, a Cα position and a rotation; translations are noised with a Gaussian and rotations with the isotropic Gaussian on SO(3), IGSO(3).",
+   "The network keeps RoseTTAFold&#x27;s three tracks: 1D per-residue features, 2D pair features, and 3D coordinates updated by an SE(3)-equivariant transformer, with the tracks exchanging information in every block. It predicts the clean structure x̂<sub>0</sub>, not the noise, and the next state interpolates toward that prediction. Its previous x̂<sub>0</sub> is fed back as a template input (self-conditioning).",
+   "Conditioning reuses the predictor&#x27;s inputs: fixed motif residues for scaffolding, hotspot flags for binder design, and symmetry by symmetrising the noise and the updates. Designs are then given sequences with ProteinMPNN and filtered by AlphaFold 2."
+  ],
+  "flow": [
+   {
+    "stage": "noised frames x<sub>t</sub>",
+    "shape": "L residues × (Cα ∈ ℝ³, R ∈ SO(3))"
+   },
+   {
+    "stage": "1D track",
+    "shape": "L × d<sub>1D</sub>"
+   },
+   {
+    "stage": "2D track",
+    "shape": "L × L × d<sub>2D</sub>"
+   },
+   {
+    "stage": "3D track",
+    "shape": "L frames"
+   },
+   {
+    "stage": "prediction",
+    "shape": "x̂<sub>0</sub>: L frames"
+   },
+   {
+    "stage": "update",
+    "shape": "x<sub>t−1</sub> from x<sub>t</sub> and x̂<sub>0</sub>"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · Nature 2023",
+    "url": "https://www.nature.com/articles/s41586-023-06415-8"
+   },
+   {
+    "label": "Code · RosettaCommons/RFdiffusion",
+    "url": "https://github.com/RosettaCommons/RFdiffusion"
+   },
+   {
+    "label": "RoseTTAFold · Science 2021",
+    "url": "https://doi.org/10.1126/science.abj8754"
+   }
+  ]
+ },
+ {
+  "id": "af3",
+  "name": "AlphaFold 3",
+  "year": 2024,
+  "org": "Google DeepMind · Isomorphic",
+  "domain": "bio",
+  "paper": "Abramson et al. · Nature 2024",
+  "url": "https://www.nature.com/articles/s41586-024-07487-w",
+  "space": "all-atom coordinates",
+  "backbone": "Pairformer trunk + diffusion transformer",
+  "params": "not stated in the paper",
+  "params_m": null,
+  "conditioning": "single s and pair z from the trunk: AdaLN(s), pair bias from z",
+  "objective": "x̂ (EDM preconditioning), σ_data = 16 Å",
+  "steps": "200",
+  "novelty": "Replaces AF2's structure module with an all-atom diffusion module conditioned on the trunk.",
+  "notes": [
+   "The trunk runs once per target; the denoiser runs 200 steps × S samples.",
+   "Token transformer: 24 blocks × 16 heads × 768, pair bias from z, AdaLN(s); no residual as printed in SI Alg. 23.",
+   "Atom attention is local: blocks of 32 query × 128 key atoms."
+  ],
+  "vs": null,
+  "blocks": {
+   "input": {
+    "title": "sequences + ligand SMILES",
+    "sub": "",
+    "role": "io",
+    "dims": "tokens: one per residue / nucleotide, one per ligand atom · atoms with reference conformers",
+    "text": "Proteins, nucleic acids, ligands (SMILES or CCD), ions and modifications are all tokenised. Every atom gets a reference conformer from RDKit.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "atoms → tokens · 3 blocks",
+    "role": "embed",
+    "dims": "atom single 128 · atom pair 16 → s<sup>inputs</sup>: N<sub>tok</sub> × 449 → s: N<sub>tok</sub> × 384, z: N<sub>tok</sub>² × 128",
+    "text": "A small atom transformer aggregates atoms to tokens; z starts as an outer sum of s plus relative-position and bond features.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tmpl": {
+    "title": "template module",
+    "sub": "2 blocks",
+    "role": "pair",
+    "dims": "N<sub>tok</sub>² × 64, 2 blocks",
+    "text": "Template structures are embedded as pair features and averaged into z.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "msa": {
+    "title": "MSA module",
+    "sub": "4 blocks · MSA → pairs z",
+    "role": "pair",
+    "dims": "MSA N<sub>seq</sub> × N<sub>tok</sub> × 64 → z",
+    "text": "Outer-product mean from the MSA into z, pair-weighted averaging back, triangle updates on z. 4 blocks; replaces AF2&#x27;s Evoformer MSA stack.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Jumper et al. 2021 · AlphaFold 2 (Evoformer, triangle updates)",
+      "url": "https://doi.org/10.1038/s41586-021-03819-2"
+     }
+    ]
+   },
+   "pf": {
+    "title": "Pairformer",
+    "sub": "48 blocks · triangle updates on z · attention on s",
+    "role": "pair",
+    "dims": "s: N<sub>tok</sub> × 384 · z: N<sub>tok</sub> × N<sub>tok</sub> × 128",
+    "text": "Per block: triangle multiplication (outgoing, incoming), triangle attention (start, end node), pair transition, single attention with pair bias, single transition. The MSA is gone from the trunk; only s and z are carried.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Jumper et al. 2021 · AlphaFold 2 (Evoformer, triangle updates)",
+      "url": "https://doi.org/10.1038/s41586-021-03819-2"
+     },
+     {
+      "label": "Simon & Silberg · The Illustrated AlphaFold",
+      "url": "https://elanapearl.github.io/blog/2024/the-illustrated-alphafold/"
+     }
+    ]
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sub>i</sub>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "s<sub>i</sub><sup>trunk</sup>: N<sub>tok</sub> × 384 · z<sub>ij</sub><sup>trunk</sup>: N<sub>tok</sub>² × 128",
+    "text": "Everything the denoiser knows about the target. It is computed once and reused for every step and every sample.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, σ<sub>0</sub> = 160 σ<sub>data</sub> = 2560 Å",
+    "text": "Karras ρ-schedule with ρ = 7, s<sub>max</sub> = 160, s<sub>min</sub> = 4 · 10<sup>−4</sup>, σ<sub>data</sub> = 16 Å.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "z ⊕ rel. pos. · s ⊕ Fourier(σ)",
+    "role": "cond",
+    "dims": "z: concat(z<sup>trunk</sup>, rel. pos.) → 128 · s: concat(s<sup>trunk</sup>, s<sup>inputs</sup>) → 384 + Fourier(¼ log(σ / σ<sub>data</sub>))",
+    "text": "Two transitions each on s and z. This is where the noise level enters the network.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "aenc": {
+    "title": "atom encoder",
+    "sub": "3 blocks · 32 × 128 windows",
+    "role": "attn",
+    "dims": "atoms: 128 ch, pairs 16 ch · 3 blocks · 4 heads · windows of 32 queries × 128 keys → tokens 768",
+    "text": "Local attention over atoms near each other in the token order, then a mean over each token&#x27;s atoms.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tok": {
+    "title": "token transformer",
+    "sub": "24 blocks × 16 heads · 768 · pair bias from z · AdaLN(s)",
+    "role": "attn",
+    "dims": "N<sub>tok</sub> × 768 · 24 blocks × 16 heads · pair bias from z (128 → 16) · AdaLN(s)",
+    "text": "Global attention over tokens. AdaLN conditions on s, every attention logit gets a learned bias from z.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     }
+    ]
+   },
+   "adec": {
+    "title": "atom decoder",
+    "sub": "3 blocks · tokens → atoms",
+    "role": "attn",
+    "dims": "tokens 768 → broadcast to atoms 128 · 3 blocks → Δx: N<sub>atom</sub> × 3",
+    "text": "Atom-level attention again, then a linear layer to coordinate updates F<sub>θ</sub>.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "structure x̂",
+    "sub": "S samples",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3",
+    "text": "x̂ = c<sub>skip</sub>(σ) x + c<sub>out</sub>(σ) F<sub>θ</sub>, EDM preconditioning. The sampler takes 200 Euler steps with churn γ<sub>0</sub> = 0.8, noise scale λ = 1.003 and step scale η = 1.5, and no alignment between steps.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "conf": {
+    "title": "confidence head",
+    "sub": "Pairformer · 4 blocks",
+    "role": "pair",
+    "dims": "4 Pairformer blocks on s, z and the predicted x̂",
+    "text": "Heads for pLDDT (50 bins, per atom), PAE (64 bins), PDE and experimentally-resolved. Trained on a short mini-rollout of the sampler.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "out": {
+    "title": "S structures + confidence",
+    "sub": "pLDDT · PAE · pTM",
+    "role": "io",
+    "dims": "S samples, ranked",
+    "text": "Ranking combines pTM / ipTM with clash and disorder penalties.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "AlphaFold 3 predicts the joint structure of proteins, nucleic acids, ligands and ions. It keeps AlphaFold 2&#x27;s split into an expensive trunk and a structure head, but the head is now a diffusion model over all atom coordinates instead of AF2&#x27;s equivariant structure module.",
+   "The trunk runs once per target: an input embedder, a template module, a 4-block MSA module and the 48-block Pairformer, recycled several times. Its outputs, a single representation s<sub>i</sub> and a pair representation z<sub>ij</sub>, are the condition c. The denoiser D<sub>θ</sub>(x, σ | c) is an atom encoder, a 24-block token transformer and an atom decoder, conditioned through AdaLN on s and an attention bias from z.",
+   "Sampling is EDM&#x27;s stochastic sampler with Euler steps (SI Algorithm 18): 200 steps, churn γ<sub>0</sub> = 0.8, λ = 1.003, η = 1.5. Because the trunk is shared, S samples cost S × 200 denoiser calls but only one trunk pass. Training runs 48 noise levels per trunk pass for the same reason."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "N<sub>tok</sub>; atoms N<sub>atom</sub>"
+   },
+   {
+    "stage": "input embedder",
+    "shape": "s<sup>inputs</sup>: N<sub>tok</sub> × 449"
+   },
+   {
+    "stage": "trunk",
+    "shape": "s: N<sub>tok</sub> × 384 · z: N<sub>tok</sub>² × 128"
+   },
+   {
+    "stage": "noise",
+    "shape": "x: N<sub>atom</sub> × 3"
+   },
+   {
+    "stage": "atom encoder",
+    "shape": "N<sub>atom</sub> × 128 → N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "token transformer",
+    "shape": "N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "atom decoder",
+    "shape": "→ N<sub>atom</sub> × 3"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · Nature 2024",
+    "url": "https://www.nature.com/articles/s41586-024-07487-w"
+   },
+   {
+    "label": "Code · google-deepmind/alphafold3",
+    "url": "https://github.com/google-deepmind/alphafold3"
+   },
+   {
+    "label": "The Illustrated AlphaFold",
+    "url": "https://elanapearl.github.io/blog/2024/the-illustrated-alphafold/"
+   }
+  ]
+ },
+ {
+  "id": "boltz2",
+  "name": "Boltz-2",
+  "year": 2025,
+  "org": "MIT · Recursion",
+  "domain": "bio",
+  "paper": "Passaro, Corso, Wohlwend et al. · 2025",
+  "url": "https://doi.org/10.1101/2025.06.14.659707",
+  "space": "all-atom coordinates",
+  "backbone": "AF3 layout, 64 Pairformer blocks",
+  "params": "521 M (denoiser 294 M)",
+  "params_m": 521,
+  "conditioning": "AF3-style; biases precomputed once; method, template, contact conditioning",
+  "objective": "x̂ (EDM)",
+  "steps": "200 + optional physics steering",
+  "novelty": "AF3 layout with a deeper trunk, an affinity head and inference-time steering.",
+  "notes": [
+   "Pairformer 64 blocks (197 M), confidence 8 blocks (25 M).",
+   "Token transformer 283 M (checkpoint) vs 198 M in OpenFold3 and Protenix: AdaLN on a 768-ch s adds 42 M, a wider SwiGLU gate 28 M (269 M by code); 14 M unexplained.",
+   "Same denoiser as Boltz-1; per-layer pair biases are computed once per target; x is Kabsch-aligned onto x̂ before every step."
+  ],
+  "vs": "AlphaFold 3",
+  "blocks": {
+   "input": {
+    "title": "sequences + ligand SMILES",
+    "sub": "+ method · pocket · contacts",
+    "role": "io",
+    "dims": "sequences, ligands + method, pocket and contact constraints, templates",
+    "text": "Method conditioning (X-ray, NMR, MD, …) lets the user ask for a structure in the style of one experimental technique.",
+    "refs": [
+     {
+      "label": "Passaro et al. 2025 · Boltz-2",
+      "url": "https://doi.org/10.1101/2025.06.14.659707"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "atoms → tokens · 3 blocks",
+    "role": "embed",
+    "dims": "atom single 128 · atom pair 16 → s<sup>inputs</sup>: N<sub>tok</sub> × 449 → s: N<sub>tok</sub> × 384, z: N<sub>tok</sub>² × 128",
+    "text": "A small atom transformer aggregates atoms to tokens; z starts as an outer sum of s plus relative-position and bond features.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tmpl": {
+    "title": "template module",
+    "sub": "2 blocks · + user templates",
+    "role": "pair",
+    "dims": "N<sub>tok</sub>² × 64, 2 blocks",
+    "text": "Templates can be supplied by the user and optionally enforced during sampling (template steering).",
+    "refs": [
+     {
+      "label": "Passaro et al. 2025 · Boltz-2",
+      "url": "https://doi.org/10.1101/2025.06.14.659707"
+     }
+    ]
+   },
+   "msa": {
+    "title": "MSA module",
+    "sub": "4 blocks · 3 M",
+    "role": "pair",
+    "dims": "4 blocks · 3 M parameters",
+    "text": "Outer-product mean from the MSA into z, pair-weighted averaging back, triangle updates on z. 4 blocks; replaces AF2&#x27;s Evoformer MSA stack.",
+    "refs": [
+     {
+      "label": "Wohlwend et al. 2024 · Boltz-1",
+      "url": "https://doi.org/10.1101/2024.11.19.624167"
+     }
+    ]
+   },
+   "pf": {
+    "title": "Pairformer",
+    "sub": "64 blocks · 197 M",
+    "role": "pair",
+    "dims": "64 blocks · 197 M parameters",
+    "text": "Sixteen blocks deeper than AF3.",
+    "refs": [
+     {
+      "label": "Passaro et al. 2025 · Boltz-2",
+      "url": "https://doi.org/10.1101/2025.06.14.659707"
+     }
+    ]
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sub>i</sub>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "s<sub>i</sub><sup>trunk</sup>: N<sub>tok</sub> × 384 · z<sub>ij</sub><sup>trunk</sup>: N<sub>tok</sub>² × 128",
+    "text": "Everything the denoiser knows about the target. It is computed once and reused for every step and every sample.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, σ<sub>0</sub> = 160 σ<sub>data</sub> = 2560 Å",
+    "text": "Karras ρ-schedule with ρ = 7, s<sub>max</sub> = 160, s<sub>min</sub> = 4 · 10<sup>−4</sup>, σ<sub>data</sub> = 16 Å.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "all per-layer biases · precomputed once per target",
+    "role": "cond",
+    "dims": "all per-layer pair biases precomputed once per target",
+    "text": "The 24 layers&#x27; pair-bias projections of z are computed once and cached, so a denoising step only touches s, x and the atom features.",
+    "refs": [
+     {
+      "label": "Passaro et al. 2025 · Boltz-2",
+      "url": "https://doi.org/10.1101/2025.06.14.659707"
+     }
+    ]
+   },
+   "aenc": {
+    "title": "atom encoder",
+    "sub": "3 blocks · 32 × 128 windows",
+    "role": "attn",
+    "dims": "atoms: 128 ch, pairs 16 ch · 3 blocks · 4 heads · windows of 32 queries × 128 keys → tokens 768",
+    "text": "Local attention over atoms near each other in the token order, then a mean over each token&#x27;s atoms.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tok": {
+    "title": "token transformer",
+    "sub": "24 × 16 heads · 768 · residual · AdaLN on 768-ch s · 283 M",
+    "role": "attn",
+    "dims": "24 × 16 heads × 768 · AdaLN on a 768-channel s · 283 M (checkpoint)",
+    "text": "Larger than the token transformers of OpenFold3 and Protenix (198 M). Counted in the released code, the 768-wide single conditioning in every AdaLN and gate adds 42 M (226.6 M with a 384-wide s), and the transition&#x27;s SwiGLU gate projects to 2 × 1536 before a separate 768 → 1536 value projection, one more matrix per block than Algorithm 25 (28 M). That gives 269 M; the remaining 14 M of the checkpoint count are unexplained.",
+    "refs": [
+     {
+      "label": "Wohlwend et al. 2024 · Boltz-1",
+      "url": "https://doi.org/10.1101/2024.11.19.624167"
+     }
+    ]
+   },
+   "adec": {
+    "title": "atom decoder",
+    "sub": "3 blocks",
+    "role": "attn",
+    "dims": "tokens 768 → broadcast to atoms 128 · 3 blocks → Δx: N<sub>atom</sub> × 3",
+    "text": "Atom-level attention again, then a linear layer to coordinate updates F<sub>θ</sub>.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "structure x̂",
+    "sub": "S samples",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3",
+    "text": "200 steps. Before every Euler step the noisy x is Kabsch-aligned onto the prediction x̂ (Boltz-1 and Boltz-2 only, besides ESMFold2). Optional steering potentials (clashes, chirality, planarity, bonds) push each step toward physical validity.",
+    "refs": [
+     {
+      "label": "Passaro et al. 2025 · Boltz-2",
+      "url": "https://doi.org/10.1101/2025.06.14.659707"
+     }
+    ]
+   },
+   "conf": {
+    "title": "confidence · 8 blocks · 25 M",
+    "sub": "+ affinity module",
+    "role": "pair",
+    "dims": "8 Pairformer blocks · 25 M + affinity module",
+    "text": "The affinity module runs a Pairformer on the pocket and predicts binder probability and log IC50.",
+    "refs": [
+     {
+      "label": "Passaro et al. 2025 · Boltz-2",
+      "url": "https://doi.org/10.1101/2025.06.14.659707"
+     }
+    ]
+   },
+   "out": {
+    "title": "S structures + confidence",
+    "sub": "pLDDT · PAE · pTM",
+    "role": "io",
+    "dims": "S samples, ranked",
+    "text": "Ranking combines pTM / ipTM with clash and disorder penalties.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "Boltz-2 keeps the AlphaFold 3 layout and the Boltz-1 denoiser, with a 64-block Pairformer, 4 trunk passes (3 recycles), and 200 sampling steps. It is the first open model in this family with a binding affinity head.",
+   "Its additions are controls: method conditioning, user templates with optional steering, pocket and contact constraints, and physics-based steering potentials applied during sampling. The denoiser&#x27;s per-layer pair biases are computed once per target and cached across steps.",
+   "Numbers on this card were read from the released checkpoint (Boltz 2.2.1)."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "N<sub>tok</sub>; atoms N<sub>atom</sub>"
+   },
+   {
+    "stage": "input embedder",
+    "shape": "s<sup>inputs</sup>: N<sub>tok</sub> × 449"
+   },
+   {
+    "stage": "trunk",
+    "shape": "s: N<sub>tok</sub> × 384 · z: N<sub>tok</sub>² × 128"
+   },
+   {
+    "stage": "noise",
+    "shape": "x: N<sub>atom</sub> × 3"
+   },
+   {
+    "stage": "atom encoder",
+    "shape": "N<sub>atom</sub> × 128 → N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "token transformer",
+    "shape": "N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "atom decoder",
+    "shape": "→ N<sub>atom</sub> × 3"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · bioRxiv 2025",
+    "url": "https://doi.org/10.1101/2025.06.14.659707"
+   },
+   {
+    "label": "Code · jwohlwend/boltz",
+    "url": "https://github.com/jwohlwend/boltz"
+   },
+   {
+    "label": "Boltz-1 · bioRxiv 2024",
+    "url": "https://doi.org/10.1101/2024.11.19.624167"
+   }
+  ]
+ },
+ {
+  "id": "openfold3",
+  "name": "OpenFold3",
+  "year": 2025,
+  "org": "OpenFold consortium",
+  "domain": "bio",
+  "paper": "OpenFold3 preview · 2025",
+  "url": "https://github.com/aqlaboratory/openfold-3",
+  "space": "all-atom coordinates",
+  "backbone": "AF3 reproduction, 48 Pairformer blocks",
+  "params": "368 M (denoiser 203 M)",
+  "params_m": 368,
+  "conditioning": "AF3 layout and widths; recomputed every call",
+  "objective": "x̂ (EDM)",
+  "steps": "200",
+  "novelty": "Open AF3 reproduction; adds the residual the SI omits.",
+  "notes": [
+   "Pairformer 147 M, MSA module 3 M, confidence 13 M.",
+   "Token transformer gets a residual connection (code comment: 'differs from SI').",
+   "A use_conditioning flag can drop the trunk input entirely."
+  ],
+  "vs": "AlphaFold 3",
+  "blocks": {
+   "input": {
+    "title": "sequences + ligand SMILES",
+    "sub": "",
+    "role": "io",
+    "dims": "tokens: one per residue / nucleotide, one per ligand atom · atoms with reference conformers",
+    "text": "Proteins, nucleic acids, ligands (SMILES or CCD), ions and modifications are all tokenised. Every atom gets a reference conformer from RDKit.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "atoms → tokens · 3 blocks",
+    "role": "embed",
+    "dims": "atom single 128 · atom pair 16 → s<sup>inputs</sup>: N<sub>tok</sub> × 449 → s: N<sub>tok</sub> × 384, z: N<sub>tok</sub>² × 128",
+    "text": "A small atom transformer aggregates atoms to tokens; z starts as an outer sum of s plus relative-position and bond features.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tmpl": {
+    "title": "template module",
+    "sub": "2 blocks",
+    "role": "pair",
+    "dims": "N<sub>tok</sub>² × 64, 2 blocks",
+    "text": "Template structures are embedded as pair features and averaged into z.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "msa": {
+    "title": "MSA module",
+    "sub": "4 blocks · 3 M",
+    "role": "pair",
+    "dims": "4 blocks · 3 M parameters",
+    "text": "Outer-product mean from the MSA into z, pair-weighted averaging back, triangle updates on z. 4 blocks; replaces AF2&#x27;s Evoformer MSA stack.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "pf": {
+    "title": "Pairformer",
+    "sub": "48 blocks · 147 M",
+    "role": "pair",
+    "dims": "48 blocks · 147 M parameters",
+    "text": "Per block: triangle multiplication (outgoing, incoming), triangle attention (start, end node), pair transition, single attention with pair bias, single transition. The MSA is gone from the trunk; only s and z are carried.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sub>i</sub>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "s<sub>i</sub><sup>trunk</sup>: N<sub>tok</sub> × 384 · z<sub>ij</sub><sup>trunk</sup>: N<sub>tok</sub>² × 128",
+    "text": "Everything the denoiser knows about the target. It is computed once and reused for every step and every sample.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, σ<sub>0</sub> = 160 σ<sub>data</sub> = 2560 Å",
+    "text": "Karras ρ-schedule with ρ = 7, s<sub>max</sub> = 160, s<sub>min</sub> = 4 · 10<sup>−4</sup>, σ<sub>data</sub> = 16 Å.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "recomputed every call",
+    "role": "cond",
+    "dims": "recomputed at every denoiser call",
+    "text": "Unlike Boltz-2 and Protenix nothing is cached across steps. A <code>use_conditioning</code> flag can switch the trunk input off entirely.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "aenc": {
+    "title": "atom encoder",
+    "sub": "3 blocks · as AF3",
+    "role": "attn",
+    "dims": "atoms: 128 ch, pairs 16 ch · 3 blocks · 4 heads · windows of 32 queries × 128 keys → tokens 768",
+    "text": "Local attention over atoms near each other in the token order, then a mean over each token&#x27;s atoms.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tok": {
+    "title": "token transformer",
+    "sub": "24 × 16 heads · 768 · 198 M · residual added (differs from SI)",
+    "role": "attn",
+    "dims": "24 × 16 heads × 768 · 198 M",
+    "text": "Adds a residual connection around each block, with the code comment &#x27;differs from SI&#x27;.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "adec": {
+    "title": "atom decoder",
+    "sub": "3 blocks",
+    "role": "attn",
+    "dims": "tokens 768 → broadcast to atoms 128 · 3 blocks → Δx: N<sub>atom</sub> × 3",
+    "text": "Atom-level attention again, then a linear layer to coordinate updates F<sub>θ</sub>.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "structure x̂",
+    "sub": "S samples",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3",
+    "text": "x̂ = c<sub>skip</sub>(σ) x + c<sub>out</sub>(σ) F<sub>θ</sub>, EDM preconditioning. The sampler takes 200 Euler steps with churn γ<sub>0</sub> = 0.8, noise scale λ = 1.003 and step scale η = 1.5, and no alignment between steps.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "conf": {
+    "title": "confidence head",
+    "sub": "Pairformer 4 blocks · 13 M",
+    "role": "pair",
+    "dims": "4 Pairformer blocks · 13 M",
+    "text": "Heads for pLDDT (50 bins, per atom), PAE (64 bins), PDE and experimentally-resolved. Trained on a short mini-rollout of the sampler.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "out": {
+    "title": "S structures + confidence",
+    "sub": "pLDDT · PAE · pTM",
+    "role": "io",
+    "dims": "S samples, ranked",
+    "text": "Ranking combines pTM / ipTM with clash and disorder penalties.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "OpenFold3 is the OpenFold consortium&#x27;s open reproduction of AlphaFold 3, trained from scratch and released under a permissive licence. Widths, depths and the sampler follow the AF3 supplementary information.",
+   "The main deviation is in the token transformer: the code adds the residual connection that the SI&#x27;s pseudocode omits. Numbers on this card were read from the released checkpoint (OpenFold3 0.4.3)."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "N<sub>tok</sub>; atoms N<sub>atom</sub>"
+   },
+   {
+    "stage": "input embedder",
+    "shape": "s<sup>inputs</sup>: N<sub>tok</sub> × 449"
+   },
+   {
+    "stage": "trunk",
+    "shape": "s: N<sub>tok</sub> × 384 · z: N<sub>tok</sub>² × 128"
+   },
+   {
+    "stage": "noise",
+    "shape": "x: N<sub>atom</sub> × 3"
+   },
+   {
+    "stage": "atom encoder",
+    "shape": "N<sub>atom</sub> × 128 → N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "token transformer",
+    "shape": "N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "atom decoder",
+    "shape": "→ N<sub>atom</sub> × 3"
+   }
+  ],
+  "links": [
+   {
+    "label": "Code · aqlaboratory/openfold-3",
+    "url": "https://github.com/aqlaboratory/openfold-3"
+   },
+   {
+    "label": "OpenFold consortium",
+    "url": "https://openfold.io"
+   }
+  ]
+ },
+ {
+  "id": "protenix",
+  "name": "Protenix",
+  "year": 2025,
+  "org": "ByteDance",
+  "domain": "bio",
+  "paper": "Protenix technical report · 2025",
+  "url": "https://github.com/bytedance/Protenix",
+  "space": "all-atom coordinates",
+  "backbone": "AF3 reproduction, 48 Pairformer blocks",
+  "params": "368 M (denoiser 203 M)",
+  "params_m": 368,
+  "conditioning": "AF3 layout; pair and atom conditioning cached across steps",
+  "objective": "x̂ (EDM)",
+  "steps": "200",
+  "novelty": "PyTorch AF3 reproduction tuned for throughput.",
+  "notes": [
+   "Residual added in the token transformer; training did not converge without it.",
+   "Custom LayerNorm and triangle kernels in the trunk; denoiser attention through PyTorch SDPA; samples in chunks of 5.",
+   "10 recycling passes by default."
+  ],
+  "vs": "AlphaFold 3",
+  "blocks": {
+   "input": {
+    "title": "sequences + ligand SMILES",
+    "sub": "",
+    "role": "io",
+    "dims": "tokens: one per residue / nucleotide, one per ligand atom · atoms with reference conformers",
+    "text": "Proteins, nucleic acids, ligands (SMILES or CCD), ions and modifications are all tokenised. Every atom gets a reference conformer from RDKit.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "atoms → tokens · 3 blocks",
+    "role": "embed",
+    "dims": "atom single 128 · atom pair 16 → s<sup>inputs</sup>: N<sub>tok</sub> × 449 → s: N<sub>tok</sub> × 384, z: N<sub>tok</sub>² × 128",
+    "text": "A small atom transformer aggregates atoms to tokens; z starts as an outer sum of s plus relative-position and bond features.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tmpl": {
+    "title": "template module",
+    "sub": "2 blocks",
+    "role": "pair",
+    "dims": "N<sub>tok</sub>² × 64, 2 blocks",
+    "text": "Template structures are embedded as pair features and averaged into z.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "msa": {
+    "title": "MSA module",
+    "sub": "4 blocks · 3 M",
+    "role": "pair",
+    "dims": "4 blocks · 3 M parameters",
+    "text": "Outer-product mean from the MSA into z, pair-weighted averaging back, triangle updates on z. 4 blocks; replaces AF2&#x27;s Evoformer MSA stack.",
+    "refs": [
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     }
+    ]
+   },
+   "pf": {
+    "title": "Pairformer",
+    "sub": "48 blocks · 147 M",
+    "role": "pair",
+    "dims": "48 blocks · 147 M parameters",
+    "text": "Per block: triangle multiplication (outgoing, incoming), triangle attention (start, end node), pair transition, single attention with pair bias, single transition. The MSA is gone from the trunk; only s and z are carried.",
+    "refs": [
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     }
+    ]
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sub>i</sub>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "s<sub>i</sub><sup>trunk</sup>: N<sub>tok</sub> × 384 · z<sub>ij</sub><sup>trunk</sup>: N<sub>tok</sub>² × 128",
+    "text": "Everything the denoiser knows about the target. It is computed once and reused for every step and every sample.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, σ<sub>0</sub> = 160 σ<sub>data</sub> = 2560 Å",
+    "text": "Karras ρ-schedule with ρ = 7, s<sub>max</sub> = 160, s<sub>min</sub> = 4 · 10<sup>−4</sup>, σ<sub>data</sub> = 16 Å.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "pair + atom terms cached · across steps",
+    "role": "cond",
+    "dims": "pair and atom conditioning cached across steps",
+    "text": "Computed once per target, as in Boltz-2.",
+    "refs": [
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     }
+    ]
+   },
+   "aenc": {
+    "title": "atom encoder",
+    "sub": "3 blocks · as AF3",
+    "role": "attn",
+    "dims": "atoms: 128 ch, pairs 16 ch · 3 blocks · 4 heads · windows of 32 queries × 128 keys → tokens 768",
+    "text": "Local attention over atoms near each other in the token order, then a mean over each token&#x27;s atoms.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tok": {
+    "title": "token transformer",
+    "sub": "24 × 16 heads · 768 · 198 M · residual added",
+    "role": "attn",
+    "dims": "24 × 16 heads × 768 · 198 M",
+    "text": "Residual added; the report notes training did not converge without it.",
+    "refs": [
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     }
+    ]
+   },
+   "adec": {
+    "title": "atom decoder",
+    "sub": "3 blocks",
+    "role": "attn",
+    "dims": "tokens 768 → broadcast to atoms 128 · 3 blocks → Δx: N<sub>atom</sub> × 3",
+    "text": "Atom-level attention again, then a linear layer to coordinate updates F<sub>θ</sub>.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "structure x̂",
+    "sub": "S samples",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3",
+    "text": "x̂ = c<sub>skip</sub>(σ) x + c<sub>out</sub>(σ) F<sub>θ</sub>, EDM preconditioning. The sampler takes 200 Euler steps with churn γ<sub>0</sub> = 0.8, noise scale λ = 1.003 and step scale η = 1.5, and no alignment between steps.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "conf": {
+    "title": "confidence head",
+    "sub": "Pairformer 4 blocks · 13 M",
+    "role": "pair",
+    "dims": "4 Pairformer blocks · 13 M",
+    "text": "Heads for pLDDT (50 bins, per atom), PAE (64 bins), PDE and experimentally-resolved. Trained on a short mini-rollout of the sampler.",
+    "refs": [
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     }
+    ]
+   },
+   "out": {
+    "title": "S structures + confidence",
+    "sub": "pLDDT · PAE · pTM",
+    "role": "io",
+    "dims": "S samples, ranked",
+    "text": "Ranking combines pTM / ipTM with clash and disorder penalties.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "Protenix is ByteDance&#x27;s PyTorch reproduction of AlphaFold 3, tuned for training and inference throughput: fused kernels, chunked sampling, and conditioning cached across denoising steps. It runs 10 trunk passes by default.",
+   "Like OpenFold3 it adds a residual connection in the token transformer. Numbers on this card were read from the released checkpoint (Protenix 1.1.0)."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "N<sub>tok</sub>; atoms N<sub>atom</sub>"
+   },
+   {
+    "stage": "input embedder",
+    "shape": "s<sup>inputs</sup>: N<sub>tok</sub> × 449"
+   },
+   {
+    "stage": "trunk",
+    "shape": "s: N<sub>tok</sub> × 384 · z: N<sub>tok</sub>² × 128"
+   },
+   {
+    "stage": "noise",
+    "shape": "x: N<sub>atom</sub> × 3"
+   },
+   {
+    "stage": "atom encoder",
+    "shape": "N<sub>atom</sub> × 128 → N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "token transformer",
+    "shape": "N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "atom decoder",
+    "shape": "→ N<sub>atom</sub> × 3"
+   }
+  ],
+  "links": [
+   {
+    "label": "Technical report · bioRxiv 2025",
+    "url": "https://doi.org/10.1101/2025.01.08.631967"
+   },
+   {
+    "label": "Code · bytedance/Protenix",
+    "url": "https://github.com/bytedance/Protenix"
+   },
+   {
+    "label": "Protenix-Mini+ · arXiv 2510.12842",
+    "url": "https://arxiv.org/abs/2510.12842"
+   }
+  ]
+ },
+ {
+  "id": "esmfold2",
+  "name": "ESMFold2",
+  "year": 2026,
+  "org": "Biohub",
+  "domain": "bio",
+  "paper": "Candido et al. · bioRxiv 2026",
+  "url": "https://doi.org/10.64898/2026.06.03.729735",
+  "space": "all-atom coordinates",
+  "backbone": "ESMC 6 B LM + looped pair stack + small denoiser",
+  "params": "denoiser 131 M",
+  "params_m": 131,
+  "conditioning": "language-model features; z as pair bias, s from inputs only",
+  "objective": "x̂ (EDM-style)",
+  "steps": "68 in the paper, 10 in the released config",
+  "novelty": "The language model replaces the MSA trunk; the denoiser shrinks to 12 blocks.",
+  "notes": [
+   "Token transformer 12 blocks × 16 heads × 768 (120 M of 131 M).",
+   "Atom attention: sliding window of 128 with FlashAttention and 3D RoPE from the reference conformer.",
+   "No trunk single representation enters the denoiser; x is Kabsch-aligned onto x̂ before every step, as in Boltz."
+  ],
+  "vs": "AlphaFold 3",
+  "blocks": {
+   "input": {
+    "title": "sequences + ligand SMILES",
+    "sub": "",
+    "role": "io",
+    "dims": "tokens: one per residue / nucleotide, one per ligand atom · atoms with reference conformers",
+    "text": "Proteins, nucleic acids, ligands (SMILES or CCD), ions and modifications are all tokenised. Every atom gets a reference conformer from RDKit.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "lm": {
+    "title": "ESM C protein LM",
+    "sub": "6 B parameters, frozen",
+    "role": "cond",
+    "dims": "ESM C, 6 B parameters → per-residue embeddings",
+    "text": "The language model replaces the MSA search and the MSA module; an MSA can still be supplied.",
+    "refs": []
+   },
+   "msa": {
+    "title": "MSA module",
+    "sub": "optional · 4 layers",
+    "role": "pair",
+    "dims": "optional · 4 layers · d<sub>msa</sub> = 128 · 8 heads",
+    "text": "No triangle attention; up to 1024 rows, resubsampled at every loop. ESMFold2-Fast drops it; without an MSA the model runs on the language model alone.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Jumper et al. 2021 · AlphaFold 2 (Evoformer, triangle updates)",
+      "url": "https://doi.org/10.1038/s41586-021-03819-2"
+     }
+    ]
+   },
+   "pair": {
+    "title": "pair stack",
+    "sub": "48 layers · 256-ch z · no single track",
+    "role": "pair",
+    "dims": "48 pair folding layers · z: N<sub>tok</sub>² × 256",
+    "text": "Triangle multiplication and transitions only (no triangle attention, no single track), run as a contractive recurrence: 1–6 loops in training, 10 in the paper&#x27;s benchmarks, instead of recycling.",
+    "refs": []
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sup>inputs</sup>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "s<sup>inputs</sup>: N<sub>tok</sub> × 451 · z<sub>ij</sub>: N<sub>tok</sub>² × 256",
+    "text": "There is no trunk single representation: the denoiser&#x27;s single conditioning comes from the input features alone, and only the pair stack&#x27;s z carries what the trunk computed.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, σ<sub>0</sub> = 160 σ<sub>data</sub> = 2560 Å",
+    "text": "Karras ρ-schedule with ρ = 7, s<sub>max</sub> = 160, s<sub>min</sub> = 4 · 10<sup>−4</sup>, σ<sub>data</sub> = 16 Å.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "s<sup>inputs</sup> ⊕ Fourier(σ) → 768 · z cached across steps",
+    "role": "cond",
+    "dims": "s ⊕ Fourier(σ) → 768 · z cached · 8.5 M",
+    "text": "Conditioning width is 768, twice AF3&#x27;s 384.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "aenc": {
+    "title": "atom encoder",
+    "sub": "sliding window 128 · Flash · 3D RoPE from ref. conformer",
+    "role": "attn",
+    "dims": "sliding window of 128 atoms · FlashAttention · 3D RoPE from the reference conformer · 1.0 M",
+    "text": "Replaces AF3&#x27;s 32 × 128 blocks with a sliding window and rotary positions from the conformer.",
+    "refs": [
+     {
+      "label": "Dao et al. 2022 · FlashAttention",
+      "url": "https://arxiv.org/abs/2205.14135"
+     },
+     {
+      "label": "Su et al. 2021 · RoFormer (RoPE)",
+      "url": "https://arxiv.org/abs/2104.09864"
+     }
+    ]
+   },
+   "tok": {
+    "title": "token transformer",
+    "sub": "12 blocks × 16 heads · 768 · 120 M · residual",
+    "role": "attn",
+    "dims": "12 blocks × 16 heads × 768 · 120 M",
+    "text": "Half the depth of AF3&#x27;s token transformer; 92 % of the denoiser&#x27;s 131 M parameters.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     },
+     {
+      "label": "Peebles & Xie 2023 · DiT",
+      "url": "https://arxiv.org/abs/2212.09748"
+     }
+    ]
+   },
+   "adec": {
+    "title": "atom decoder",
+    "sub": "3 blocks · RoPE",
+    "role": "attn",
+    "dims": "3 blocks · RoPE · 0.9 M",
+    "text": "Atom-level attention again, then a linear layer to coordinate updates F<sub>θ</sub>.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "structure x̂",
+    "sub": "S samples",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3",
+    "text": "The paper&#x27;s schedule drops every level above σ = 256 Å, leaving 68 of 100 steps; the released config runs 10. The noisy x is Kabsch-aligned onto x̂ before every Euler step.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "conf": {
+    "title": "confidence head",
+    "sub": "4 pair folding layers",
+    "role": "pair",
+    "dims": "4 Pairformer blocks on s, z and the predicted x̂",
+    "text": "Heads for pLDDT (50 bins, per atom), PAE (64 bins), PDE and experimentally-resolved. Trained on a short mini-rollout of the sampler.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "out": {
+    "title": "S structures + confidence",
+    "sub": "pLDDT · PAE · pTM",
+    "role": "io",
+    "dims": "S samples, ranked",
+    "text": "Ranking combines pTM / ipTM with clash and disorder penalties.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "ESMFold2 replaces the MSA-based trunk with the 6 B-parameter ESM C language model and a looped pair stack, and shrinks the denoiser: 12 token-transformer blocks, sliding-window atom attention with 3D RoPE, and no trunk single representation. It samples in 10–68 steps.",
+   "Parameter counts were read from the checkpoint: 131.5 M for the denoiser, of which the token transformer is 120.4 M."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "N<sub>tok</sub>; atoms N<sub>atom</sub>"
+   },
+   {
+    "stage": "ESM C",
+    "shape": "N<sub>tok</sub> × d<sub>LM</sub>"
+   },
+   {
+    "stage": "pair stack",
+    "shape": "z: N<sub>tok</sub>² × 256"
+   },
+   {
+    "stage": "atom encoder",
+    "shape": "N<sub>atom</sub> → N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "token transformer",
+    "shape": "12 blocks, N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "atom decoder",
+    "shape": "→ N<sub>atom</sub> × 3"
+   }
+  ],
+  "links": []
+ }
+]

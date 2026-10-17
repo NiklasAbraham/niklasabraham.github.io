@@ -1,0 +1,13 @@
+{
+ "label": "Why latents and patches",
+ "type": "graph",
+ "spec": {
+  "type": "graph",
+  "title": "Attention cost by representation (256² image)",
+  "caption": "log₁₀ of the number of attention pairs, N², for one attention layer over every position. Each step down removes orders of magnitude.",
+  "chart_type": "bars",
+  "x_label": "what the network attends over",
+  "y_label": "log10(N²)",
+  "data_json": "{\"bars\": [{\"label\": \"pixels 256\\u00b2 (N = 65,536)\", \"value\": 9.6}, {\"label\": \"latent 32\\u00b2 (N = 1,024)\", \"value\": 6.0}, {\"label\": \"2\\u00d72 patches (N = 256)\", \"value\": 4.8}]}"
+ }
+}

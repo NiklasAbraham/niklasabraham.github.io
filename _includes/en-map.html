@@ -1,0 +1,6 @@
+{%- comment -%} A map of the energy long read, drawn with the ConceptsPlots map kit: file= (in _includes/energy-article/), title=, caption=, wide= {%- endcomment -%}
+<figure class="concept concept-drawing en-map{% if include.wide %} media-wide{% endif %}">
+<header><span class="concept-kind">map</span><span class="concept-title">{{ include.title }}</span><button class="concept-btn" type="button" data-zoom>⤢ enlarge</button></header>
+<div class="da-svgstage">{% include energy-article/{{ include.file }} %}</div>
+<figcaption>{{ include.caption }}</figcaption>
+</figure>

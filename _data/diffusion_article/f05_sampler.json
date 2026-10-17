@@ -1,0 +1,28 @@
+{
+ "label": "From a denoiser to a sampler",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "The probability-flow ODE and AlphaFold 3's sampler",
+  "caption": "EDM's deterministic ODE, then AF3's stochastic Euler variant (SI Algorithm 18) with its constants γ₀ = 0.8, λ = 1.003, η = 1.5.",
+  "main_latex": "\\frac{\\mathrm d x}{\\mathrm d \\sigma} = \\frac{x - D_\\theta(x, \\sigma \\mid c)}{\\sigma}",
+  "steps": [
+   {
+    "latex": "x_{i+1} = x_i + (\\sigma_{i+1} - \\sigma_i)\\, \\frac{x_i - D_\\theta(x_i, \\sigma_i \\mid c)}{\\sigma_i}",
+    "explanation": "One Euler step from σᵢ down to σᵢ₊₁. Integrating from σ_max to 0 transports noise to data."
+   },
+   {
+    "latex": "\\hat\\sigma = \\sigma_i (1 + \\gamma),\\qquad \\hat x = x_i + \\lambda \\sqrt{\\hat\\sigma^2 - \\sigma_i^2}\\;\\varepsilon",
+    "explanation": "AF3 first raises the noise level by a factor 1 + γ (churn, γ = γ₀ = 0.8 while σ > 1) and injects fresh noise."
+   },
+   {
+    "latex": "x_{i+1} = \\hat x + \\eta\\,(\\sigma_{i+1} - \\hat\\sigma)\\, \\frac{\\hat x - D_\\theta(\\hat x, \\hat\\sigma \\mid c)}{\\hat\\sigma}",
+    "explanation": "Then takes an Euler step scaled by η = 1.5: it deliberately over-steps toward the denoiser's prediction."
+   },
+   {
+    "latex": "\\sigma_i = \\sigma_\\text{data}\\Big(s_\\text{max}^{1/\\rho} + \\tfrac{i}{N}\\big(s_\\text{min}^{1/\\rho} - s_\\text{max}^{1/\\rho}\\big)\\Big)^{\\rho}",
+    "explanation": "Noise levels follow the Karras schedule with ρ = 7, s_max = 160, s_min = 4·10⁻⁴, N = 200: from 2560 Å down to well below an ångström."
+   }
+  ]
+ }
+}

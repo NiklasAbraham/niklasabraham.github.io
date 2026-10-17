@@ -1,0 +1,29 @@
+{%- comment -%}
+The red thread of the article: one prediction from input to samples. at= comma-separated stations to
+highlight (input, trunk, cond, noise, denoiser, enc, tok, dec, sampler, out); note= one line under it.
+{%- endcomment -%}
+{%- assign at = include.at | default: '' | split: ',' -%}
+{%- capture hl -%}{% for a in at %}|{{ a | strip }}|{% endfor %}{%- endcapture -%}
+<nav class="da-route{% if include.at %} has-at{% endif %}" aria-label="Where this section sits in the model">
+<div class="da-route-row">
+<a class="st{% if hl contains '|input|' %} on{% endif %}" href="#atoms"><b>Input</b><i>sequences, ligands, MSA</i></a>
+<span class="ar">→</span>
+<a class="st{% if hl contains '|trunk|' %} on{% endif %}" href="#pair"><b>Trunk</b><i>MSA module · Pairformer × 48</i></a>
+<span class="ar">→</span>
+<a class="st{% if hl contains '|cond|' %} on{% endif %}" href="#trunk"><b>Condition c</b><i>s and z, once per target</i></a>
+<span class="ar">→</span>
+<span class="loop">
+<a class="st{% if hl contains '|noise|' %} on{% endif %}" href="#noise-level"><b>Noise level σ</b><i>Fourier code</i></a>
+<span class="ar">+</span>
+<span class="st den{% if hl contains '|denoiser|' %} on{% endif %}"><a href="#atoms"><b>Denoiser D<sub>θ</sub></b></a><span class="sub"><a class="ss{% if hl contains '|enc|' %} on{% endif %}" href="#atoms">atom enc.</a><a class="ss{% if hl contains '|tok|' %} on{% endif %}" href="#atoms">token transformer</a><a class="ss{% if hl contains '|dec|' %} on{% endif %}" href="#atoms">atom dec.</a></span></span>
+<span class="ar">→</span>
+<a class="st{% if hl contains '|sampler|' %} on{% endif %}" href="#af3-sampler"><b>Sampler step</b><i>churn, Euler, η = 1.5</i></a>
+<span class="lp">↺ × 200 steps</span>
+</span>
+<span class="ar">→</span>
+<a class="st{% if hl contains '|out|' %} on{% endif %}" href="#af3-sampler"><b>Structures</b><i>the samples that come out</i></a>
+</div>
+{%- if include.note %}
+<p class="da-route-note">{{ include.note }}</p>
+{%- endif %}
+</nav>

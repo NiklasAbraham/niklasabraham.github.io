@@ -1,0 +1,50 @@
+// The German energy long read (/blog/2026/german-energy-market/): maps, the explorer, stat tiles.
+// Article typography, cards and the rail come from _diffusion_article.scss (.da, .concept).
+
+.en-map .da-svgstage { background: #fff; padding: 0; }
+.en-map .da-svgstage svg { width: 100%; height: auto; display: block; }
+
+.da .en-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin: 1.6rem 0 2rem;
+  @media (max-width: 600px) { grid-template-columns: repeat(2, 1fr); }
+  > div { border: 1px solid var(--global-card-border); border-radius: 12px; padding: 0.7rem 0.85rem 0.6rem; background: var(--global-card-bg); }
+  b { display: block; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: #0b4fc0; }
+  span { display: block; font-size: 0.8rem; line-height: 1.35; color: var(--global-text-color-light); margin-top: 0.25rem; }
+  .s-warm b { color: #b4552f; } .s-teal b { color: #138374; } .s-ink b { color: var(--global-text-color); }
+}
+
+.ee {
+  margin: 2rem 0; border: 1px solid var(--global-card-border); border-radius: 14px; background: var(--global-card-bg); overflow: hidden;
+  > header { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--global-card-border); }
+  .concept-kind { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #138374; }
+  .concept-title { font-weight: 600; font-size: 0.95rem; }
+  figcaption { padding: 0.6rem 0.9rem 0.7rem; font-size: 0.84rem; line-height: 1.55; color: var(--global-text-color-light); border-top: 1px solid var(--global-card-border); }
+}
+.ee-controls {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; padding: 0.6rem 0.9rem 0.2rem;
+  button, select, input { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.74rem; color: var(--global-text-color);
+    background: #fff; border: 1px solid var(--global-card-border); border-radius: 7px; padding: 0.22rem 0.55rem; cursor: pointer; }
+  button:hover, button.on { border-color: #0b4fc0; color: #0b4fc0; }
+  button.on { background: rgba(11, 79, 192, 0.07); }
+  .ee-span { display: inline-flex; gap: 0.25rem; margin-left: 0.4rem; }
+  .ee-preset { margin-left: auto; }
+}
+.ee-stage { position: relative; height: 430px; background: #fff; canvas { width: 100%; height: 100%; display: block; } }
+.ee-tip {
+  position: absolute; pointer-events: none; background: rgba(255, 255, 255, 0.96); border: 1px solid var(--global-card-border);
+  border-radius: 8px; padding: 0.4rem 0.55rem; font-size: 0.74rem; line-height: 1.45; color: #04204b; box-shadow: 0 4px 14px rgba(4, 32, 75, 0.08);
+  min-width: 190px;
+  i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 0.35rem; }
+}
+.ee-stats {
+  display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; padding: 0.5rem 0.9rem; font-size: 0.8rem; color: var(--global-text-color-light);
+  border-top: 1px solid var(--global-card-border);
+  b { color: var(--global-text-color); font-weight: 700; }
+}
+.ee-legend {
+  display: flex; flex-wrap: wrap; gap: 0.2rem 0.8rem; padding: 0.2rem 0.9rem 0.6rem; font-size: 0.72rem; color: var(--global-text-color-light);
+  i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.3rem; vertical-align: -1px; }
+  i.ln { height: 2px; width: 14px; background: #04204b; vertical-align: 3px; }
+  i.ln.pr { background: #b4552f; }
+}
+@media (max-width: 640px) { .ee-stage { height: 360px; } .ee-controls .ee-preset { margin-left: 0; } }

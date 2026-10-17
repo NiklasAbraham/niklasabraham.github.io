@@ -1,0 +1,24 @@
+{
+ "label": "Rectified flow and where to train it",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "SD3's training objective: a straight path, sampled in the middle",
+  "caption": "Esser et al. 2024, Eqs. 13, 19, 23. Data at t = 0, noise at t = 1.",
+  "main_latex": "\\mathcal L = \\mathbb E_{t \\sim \\pi(t),\\, x_0,\\, \\varepsilon}\\ \\big\\| v_\\theta(z_t, t \\mid c) - (\\varepsilon - x_0) \\big\\|^2,\\qquad z_t = (1 - t)\\, x_0 + t\\, \\varepsilon",
+  "steps": [
+   {
+    "latex": "\\pi_\\text{ln}(t; m, s) = \\frac{1}{s\\sqrt{2\\pi}}\\,\\frac{1}{t(1-t)}\\,\\exp\\!\\Big(-\\frac{(\\operatorname{logit} t - m)^2}{2 s^2}\\Big)",
+    "explanation": "Logit-normal sampling of t puts training effort in the middle of the path, where the velocity is hardest to predict. With m = 0, s = 1 it ranked first among 61 formulations (Table 1)."
+   },
+   {
+    "latex": "t_m = \\frac{\\sqrt{m/n}\\; t_n}{1 + (\\sqrt{m/n} - 1)\\, t_n}",
+    "explanation": "Resolution shift: more pixels need more noise to destroy the same signal. SD3 uses a shift of √(m/n) = 3 at 1024², for training and sampling."
+   },
+   {
+    "latex": "x_0 = z_t - t\\, v, \\qquad \\varepsilon = z_t + (1 - t)\\, v",
+    "explanation": "The velocity model is a denoiser in disguise: the same quantity AF3's D_θ returns, reached by a different parameterisation."
+   }
+  ]
+ }
+}

@@ -1,0 +1,24 @@
+{
+ "label": "Classifier-free guidance",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "Guidance sharpens the conditional",
+  "caption": "Ho & Salimans 2022. w = 1 is the plain conditional model; image models typically sample at w ≈ 4–8.",
+  "main_latex": "D_w(x, \\sigma \\mid c) = D(x, \\sigma \\mid \\varnothing) + w\\,\\big[D(x, \\sigma \\mid c) - D(x, \\sigma \\mid \\varnothing)\\big]",
+  "steps": [
+   {
+    "latex": "\\nabla \\log p_\\sigma(x) + w\\, \\nabla \\log p_\\sigma(c \\mid x)",
+    "explanation": "In score form, guidance adds w times the gradient of an implicit classifier."
+   },
+   {
+    "latex": "\\tilde p(x \\mid c) \\propto p(x)\\, p(c \\mid x)^{w}",
+    "explanation": "At σ = 0 that is the score of a tilted distribution: w > 1 concentrates mass where the condition is most certain. Diversity is traded for fidelity on purpose."
+   },
+   {
+    "latex": "\\text{cost: } 2 \\times \\text{network calls per step}",
+    "explanation": "Unless the guidance scale is distilled into the network, as in FLUX.1 [dev]. The co-folding models in the gallery do not use guidance at all."
+   }
+  ]
+ }
+}

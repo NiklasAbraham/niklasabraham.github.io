@@ -1,0 +1,12 @@
+{%- assign c = site.data.diffusion_article[include.id] -%}{%- assign s = c.spec -%}
+<figure class="concept concept-{{ s.type }}" id="fig-{{ include.id }}">
+<header><span class="concept-kind">{% case s.type %}{% when '2d-anim' %}animation{% when 'graph' %}graph{% when 'formula' %}formula{% else %}background{% endcase %}</span><span class="concept-title">{{ s.title | default: c.label }}</span>{% if s.type == '2d-anim' %}<button class="concept-btn" type="button" data-replay>↻ replay</button>{% endif %}</header>
+{%- if s.type == 'formula' %}
+<div class="concept-formula"><div class="concept-formula-main">$$ {{ s.main_latex }} $$</div><ol>{% for st in s.steps %}<li><p><span class="concept-step-n">{{ forloop.index }}</span>{{ st.explanation }}</p><div class="concept-formula-step">$$ {{ st.latex }} $$</div></li>{% endfor %}</ol></div>
+{%- else %}
+<div class="concept-stage"></div><script type="application/json" class="concept-spec">{{ s | jsonify }}</script>
+{%- endif %}
+{%- if s.caption %}
+<figcaption>{{ s.caption }}</figcaption>
+{%- endif %}
+</figure>

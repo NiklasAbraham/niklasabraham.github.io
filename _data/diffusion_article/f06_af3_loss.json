@@ -1,0 +1,32 @@
+{
+ "label": "AlphaFold 3's diffusion loss",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "How AlphaFold 3's denoiser is trained",
+  "caption": "AF3 SI §3.7 and §4, Eqs. 2–6 and 15, Table 6. Boltz-1, Protenix and ESMFold2 replace the printed weight's denominator (t̂ + σ_data)² with EDM's (t̂ σ_data)²; Protenix calls the printed form a typo.",
+  "main_latex": "\\mathcal L_\\text{diffusion} = \\frac{\\hat t^2 + \\sigma_\\text{data}^2}{(\\hat t\\,\\sigma_\\text{data})^2}\\Big(\\mathcal L_\\text{MSE} + \\alpha_\\text{bond}\\,\\mathcal L_\\text{bond}\\Big) + \\mathcal L_\\text{smooth-LDDT}",
+  "steps": [
+   {
+    "latex": "\\hat t = \\sigma_\\text{data}\\, \\exp\\!\\big(-1.2 + 1.5\\, \\mathcal N(0, 1)\\big), \\qquad \\sigma_\\text{data} = 16\\ \\text{Å}",
+    "explanation": "Noise levels for training are log-normal around 0.3 σ_data, i.e. most training happens at a few ångströms of noise."
+   },
+   {
+    "latex": "\\mathcal L_\\text{MSE} = \\tfrac13 \\operatorname{mean}_l\\, w_l\\, \\big\\| \\hat x_l - \\operatorname{align}(x_l^\\text{GT}) \\big\\|^2,\\qquad w_l = 1 + 5\\,[\\text{DNA}] + 5\\,[\\text{RNA}] + 10\\,[\\text{ligand}]",
+    "explanation": "Squared error after a weighted rigid (Kabsch) alignment of the ground truth onto the prediction; ligand atoms count ten times more than protein atoms."
+   },
+   {
+    "latex": "\\mathcal L_\\text{bond} = \\operatorname{mean}_{(l,m) \\in \\text{bonds}} \\big(\\|\\hat x_l - \\hat x_m\\| - \\|x^\\text{GT}_l - x^\\text{GT}_m\\|\\big)^2",
+    "explanation": "Bond lengths between ligands and polymers, switched on (α_bond = 1) only in fine-tuning."
+   },
+   {
+    "latex": "\\mathcal L_\\text{smooth-LDDT} = 1 - \\operatorname{mean}\\ \\tfrac14 \\sum_{c \\in \\{0.5,1,2,4\\}} \\operatorname{sigmoid}\\big(c - |\\hat d_{lm} - d_{lm}|\\big)",
+    "explanation": "A differentiable lDDT on all atom pairs within 15 Å (30 Å for nucleic acids): rewards correct local geometry independent of global alignment."
+   },
+   {
+    "latex": "\\mathcal L = 4\\,\\mathcal L_\\text{diffusion} + 0.03\\,\\mathcal L_\\text{distogram} + 10^{-4}\\,\\mathcal L_\\text{confidence}",
+    "explanation": "The trunk is trained through the distogram head and through the denoiser; 48 noised copies of each structure share one trunk pass."
+   }
+  ]
+ }
+}

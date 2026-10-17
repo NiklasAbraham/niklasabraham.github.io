@@ -1,0 +1,13 @@
+{
+ "label": "ADM's architecture search",
+ "type": "graph",
+ "spec": {
+  "type": "graph",
+  "title": "ADM's ablation: FID improvement of each change (700k steps)",
+  "caption": "ImageNet 128, baseline FID 15.33 (Dhariwal & Nichol 2021, Table 1). Rescaling residuals by 1/√2 made FID worse by 0.16 and was dropped; AdaGN instead of adding the embedding is worth another 2.02 (Table 3).",
+  "chart_type": "bars",
+  "x_label": "",
+  "y_label": "FID reduction",
+  "data_json": "{\"bars\": [{\"label\": \"deeper, narrower\", \"value\": 0.21}, {\"label\": \"4 heads\", \"value\": 0.54}, {\"label\": \"attention at 32, 16, 8\", \"value\": 0.72}, {\"label\": \"BigGAN up/down\", \"value\": 1.2}, {\"label\": \"all adopted\", \"value\": 3.14}, {\"label\": \"AdaGN vs add\", \"value\": 2.02}]}"
+ }
+}

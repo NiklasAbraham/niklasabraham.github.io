@@ -1,0 +1,13 @@
+{
+ "label": "How to feed the condition into a transformer",
+ "type": "graph",
+ "spec": {
+  "type": "graph",
+  "title": "DiT's conditioning ablation (FID-50K after 400k steps, lower is better)",
+  "caption": "DiT-XL/2 on ImageNet 256, no guidance (Peebles & Xie 2023, Table 4). adaLN-Zero nearly halves the FID of in-context tokens at the same compute.",
+  "chart_type": "bars",
+  "x_label": "",
+  "y_label": "FID-50K",
+  "data_json": "{\"bars\": [{\"label\": \"in-context tokens\", \"value\": 35.24}, {\"label\": \"cross-attention\", \"value\": 26.14}, {\"label\": \"adaLN\", \"value\": 25.21}, {\"label\": \"adaLN-Zero\", \"value\": 19.47}]}"
+ }
+}

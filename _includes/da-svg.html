@@ -1,0 +1,8 @@
+{%- comment -%} A gallery-style SVG drawing as a card: file= (in _includes/diffusion-article/), title=, caption=, wide= {%- endcomment -%}
+<figure class="concept concept-drawing{% if include.wide %} media-wide{% endif %}">
+<header><span class="concept-kind">drawing</span><span class="concept-title">{{ include.title }}</span><button class="concept-btn" type="button" data-zoom>⤢ enlarge</button></header>
+<div class="da-svgstage">{% if include.dir %}{% include {{ include.dir }}/{{ include.file }} %}{% else %}{% include diffusion-article/{{ include.file }} %}{% endif %}</div>
+{%- if include.caption %}
+<figcaption>{{ include.caption }}</figcaption>
+{%- endif %}
+</figure>

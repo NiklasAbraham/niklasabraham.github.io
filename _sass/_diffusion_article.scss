@@ -1,0 +1,286 @@
+// Concept-first article on diffusion denoisers (/projects/diffusion-architectures/explained/)
+// and the concept cards it uses (same look as the thesis desk's concept blocks).
+
+.concept {
+  margin: 2rem 0;
+  border: 1px solid var(--global-card-border);
+  border-radius: 14px;
+  background: var(--global-card-bg);
+  overflow: hidden;
+  > header {
+    display: flex; align-items: baseline; gap: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--global-card-border);
+  }
+  .concept-kind {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #0b4fc0;
+  }
+  &.concept-formula .concept-kind { color: #b4552f; }
+  &.concept-graph .concept-kind { color: #138374; }
+  .concept-title { font-weight: 600; flex: 1; min-width: 0; font-size: 0.95rem; color: var(--global-text-color); }
+  .concept-btn {
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.7rem;
+    color: var(--global-text-color-light); background: none;
+    border: 1px solid var(--global-card-border); border-radius: 6px; padding: 0.1rem 0.5rem; cursor: pointer;
+    &:hover { color: var(--global-theme-color); border-color: var(--global-theme-color); }
+  }
+  .concept-stage { position: relative; height: 340px; background: #fff; }
+  &.concept-2d-anim .concept-stage { height: 400px; }
+  .concept-frame, .concept-canvas { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+  figcaption {
+    padding: 0.6rem 0.9rem 0.7rem; font-size: 0.84rem; line-height: 1.55;
+    color: var(--global-text-color-light);
+    border-top: 1px solid var(--global-card-border);
+  }
+  .concept-error { margin: 0; padding: 0.4rem 0.9rem; font-size: 0.8rem; color: #b4552f; background: rgba(180, 85, 47, 0.08); }
+  .concept-formula { padding: 0.7rem 0.9rem 0.4rem; }
+  .concept-formula-main { overflow-x: auto; padding: 0.2rem 0.6rem; background: var(--dg-panel); border-radius: 10px; }
+  .concept-formula ol { list-style: none; padding: 0; margin: 0.6rem 0 0; }
+  .concept-formula li { padding: 0.45rem 0; border-top: 1px solid var(--global-card-border); }
+  .concept-formula li p { margin: 0; font-size: 0.86rem; color: var(--global-text-color-light); }
+  .concept-formula-step { overflow-x: auto; overflow-y: hidden; font-size: 0.95em; }
+  .concept-step-n { font-family: 'JetBrains Mono', ui-monospace, monospace; color: #b4552f; margin-right: 0.5rem; }
+  mjx-container { max-width: 100%; }
+}
+
+.da {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 0 4rem;
+  font-size: 1.04rem;
+  line-height: 1.75;
+  color: var(--global-text-color);
+
+  .da-eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.75rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--dg-diff); margin-bottom: 0.6rem;
+  }
+  h1.da-title { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 800; letter-spacing: -0.045em; line-height: 1.05; margin-bottom: 1rem; }
+  .da-lede { font-size: 1.18rem; line-height: 1.6; color: var(--global-text-color-light); margin-bottom: 1.5rem; }
+  .da-meta { font-size: 0.85rem; color: var(--global-text-color-light); margin-bottom: 2rem; }
+
+  h2 {
+    font-size: 1.6rem; font-weight: 750; letter-spacing: -0.03em; line-height: 1.2;
+    margin: 3.2rem 0 1rem; scroll-margin-top: 80px;
+  }
+  h2 .num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.9rem; color: var(--dg-diff); margin-right: 0.6rem; vertical-align: 0.2rem; }
+  .da-part {
+    margin: 4.5rem 0 0; padding-top: 1.4rem; border-top: 2px solid var(--global-text-color);
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--global-text-color-light);
+    strong { display: block; font-family: inherit; font-size: 1.5rem; letter-spacing: -0.02em; text-transform: none; color: var(--global-text-color); margin-top: 0.3rem; }
+  }
+  p { margin-bottom: 1.15rem; }
+  a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+  .da-toc {
+    border: 1px solid var(--global-card-border); border-radius: 14px; padding: 1rem 1.3rem; margin: 1.5rem 0 2rem;
+    background: var(--global-card-bg); font-size: 0.92rem; line-height: 1.6;
+    ol { margin: 0.3rem 0 0; padding-left: 1.3rem; columns: 2; column-gap: 2rem; }
+    li { break-inside: avoid; }
+    a { text-decoration: none; }
+    .lbl { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--global-text-color-light); }
+  }
+
+  .da-in-gallery {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+    margin: -0.2rem 0 1.4rem; font-size: 0.82rem; color: var(--global-text-color-light);
+    a {
+      text-decoration: none; padding: 0.15rem 0.6rem; border-radius: 999px;
+      border: 1px solid var(--global-card-border); color: var(--global-text-color); background: var(--global-card-bg);
+      &:hover { border-color: var(--global-theme-color); color: var(--global-theme-color); }
+    }
+  }
+
+  .da-note {
+    border-left: 3px solid var(--dg-diff); padding: 0.7rem 1rem; margin: 1.5rem 0;
+    background: var(--dg-panel); border-radius: 0 10px 10px 0; font-size: 0.96rem;
+    p:last-child { margin-bottom: 0; }
+  }
+
+  table { width: 100%; font-size: 0.88rem; border-collapse: collapse; margin: 1rem 0 2rem; display: block; overflow-x: auto; }
+  th, td { padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--global-card-border); vertical-align: top; text-align: left; }
+  th { font-weight: 600; }
+  ul, ol { padding-left: 1.3rem; }
+  li { margin-bottom: 0.4rem; }
+  .da-refs { font-size: 0.9rem; }
+  mjx-container:not([display]) { display: inline-block; max-width: 100%; overflow-x: auto; overflow-y: hidden; vertical-align: middle; }
+  mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+}
+
+@media (max-width: 640px) {
+  .da { font-size: 1rem; .da-toc ol { columns: 1; } }
+  .concept .concept-stage { height: 320px; }
+  .concept.concept-2d-anim .concept-stage { height: 440px; }
+}
+
+// figkit renders and films inside the article
+.concept-media {
+  .media-stage { background: #fff; display: flex; justify-content: center; }
+  img, video { display: block; width: 100%; height: auto; max-height: 560px; object-fit: contain; background: #fff; }
+  .concept-kind { color: #6a47c2; }
+}
+
+// ---------------------------------------------------------------- reading aids (assets/js/da-guide.js)
+// Contents rail on the left, in the style of the thesis slide decks (deep Oxford blue, numbered
+// sections, the current one marked). Fixed from 1340 px up, where it fits beside the 760 px column;
+// below that it opens from the "Contents" button as an overlay.
+$da-rail: 276px;
+#da-rail {
+  position: fixed; left: 0; bottom: 0; top: 56px; width: $da-rail; z-index: 1020;
+  padding: 1.4rem 1.2rem 2rem 1.3rem; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--global-bg-color); color: var(--global-text-color-light);
+  border-right: 1px solid var(--global-card-border);
+  font-family: 'Inter', system-ui, sans-serif; font-size: 0.82rem; line-height: 1.35;
+  scrollbar-width: thin; scrollbar-color: var(--global-card-border) transparent;
+  transform: translateX(-100%); transition: transform 0.3s ease;
+  .rprog { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--global-card-border);
+    span { display: block; height: 100%; width: 0; background: #04204b; transition: width 0.2s linear; } }
+  .tbrand { font-weight: 750; letter-spacing: -0.02em; color: var(--global-text-color); font-size: 1.02rem; margin-top: 0.3rem; }
+  .tsub { color: var(--global-text-color-light); font-size: 0.78rem; margin: 0.15rem 0 1.1rem; }
+  .tlabel { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.66rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--dg-muted); margin: 0.9rem 0 0.45rem; }
+  .rmini { list-style: none; margin: 0 0 0.4rem; padding: 0 0 0 0.9rem; position: relative;
+    &:before { content: ""; position: absolute; left: 0.28rem; top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--global-card-border); }
+    li { position: relative; padding: 0.12rem 0; margin: 0; color: var(--dg-muted); opacity: 0.7; transition: color 0.2s, opacity 0.2s;
+      &:before { content: ""; position: absolute; left: -0.82rem; top: 0.42rem; width: 7px; height: 7px; border-radius: 50%;
+        background: var(--global-bg-color); border: 1px solid var(--dg-res); transition: all 0.2s; }
+      b { font-weight: 600; font-size: 0.8rem; }
+      i { font-style: normal; font-size: 0.7rem; margin-left: 0.35rem; }
+      &.on { color: var(--global-text-color); opacity: 1;
+        &:before { background: #b4552f; border-color: #b4552f; box-shadow: 0 0 0 3px rgba(180, 85, 47, 0.18); } } } }
+  nav { display: flex; flex-direction: column; }
+  .rpart { margin: 0.9rem 0 0.25rem; padding-top: 0.6rem; border-top: 1px solid var(--global-card-border);
+    color: var(--global-text-color); font-weight: 650; font-size: 0.8rem;
+    span { display: block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 400; font-size: 0.62rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--dg-muted); margin-bottom: 0.1rem; } }
+  nav a { position: relative; display: flex; gap: 0.55rem; align-items: baseline; padding: 0.2rem 0 0.2rem 0.75rem;
+    text-decoration: none; transition: color 0.2s;
+    .tn { flex: 0 0 1.4rem; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.7rem; color: var(--dg-muted); }
+    &.on { font-weight: 600; .tn { color: #04204b; }
+      &:before { content: ""; position: absolute; left: 0; top: 0.3em; width: 3px; height: 1.1em; border-radius: 2px; background: #04204b; } } }
+  .tfoot { margin-top: 1.2rem; padding-top: 0.7rem; border-top: 1px solid var(--global-card-border);
+    font-size: 0.74rem; color: var(--global-text-color-light); }
+}
+#da-railbtn {
+  position: fixed; left: 14px; top: 68px; z-index: 1030;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.38rem 0.8rem 0.38rem 0.65rem; border-radius: 999px; cursor: pointer;
+  background: var(--global-bg-color); border: 1px solid var(--global-card-border); box-shadow: 0 2px 12px rgba(4, 32, 75, 0.12);
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.72rem; letter-spacing: 0.06em;
+  i { display: none; }
+  &:before { content: "☰"; font-size: 0.9rem; line-height: 1; }
+}
+body.da-rail-open #da-railbtn:before { content: "✕"; }
+#da-veil { position: fixed; inset: 0; z-index: 1015; background: rgba(4, 32, 75, 0.18); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+body.da-rail-open {
+  #da-rail { transform: none; box-shadow: 0 0 50px rgba(4, 32, 75, 0.18); }
+  #da-veil { opacity: 1; pointer-events: auto; }
+}
+@media (min-width: 1340px) {
+  #da-rail { transform: none; }
+  #da-railbtn, #da-veil { display: none; }
+  .da .da-toc { display: none; }   // the rail replaces the inline contents box
+}
+
+// Wide figures use the screen: centred bleed on mid-size screens, and from 1340 px (rail visible)
+// they keep the column's left edge and extend to the right.
+.da .concept-media img, .da .concept-media video { max-height: 78vh; }
+@media (min-width: 900px) {
+  .da .media-wide {
+    width: unquote("min(1180px, calc(100vw - 48px))");
+    margin-left: unquote("calc(50% - min(590px, 50vw - 24px))");
+  }
+}
+@media (min-width: 1340px) {
+  .da .media-wide { width: unquote("min(1260px, calc(50vw + 380px - 40px))"); margin-left: 0; }
+}
+
+.concept-drawing {
+  .concept-kind { color: #04204b; }
+  .da-svgstage { background: #fff; padding: 0.8rem 1rem; display: flex; justify-content: center;
+    svg { max-width: 860px; } }
+}
+html[data-theme='dark'] .concept-drawing .da-svgstage { background: var(--global-card-bg); }
+
+// The red thread: one prediction from input to samples, the current stations marked.
+.da .da-route {
+  margin: 1.6rem 0 2rem; padding: 0.9rem 1rem 0.8rem; border-radius: 14px;
+  border: 1px solid var(--global-card-border); background: var(--global-card-bg);
+  font-size: 0.78rem; line-height: 1.25;
+  .da-route-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.3rem; }
+  a { text-decoration: none; }
+  .st { display: inline-flex; flex-direction: column; padding: 0.35rem 0.6rem; border-radius: 9px;
+    border: 1px solid var(--global-card-border); background: var(--global-bg-color); color: var(--global-text-color);
+    transition: opacity 0.2s;
+    b { font-weight: 650; font-size: 0.8rem; }
+    i { font-style: normal; font-size: 0.7rem; color: var(--global-text-color-light); } }
+  .den { flex-direction: column; gap: 0.25rem; > a b { color: inherit; } }
+  .den .sub { display: flex; gap: 0.25rem; }
+  .ss { padding: 0.12rem 0.4rem; border-radius: 6px; font-size: 0.7rem; color: var(--global-text-color-light);
+    border: 1px dashed var(--global-card-border); }
+  .ar { color: var(--global-text-color-light); font-size: 0.9rem; }
+  .loop { position: relative; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.3rem;
+    padding: 0.55rem 0.5rem 0.4rem; border: 1.5px dashed #b4552f; border-radius: 12px; margin-top: 0.4rem; }
+  .lp { position: absolute; top: -0.65rem; right: 0.6rem; padding: 0 0.35rem; background: var(--global-card-bg);
+    color: #b4552f; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.66rem; }
+  &.has-at .st:not(.on), &.has-at .ss:not(.on) { opacity: 0.45; }
+  &.has-at .den:not(.on) { opacity: 1; }
+  &.has-at .den:not(.on) > a { opacity: 0.45; }
+  .st.on { background: #04204b; border-color: #04204b; color: #fff; opacity: 1; i { color: rgba(255, 255, 255, 0.72); } }
+  .den.on .ss { color: rgba(255, 255, 255, 0.85); border-color: rgba(255, 255, 255, 0.4); }
+  .ss.on { background: #04204b; color: #fff; border: 1px solid #04204b; opacity: 1; }
+  .da-route-note { margin: 0.65rem 0 0; font-size: 0.86rem; line-height: 1.5; color: var(--global-text-color); }
+}
+
+// Enlarged figure overlay
+#da-zoom {
+  position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column;
+  background: rgba(10, 16, 28, 0.88); backdrop-filter: blur(3px);
+  &.open { display: flex; }
+  .zbar { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem; color: #e6e8ec; font-size: 0.85rem; }
+  .zt { font-weight: 650; flex: 1; }
+  .zh { color: #9aa1ad; font-size: 0.75rem; }
+  .zx { background: none; border: 1px solid #5d6573; color: #e6e8ec; border-radius: 8px; padding: 0.15rem 0.6rem; cursor: pointer; }
+  .zstage { flex: 1; overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 0 1rem 1.2rem; cursor: zoom-in;
+    img, svg { background: #fff; border-radius: 8px; max-width: 96vw; max-height: calc(100vh - 80px); width: auto; height: auto; }
+    svg { width: unquote("min(96vw, 1400px)"); padding: 1rem; }
+    &.full { cursor: zoom-out; align-items: flex-start; justify-content: flex-start;
+      img { max-width: none; max-height: none; }
+      svg { max-height: none; width: 1900px; } } }
+}
+body.da-zoom-open { overflow: hidden; }
+// the theme colours every <a> and its spans; the rail's links stay in the text colours
+#da-rail nav a { color: var(--global-text-color-light) !important; }
+#da-rail nav a:hover, #da-rail nav a.on { color: var(--global-text-color) !important; }
+#da-rail .tfoot a { color: var(--global-theme-color) !important; }
+#da-railbtn, #da-railbtn span { color: var(--global-text-color) !important; }
+#da-rail nav a span:not(.tn) { color: inherit !important; }
+#da-rail nav a:hover { border-bottom: none !important; }
+// phones: drawings keep a readable size and scroll sideways inside their card
+@media (max-width: 640px) {
+  .concept-drawing .da-svgstage { overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch;
+    svg { min-width: 600px; } }
+}
+
+// ---------------------------------------------------------------- the rail from 1200 px (2026-10-17)
+// The rail shows from 1200 px; between 1200 and 1340 the column moves right to make room for it
+// (the theme's .container is 880 px wide, with 15 px padding).
+@media (min-width: 1200px) {
+  #da-rail { transform: none; }
+  #da-railbtn, #da-veil { display: none; }
+  .da .da-toc { display: none; }
+}
+@media (min-width: 1200px) and (max-width: 1339.98px) {
+  .da { margin-left: unquote("max(0px, calc(296px - (100vw - 880px) / 2 - 15px))"); margin-right: auto; }
+  .da .media-wide { width: unquote("min(1260px, calc(100vw - 296px - 36px))"); margin-left: 0; }
+}
+
+// Bridges between sections: one or two sentences that close a section and open the next.
+.da p.da-bridge {
+  margin: 2.4rem 0 0; padding: 0.15rem 0 0.15rem 1rem; border-left: 2px solid #04204b;
+  font-size: 1.02rem; line-height: 1.7; color: var(--global-text-color);
+}
+.da p.da-bridge + .da-part { margin-top: 3rem; }

@@ -1,0 +1,28 @@
+{
+ "label": "ε, x̂₀ and v are interchangeable",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "Converting between prediction targets",
+  "caption": "General Gaussian path x_t = α_t x₀ + σ_t ε; rectified flow is α_t = 1 − t, σ_t = t.",
+  "main_latex": "x_t = \\alpha_t\\, x_0 + \\sigma_t\\, \\varepsilon",
+  "steps": [
+   {
+    "latex": "\\hat x_0 = \\frac{x_t - \\sigma_t\\, \\hat\\varepsilon}{\\alpha_t}",
+    "explanation": "From a noise prediction (DDPM, Stable Diffusion 1 and XL) to a data prediction."
+   },
+   {
+    "latex": "\\hat\\varepsilon = \\frac{x_t - \\alpha_t\\, \\hat x_0}{\\sigma_t}",
+    "explanation": "And back. Which target is easiest to learn depends on σ: ε is trivial at high noise, x₀ at low noise."
+   },
+   {
+    "latex": "x_t = (1 - t)\\, x_0 + t\\, \\varepsilon \\;\\Rightarrow\\; v = \\frac{\\mathrm d x_t}{\\mathrm d t} = \\varepsilon - x_0",
+    "explanation": "On the straight rectified-flow path the velocity is constant along each pair (x₀, ε). SD3 and FLUX predict v."
+   },
+   {
+    "latex": "\\hat x_0 = x_t - t\\, \\hat v, \\qquad \\hat\\varepsilon = x_t + (1 - t)\\, \\hat v",
+    "explanation": "So a velocity model is also a denoiser: every architecture in the gallery answers the same question."
+   }
+  ]
+ }
+}

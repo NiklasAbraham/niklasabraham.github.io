@@ -1,0 +1,7 @@
+{%- comment -%} A data figure of the energy long read: src= (in assets/energy-article/media/), title=, caption=, wide= {%- endcomment -%}
+{%- assign base = '/assets/energy-article/media/' | relative_url -%}
+<figure class="concept concept-media{% if include.wide %} media-wide{% endif %}">
+<header><span class="concept-kind">{{ include.kind | default: 'data' }}</span><span class="concept-title">{{ include.title }}</span><button class="concept-btn" type="button" data-zoom>⤢ enlarge</button></header>
+<div class="media-stage"><img src="{{ base }}{{ include.src }}" alt="{{ include.title }}" loading="lazy"></div>
+<figcaption>{{ include.caption }}</figcaption>
+</figure>

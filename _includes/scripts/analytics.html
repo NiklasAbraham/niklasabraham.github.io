@@ -1,3 +1,5 @@
+{%- comment -%} Off: Google Analytics would need a consent banner (§ 25 TDDDG, GDPR). Kept only behind the config flag. {%- endcomment -%}
+{%- if site.enable_google_analytics -%}
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-SDZ33Y0K4J"></script>
 <script>
@@ -7,3 +9,4 @@
 
   gtag('config', 'G-SDZ33Y0K4J');
 </script>
+{%- endif -%}

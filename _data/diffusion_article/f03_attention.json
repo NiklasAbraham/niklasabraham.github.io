@@ -1,0 +1,28 @@
+{
+ "label": "Attention, with and without a bias",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "Attention in its three uses",
+  "caption": "d is the per-head width. Self-attention, cross-attention and pair-biased attention differ only in where Q, K, V and B come from.",
+  "main_latex": "\\operatorname{Attn}(Q, K, V) = \\operatorname{softmax}\\!\\Big(\\frac{Q K^\\top}{\\sqrt d} + B\\Big)\\, V",
+  "steps": [
+   {
+    "latex": "Q = H W_Q,\\quad K = H W_K,\\quad V = H W_V,\\quad B = 0",
+    "explanation": "Self-attention: queries, keys and values all come from the same tokens H (DiT, U-ViT, every U-Net attention layer)."
+   },
+   {
+    "latex": "Q = H_\\text{img} W_Q,\\quad K = H_\\text{text} W_K,\\quad V = H_\\text{text} W_V",
+    "explanation": "Cross-attention (SD 1, SDXL): image positions ask, text tokens answer. Text is never updated."
+   },
+   {
+    "latex": "Q = \\big[H_\\text{txt} W_Q^\\text{txt};\\, H_\\text{img} W_Q^\\text{img}\\big],\\ \\text{likewise } K, V",
+    "explanation": "Joint attention (SD3, FLUX): each stream has its own weights, then one softmax runs over the concatenated sequence."
+   },
+   {
+    "latex": "B_{ij}^{(h)} = w_h^\\top \\operatorname{LN}(z_{ij})",
+    "explanation": "Pair bias (AlphaFold 3 and successors): every logit gets a learned bias from the pair representation, so geometry the trunk inferred steers what attends to what."
+   }
+  ]
+ }
+}

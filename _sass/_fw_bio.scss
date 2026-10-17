@@ -1,0 +1,32 @@
+// _fw_bio.scss: styles for fw-bio.js (chapter 1, the biology); every rule scoped under .fw
+.fw {
+  .fw-layer.fwb > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .fw-layer.fwb .fwb-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .fw-layer.fwb .fwb-over { pointer-events: none; }
+  // amino acids: the side chain and name card of the current example crossfade; its tile lights up
+  .fwb-sc { opacity: 0; transition: opacity 0.45s ease; }
+  .fwb-sc.fwb-on { opacity: 1; }
+  .fwb-tile .fwb-hl { opacity: 0; transition: opacity 0.35s ease; }
+  .fwb-tile .fwb-l { transition: fill 0.35s ease; }
+  .fwb-tile .fwb-l3 { transition: fill 0.35s ease; }
+  .fwb-tile.fwb-on .fwb-hl { opacity: 1; }
+  .fwb-tile.fwb-on .fwb-l, .fwb-tile.fwb-on .fwb-l3 { fill: #fff; }
+  // the reading head over the sequence, the coordinate table
+  .fwb-read { transition: cx 0.13s linear, cy 0.13s linear; }
+  .fwb-tbl { transition: transform 0.45s cubic-bezier(.2,.7,.2,1); }
+  .fwb-row text { transition: fill 0.3s ease; }
+  .fwb-row.fwb-on text { fill: #2f5bd3; font-weight: 700; }
+  // the one dot that holds every measured structure
+  .fwb-ping { opacity: 0; transform-box: fill-box; transform-origin: center; }
+  .fw-layer.play .fwb-ping { animation: fwbping 1.8s ease-out 2.3s infinite; }
+  @keyframes fwbping { 0% { opacity: 0.9; transform: scale(0.4); } 100% { opacity: 0; transform: scale(2.2); } }
+}
+// portrait stage for the biology steps on phones
+@media (max-width: 700px) {
+  .fw .fw-stage:has(> .fw-layer.on.fwb-tall) { aspect-ratio: 520 / 860; }
+}
+.fw {
+  // poses: the panel whose pose is being sampled gets its coloured frame
+  .fwb-frame { opacity: 0; transition: opacity 0.35s ease; }
+  .fwb-cur .fwb-frame { opacity: 1; }
+}

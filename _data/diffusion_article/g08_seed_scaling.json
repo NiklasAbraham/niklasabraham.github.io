@@ -1,0 +1,13 @@
+{
+ "label": "Seeds versus diversity",
+ "type": "graph",
+ "spec": {
+  "type": "graph",
+  "title": "Antibody–antigen success as more seeds are sampled",
+  "caption": "Top-ranked DockQ > 0.23 success. Protenix-v1 on FoldBench Ab–Ag, bootstrapped from 100 seeds (Protenix-v1 report p. 6): 36.0 % at 1 seed, 42.9 % at 10, 47.7 % at 80. ESMFold2 (5 samples per seed): 49 % at 1 seed to 65 % at 1,024 (ESMFold2 p. 6; intermediate points not reported, line drawn straight in log seeds). Different benchmarks subsets; compare shapes, not heights.",
+  "chart_type": "lines",
+  "x_label": "log10(number of seeds)",
+  "y_label": "success (%)",
+  "data_json": "{\"series\": [{\"name\": \"Protenix-v1\", \"color\": \"#0B4FC0\", \"points\": [[0, 36.01], [1, 42.92], [1.903, 47.68]]}, {\"name\": \"ESMFold2\", \"color\": \"#B4552F\", \"points\": [[0, 49], [3.01, 65]]}]}"
+ }
+}

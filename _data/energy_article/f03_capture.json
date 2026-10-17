@@ -1,0 +1,28 @@
+{
+ "label": "Capture rate",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "Capture price and capture rate",
+  "main_latex": "\\mathrm{CR} = \\frac{\\bar p^{\\,\\text{capt}}}{\\bar p} = \\frac{\\sum_t p_t\\, q_t \\,/\\, \\sum_t q_t}{\\frac{1}{T}\\sum_t p_t}",
+  "steps": [
+   {
+    "latex": "\\bar p^{\\,\\text{capt}} = \\frac{\\sum_t p_t\\, q_t}{\\sum_t q_t}",
+    "explanation": "The average price a technology actually earns: each hour's price weighted by its output q in that hour."
+   },
+   {
+    "latex": "\\bar p = \\tfrac{1}{T}\\textstyle\\sum_t p_t",
+    "explanation": "The base price: the plain average over all T hours, what a flat 'baseload' delivery earns."
+   },
+   {
+    "latex": "2025: \\ \\bar p = 89.3, \\quad \\bar p^{\\,\\text{capt}}_{\\text{solar}} = 46.1 \\;\\Rightarrow\\; \\mathrm{CR}_{\\text{solar}} = 0.52",
+    "explanation": "Computed from hourly Energy-Charts data. Solar earned 52 % of the base price; onshore wind 87 %, offshore wind 96 %."
+   },
+   {
+    "latex": "24\\,\\%",
+    "explanation": "of all German solar energy in 2025 was produced in hours with a negative day-ahead price."
+   }
+  ],
+  "caption": "Falling capture rates as a technology's share grows are called cannibalisation: every new panel produces exactly when all the others do."
+ }
+}

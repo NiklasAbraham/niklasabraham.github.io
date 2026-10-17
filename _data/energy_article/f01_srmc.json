@@ -1,0 +1,40 @@
+{
+ "label": "Short-run marginal cost",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "What one more megawatt-hour costs a thermal plant",
+  "main_latex": "c^{\\text{SRMC}} = \\frac{p_{\\text{fuel}}}{\\eta} \\;+\\; \\frac{e_{\\text{fuel}}}{\\eta}\\,p_{\\text{CO}_2} \\;+\\; c_{\\text{var}}",
+  "steps": [
+   {
+    "latex": "\\frac{p_{\\text{fuel}}}{\\eta}",
+    "explanation": "Fuel cost per MWh of electricity: the fuel price per MWh of heat divided by the plant's efficiency η. A combined-cycle gas plant (η ≈ 0.55) burns 1.8 MWh of gas per MWh of power."
+   },
+   {
+    "latex": "\\frac{e_{\\text{fuel}}}{\\eta}\\,p_{\\text{CO}_2}",
+    "explanation": "Carbon cost: emissions per MWh of heat e (gas 0.20, hard coal 0.34, lignite about 0.40 t CO₂) divided by η, times the EU ETS allowance price. The December-2025 EUA averaged about 74 EUR/t in 2025."
+   },
+   {
+    "latex": "c_{\\text{var}}",
+    "explanation": "Other variable costs: maintenance that scales with running hours, auxiliary materials, start-up wear; a few EUR/MWh."
+   },
+   {
+    "latex": "\\text{CCGT: } \\tfrac{35}{0.55} + \\tfrac{0.20}{0.55}\\cdot 74 + 3 \\approx 64 + 27 + 3 = 94\\ \\text{EUR/MWh}",
+    "explanation": "Gas at 35 EUR/MWh (heat), roughly where the Dutch TTF hub traded for much of 2025."
+   },
+   {
+    "latex": "\\text{Hard coal: } \\tfrac{12}{0.40} + \\tfrac{0.34}{0.40}\\cdot 74 + 4 \\approx 30 + 63 + 4 = 97\\ \\text{EUR/MWh}",
+    "explanation": "Imported coal at about 12 EUR per MWh of heat. Carbon is now the larger part of the cost."
+   },
+   {
+    "latex": "\\text{Lignite: } \\tfrac{5}{0.37} + \\tfrac{0.40}{0.37}\\cdot 74 + 5 \\approx 14 + 80 + 5 = 99\\ \\text{EUR/MWh}",
+    "explanation": "Lignite is mined next to the plant and cheap as a fuel, but it is the dirtiest per MWh: its carbon cost alone, about 80 EUR/MWh, is three times a gas plant's 27."
+   },
+   {
+    "latex": "\\text{Old gas turbine: } \\tfrac{35}{0.35} + \\tfrac{0.20}{0.35}\\cdot 74 + 3 \\approx 146\\ \\text{EUR/MWh}",
+    "explanation": "Low efficiency makes peakers the top of the stack: they run only in the scarcest hours."
+   }
+  ],
+  "caption": "Illustrative 2025 inputs; fuel prices and efficiencies vary by plant and month. The point: with carbon at around 70–80 EUR/t, gas, hard coal and lignite all land near 90–100 EUR/MWh, which is why the German price so often sits there."
+ }
+}

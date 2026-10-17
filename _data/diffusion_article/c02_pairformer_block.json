@@ -1,0 +1,40 @@
+{
+ "label": "One Pairformer block",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "One Pairformer block (AF3 SI Algorithm 17), repeated 48 times",
+  "caption": "z: N × N × 128 pair features, s: N × 384 single features. Every step is residual: it adds a correction to what is already there. The pair track goes first; the single track then reads the updated z.",
+  "main_latex": "(s, z) \\;\\mapsto\\; (s, z) + \\text{seven residual updates}, \\qquad \\text{48 blocks with separate weights}",
+  "steps": [
+   {
+    "latex": "z \\leftarrow z + \\mathrm{TriMulOut}(z)",
+    "explanation": "Rewrite each pair from the two edges leaving its tokens, summed over every third token. O(N³)."
+   },
+   {
+    "latex": "z \\leftarrow z + \\mathrm{TriMulIn}(z)",
+    "explanation": "The same from the edges arriving at its tokens. After these two steps every pair has, in principle, heard from every other pair."
+   },
+   {
+    "latex": "z \\leftarrow z + \\mathrm{TriAttStart}(z): \\quad a^h_{ijk} = \\mathrm{softmax}_k\\big(q^{h\\top}_{ij} k^h_{ik}/\\sqrt{32} + b^h_{jk}\\big)",
+    "explanation": "Pair (i, j) attends over the pairs (i, k) that start at the same token, 4 heads; the third edge (j, k) of each triangle sets a bias on the attention weight. Unlike multiplication, attention chooses which k to listen to. O(N³)."
+   },
+   {
+    "latex": "z \\leftarrow z + \\mathrm{TriAttEnd}(z): \\quad a^h_{ijk} = \\mathrm{softmax}_k\\big(q^{h\\top}_{ij} k^h_{kj}/\\sqrt{32} + b^h_{ki}\\big)",
+    "explanation": "The same over the pairs (k, j) that end at the same token, with (k, i) as the bias edge."
+   },
+   {
+    "latex": "z_{ij} \\leftarrow z_{ij} + W_3\\big(\\mathrm{swish}(W_1 \\bar z_{ij}) \\odot W_2 \\bar z_{ij}\\big)",
+    "explanation": "A SwiGLU feed-forward layer, 128 → 512 → 128, applied to every pair on its own: no mixing between pairs."
+   },
+   {
+    "latex": "s_i \\leftarrow s_i + \\sum_j \\mathrm{softmax}_j\\big(q_i^\\top k_j/\\sqrt{24} + \\mathrm{Linear}(\\mathrm{LN}\\,z_{ij})\\big)\\, v_j",
+    "explanation": "Attention over tokens with 16 heads, where the pair representation adds one bias per head to every logit. This is the only place z influences s inside the block; nothing flows from s back into z."
+   },
+   {
+    "latex": "s_i \\leftarrow s_i + \\mathrm{SwiGLU}(s_i), \\qquad 384 \\to 1536 \\to 384",
+    "explanation": "A feed-forward layer on every token. Then the next block starts again with the triangle updates."
+   }
+  ]
+ }
+}

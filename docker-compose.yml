@@ -4,6 +4,12 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    # Only nginx error messages end up here (access_log is off); keep them small
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "2"
     networks:
       - proxy
     labels:
@@ -15,12 +21,15 @@ services:
       - "traefik.http.routers.personalsite.tls=true"
       - "traefik.http.routers.personalsite.tls.certresolver=letsencrypt"
       - "traefik.http.services.personalsite.loadbalancer.server.port=80"
+      # No access log for this site (the privacy policy says so)
+      - "traefik.http.routers.personalsite.observability.accesslogs=false"
       # Redirect www -> apex
       - "traefik.http.routers.personalsite-www.rule=Host(`www.niklas-abraham.de`)"
       - "traefik.http.routers.personalsite-www.entrypoints=websecure"
       - "traefik.http.routers.personalsite-www.tls=true"
       - "traefik.http.routers.personalsite-www.tls.certresolver=letsencrypt"
       - "traefik.http.routers.personalsite-www.middlewares=personalsite-redirect-www"
+      - "traefik.http.routers.personalsite-www.observability.accesslogs=false"
       - "traefik.http.middlewares.personalsite-redirect-www.redirectregex.regex=^https://www\\.niklas-abraham\\.de(.*)"
       - "traefik.http.middlewares.personalsite-redirect-www.redirectregex.replacement=https://niklas-abraham.de$${1}"
       - "traefik.http.middlewares.personalsite-redirect-www.redirectregex.permanent=true"

@@ -1,0 +1,13 @@
+{
+ "label": "Trunk versus denoiser size",
+ "type": "graph",
+ "spec": {
+  "type": "graph",
+  "title": "Parameters in the trunk and the denoiser (millions)",
+  "caption": "Read from the released checkpoints (Boltz 2.2.1, OpenFold3 0.4.3, ESMFold2). The denoiser is as large as the Pairformer but runs 200 times per sample; the Pairformer runs once.",
+  "chart_type": "bars",
+  "x_label": "",
+  "y_label": "parameters (M)",
+  "data_json": "{\"bars\": [{\"label\": \"Boltz-2 Pairformer\", \"value\": 197}, {\"label\": \"Boltz-2 denoiser\", \"value\": 294}, {\"label\": \"OF3 Pairformer\", \"value\": 147}, {\"label\": \"OF3 denoiser\", \"value\": 203}, {\"label\": \"ESMFold2 denoiser\", \"value\": 131}]}"
+ }
+}

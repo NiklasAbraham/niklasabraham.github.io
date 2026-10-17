@@ -1,0 +1,6 @@
+{%- assign base = '/assets/diffusion-article/media/' | relative_url -%}
+<figure class="concept concept-media{% if include.wide %} media-wide{% endif %}">
+<header><span class="concept-kind">{% if include.film %}film{% elsif include.kind %}{{ include.kind }}{% else %}render{% endif %}</span><span class="concept-title">{{ include.title }}</span>{% if include.film %}<button class="concept-btn" type="button" data-film-toggle>❚❚ pause</button>{% else %}<button class="concept-btn" type="button" data-zoom>⤢ enlarge</button>{% endif %}</header>
+<div class="media-stage">{% if include.film %}<video muted loop playsinline preload="none" poster="{{ base }}{{ include.film }}_poster.jpg" data-film><source src="{{ base }}{{ include.film }}.webm" type="video/webm"><source src="{{ base }}{{ include.film }}.mp4" type="video/mp4"></video>{% else %}<img src="{{ base }}{{ include.src }}" alt="{{ include.title }}" loading="lazy">{% endif %}</div>
+<figcaption>{{ include.caption }}</figcaption>
+</figure>
