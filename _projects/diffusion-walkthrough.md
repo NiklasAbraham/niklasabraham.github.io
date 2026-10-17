@@ -132,7 +132,7 @@ The sampler starts from pure noise, far larger than the complex, and walks the n
 </main>
 </div>
 </div>
-<script defer src="{{ '/assets/js/fw-core.js' | relative_url }}"></script>
-<script defer src="{{ '/assets/js/fw-bio.js' | relative_url }}"></script>
-<script defer src="{{ '/assets/js/fw-model.js' | relative_url }}"></script>
-<script defer src="{{ '/assets/js/fw-live.js' | relative_url }}"></script>
+<script defer src="{{ '/assets/js/fw-core.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/fw-bio.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/fw-model.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/fw-live.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

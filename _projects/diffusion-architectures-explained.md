@@ -835,5 +835,5 @@ Facts in this article were collected from the papers, their supplementary inform
 </div>
 
 </article>
-<script defer src="{{ '/assets/js/concepts.js' | relative_url }}"></script>
-<script defer src="{{ '/assets/js/da-guide.js' | relative_url }}"></script>
+<script defer src="{{ '/assets/js/concepts.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/da-guide.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

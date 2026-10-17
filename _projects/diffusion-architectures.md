@@ -207,5 +207,5 @@ permalink: /projects/diffusion-architectures/
 
 <script type="application/json" id="dg-data">{{ models | jsonify }}</script>
 </div>
-<script defer src="{{ '/assets/js/diffusion-gallery.js' | relative_url }}"></script>
-<script defer src="{{ '/assets/js/dg-rail.js' | relative_url }}"></script>
+<script defer src="{{ '/assets/js/diffusion-gallery.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/dg-rail.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

@@ -383,6 +383,6 @@ Germany's electricity system has changed more in the last decade than in the fif
 The animations were drafted with a concept-visualisation pipeline adapted from [Get It.](https://github.com/beltromatti/get-it) and checked frame by frame; their numbers are illustrative unless the caption says otherwise.
 
 </article>
-<script defer src="{{ '/assets/js/concepts.js' | relative_url }}"></script>
-<script defer src="{{ '/assets/js/da-guide.js' | relative_url }}"></script>
-<script defer src="{{ '/assets/js/energy-explorer.js' | relative_url }}"></script>
+<script defer src="{{ '/assets/js/concepts.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/da-guide.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/energy-explorer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
