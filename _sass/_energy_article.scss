@@ -1,17 +1,8 @@
-// The German energy long read (/blog/2026/german-energy-market/): maps, the explorer, stat tiles.
+// The German energy long read (/blog/2026/german-energy-market/): maps and the explorer.
 // Article typography, cards and the rail come from _diffusion_article.scss (.da, .concept).
 
 .en-map .da-svgstage { background: #fff; padding: 0; }
 .en-map .da-svgstage svg { width: 100%; height: auto; display: block; }
-
-.da .en-stats {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin: 1.6rem 0 2rem;
-  @media (max-width: 600px) { grid-template-columns: repeat(2, 1fr); }
-  > div { border: 1px solid var(--global-card-border); border-radius: 12px; padding: 0.7rem 0.85rem 0.6rem; background: var(--global-card-bg); }
-  b { display: block; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: #0b4fc0; }
-  span { display: block; font-size: 0.8rem; line-height: 1.35; color: var(--global-text-color-light); margin-top: 0.25rem; }
-  .s-warm b { color: #b4552f; } .s-teal b { color: #138374; } .s-ink b { color: var(--global-text-color); }
-}
 
 .ee {
   margin: 2rem 0; border: 1px solid var(--global-card-border); border-radius: 14px; background: var(--global-card-bg); overflow: hidden;

@@ -136,6 +136,7 @@ exclude:
   - Dockerfile
   - docker-compose.yml
   - nginx.conf
+  - CLAUDE.md
   - .dockerignore
 keep_files:
   - CNAME

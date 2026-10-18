@@ -19,15 +19,6 @@ read_time: 45 # the word count would include the inlined map SVGs
 **A note before you start.** I am not an energy economist; I wrote this to understand a market I pay into every month. The time series are my own analysis of public data from [Energy-Charts](https://www.energy-charts.info) (Fraunhofer ISE, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), from ENTSO-E, EEX and the transmission operators), aggregated and plotted by me; figures from reports are quoted with their source. If you find a mistake, [message me on LinkedIn](https://www.linkedin.com/in/niklas-abraham-05983b247) and I will fix it. Nothing here is investment, tax or energy-procurement advice; the data run to 16 October 2026.
 </div>
 
-<div class="en-stats" markdown="0">
-<div><b>2,925 TWh</b><span>primary energy used in 2025, 36 % of it oil</span></div>
-<div class="s-teal"><b>59.8 %</b><span>of public net electricity from renewables, 2025</span></div>
-<div class="s-warm"><b>89 EUR/MWh</b><span>average day-ahead price 2025 (235 in 2022)</span></div>
-<div><b>576 h</b><span>with a negative price in 2025 (126 in 2015)</span></div>
-<div class="s-warm"><b>52 %</b><span>of the base price earned by solar in 2025</span></div>
-<div class="s-ink"><b>37.0 ct</b><span>per kWh paid by an average household, 2026</span></div>
-</div>
-
 **The question.** Germany burns oil in its cars, gas in its boilers and factories, and makes about three fifths of its public electricity from wind, sun, water and biomass. Electricity is only a fifth of final energy, but it is where the energy transition happens first, where prices are set every quarter-hour, and where the swings are largest. So this long read starts with the whole energy system and then spends most of its time on electricity: how the market works, who regulates it, and what eleven years of hourly data say about how it moves.
 
 1. **Where the energy comes from.** Primary energy, imports of gas and oil, the electricity mix and where in the country it is produced.
