@@ -3243,5 +3243,271 @@
    }
   ],
   "links": []
+ },
+ {
+  "id": "rfd3",
+  "name": "RFdiffusion3",
+  "year": 2026,
+  "org": "Baker lab, UW",
+  "domain": "bio",
+  "paper": "Butcher, Krishna, Mitra et al. · Science 2026",
+  "url": "https://doi.org/10.1126/science.aeh2982",
+  "space": "free atoms (backbone + sidechain)",
+  "backbone": "2-layer Pairformer + AF3-style transformer U-Net",
+  "params": "168 M trainable",
+  "params_m": 168,
+  "conditioning": "motif atoms placed in the noise cloud; classifier-free guidance",
+  "objective": "x̂ on atom coordinates",
+  "steps": "100 in Fig. 1A; recycling at every step",
+  "novelty": "The AF3 denoiser with the trunk cut from 48 Pairformer layers to 2.",
+  "notes": [
+   "Design, not prediction: the input is design conditions, not a sequence, so the paper argues a much lighter conditioning module suffices. 168 M parameters against about 350 M for AF3.",
+   "Triangle multiplicative and triangle attention updates are dropped entirely.",
+   "Sequence-agnostic atomisation: 4 backbone + 10 sidechain atoms per residue (tryptophan is the largest canonical sidechain), virtual atoms on Cβ pad the shorter ones, with distinct virtual indices for isosteres such as Cys/Ser and the bases C/U; 11–12 backbone + 11 base atoms for nucleic acids, 23 at most.",
+   "Attention is distance-gated: only residues and atoms geometrically close in the noise attend to each other, which the authors report prevents overfitting and cropping artifacts.",
+   "Recycling moves from the trunk into the sampler: each diffusion step recycles, buying inference compute without new parameters.",
+   "Two inference-time knobs trade adherence against diversity: a higher classifier-free guidance scale raises motif adherence while lowering codesignability (Fig. 2D), and the step scale sets the sampling temperature (fig. S1C)."
+  ],
+  "vs": "AlphaFold 3",
+  "blocks": {
+   "input": {
+    "title": "design conditions",
+    "sub": "motif atoms · ligands · symmetry",
+    "role": "io",
+    "dims": "design conditions: motif atoms, ligands, length, symmetry",
+    "text": "The input is not a sequence. Motifs are given as atoms, without having to say which sequence positions will carry them; the coordinates of the motif or binding partner are placed inside the developing noise cloud so the network refines the structure in the motif&#x27;s context.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     }
+    ]
+   },
+   "atomise": {
+    "title": "atomisation",
+    "sub": "4 + 10 atoms per residue",
+    "role": "embed",
+    "dims": "protein: 4 backbone + 10 sidechain atoms · RNA 12 + 11, DNA 11 + 11 · at most 23",
+    "text": "Side chains and bases have to be representable before the sequence is known, so every residue gets the atom count of the largest member of its class — tryptophan&#x27;s 10 sidechain atoms, the 11 atoms of the largest base — and virtual atoms on the Cβ pad the rest. Isosteric pairs such as Cys/Ser and the bases C and U are given distinct virtual atom indices, so the model can tell them apart despite identical bonded geometry.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     },
+     {
+      "label": "Qu et al. 2025 · P(all-atom)",
+      "url": "https://openreview.net/forum?id=xeZmxOBvW9"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "atoms → tokens",
+    "role": "embed",
+    "dims": "atomic and residue-level features of the partially noised structure",
+    "text": "Lighter than AF3&#x27;s: no MSA search, no templates, no sequence.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     }
+    ]
+   },
+   "pf": {
+    "title": "Pairformer",
+    "sub": "2 layers · no triangle updates",
+    "role": "pair",
+    "dims": "2 layers · no triangle multiplicative or triangle attention updates",
+    "text": "AF3 spends most of its trunk compute extracting distance information from a sequence. For design the input is already a set of high-level conditions, so the paper shrinks the Pairformer from 48 layers to 2 and drops the triangle updates used throughout prior design and prediction networks. The whole network comes to 168 M trainable parameters against about 350 M for AF3, and RFD3 is an order of magnitude faster than earlier design diffusion models.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sub>i</sub>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "conditioning features for the diffusion module",
+    "text": "Most of the compute is now spent in the denoiser rather than in the trunk.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3",
+    "text": "Training noises protein and nucleic acid structures to different extents and predicts backbone and sidechain positions.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "motif atoms sit in the noise cloud · s ⊕ Fourier(σ) · CFG γ<sub>CFG</sub>",
+    "role": "cond",
+    "dims": "conditioning features ⊕ Fourier(σ) · classifier-free guidance scale γ<sub>CFG</sub>",
+    "text": "Two conditioning routes. The hard one is geometric: motif and partner atoms are present in the noise cloud itself. The soft one is classifier-free guidance, which the paper reports improves adherence to the conditioning information — at a price, see the sampler.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     },
+     {
+      "label": "Ho & Salimans 2022 · Classifier-free guidance",
+      "url": "https://arxiv.org/abs/2207.12598"
+     }
+    ]
+   },
+   "aenc": {
+    "title": "downsample · atom encoder",
+    "sub": "sparse: geometric neighbours · cross-attention atoms → tokens",
+    "role": "attn",
+    "dims": "sparse attention between atom and token features · cross-attention down-pooling",
+    "text": "Only residues and atoms that are geometrically close in the noise attend to each other. These distance-based keys push the network toward local interactions, help prevent overfitting and mitigate the artifacts seen with cropping. Pooling atoms into tokens is a cross-attention: each atom&#x27;s features are weighted before they are pooled, so the token-level transformer can focus on specific atoms within a token — the mechanism comes from the Byte Latent Transformer.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     },
+     {
+      "label": "Pagnoni et al. 2025 · Byte Latent Transformer (cross-attention pooling)",
+      "url": "https://arxiv.org/abs/2412.09871"
+     }
+    ]
+   },
+   "tok": {
+    "title": "token transformer",
+    "sub": "sparse attention over tokens",
+    "role": "attn",
+    "dims": "sparse attention over token features",
+    "text": "The middle of a transformer U-Net, where the coarse-grained token representation is processed.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     },
+     {
+      "label": "Ronneberger et al. 2015 · U-Net",
+      "url": "https://arxiv.org/abs/1505.04597"
+     }
+    ]
+   },
+   "adec": {
+    "title": "upsample · atom decoder",
+    "sub": "tokens modulate atoms · → coordinate update",
+    "role": "attn",
+    "dims": "token features modulate atom features → coordinate update",
+    "text": "Token features are read back out by cross-attention with token splitting, then modulate the atom features to predict coordinate updates.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "designed structure x̂",
+    "sub": "all atoms, backbone + sidechain",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, backbone and sidechain",
+    "text": "Fig. 1A shows a 100-step trajectory (t = 100, 50, 40, 20, 0). Recycling is introduced at every diffusion step, which buys inference compute without adding parameters. Two inference-time settings trade conditioning adherence against diversity: raising γ<sub>CFG</sub> raises the weighted secondary-structure F1 of a design against its target while lowering codesignability (Fig. 2D), and the step scale sets the sampling temperature (fig. S1C).",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     },
+     {
+      "label": "Ho & Salimans 2022 · Classifier-free guidance",
+      "url": "https://arxiv.org/abs/2207.12598"
+     }
+    ]
+   },
+   "out": {
+    "title": "protein, RNA or DNA design",
+    "sub": "sequence from MPNN, or codesigned",
+    "role": "io",
+    "dims": "designs, then sequence assignment",
+    "text": "Protein designs get sequences from ProteinMPNN, or LigandMPNN where non-protein atoms are present, and are filtered by structure prediction with AF3 or RF3. RNA is the exception: the sequences the model codesigns are foldable and are used directly.",
+    "refs": [
+     {
+      "label": "Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3",
+      "url": "https://doi.org/10.1126/science.aeh2982"
+     },
+     {
+      "label": "Dauparas et al. 2022 · ProteinMPNN",
+      "url": "https://doi.org/10.1126/science.add2187"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "RFdiffusion3 designs proteins, RNA and DNA by diffusing free atoms rather than residue frames. Because every residue carries a fixed atom budget — 4 backbone and 10 sidechain atoms, padded with virtual atoms — an atomic motif can be specified without saying which sequence positions will carry it, which is what RFdiffusion2&#x27;s frame representation made awkward.",
+   "Architecturally it is the AlphaFold 3 diffusion module with the trunk removed. The reasoning is that design conditions are not a sequence: there is no evolutionary signal to extract, so the Pairformer goes from 48 layers to 2, the triangle updates go altogether, and the network lands at 168 M parameters against roughly 350 M for AF3. The denoiser itself is a transformer U-Net — distance-gated sparse attention, cross-attention pooling between atoms and tokens, coordinate updates on the way back up — and recycling now happens at every diffusion step instead of in the trunk.",
+   "Conditioning comes in geometrically, with motif atoms placed in the noise cloud, and through classifier-free guidance. Fig. 2D is the trade-off drawn explicitly: as γ<sub>CFG</sub> rises, adherence to the target secondary structure rises and codesignability falls. The step scale tunes diversity against designability the same way.",
+   "Experimentally the paper reports zero-shot 96-construct campaigns giving active de novo phosphotriesterases with a carbamylated-lysine, two-metal active site, and zinc proteases against transthyretin."
+  ],
+  "flow": [
+   {
+    "stage": "design conditions",
+    "shape": "motif atoms, ligands, length"
+   },
+   {
+    "stage": "atomisation",
+    "shape": "N<sub>res</sub> × 14 atoms (23 with NA)"
+   },
+   {
+    "stage": "conditioning trunk",
+    "shape": "2 Pairformer layers"
+   },
+   {
+    "stage": "noise",
+    "shape": "x: N<sub>atom</sub> × 3"
+   },
+   {
+    "stage": "downsample",
+    "shape": "atoms → tokens, sparse + cross-attention"
+   },
+   {
+    "stage": "token transformer",
+    "shape": "sparse attention over tokens"
+   },
+   {
+    "stage": "upsample",
+    "shape": "→ Δx: N<sub>atom</sub> × 3"
+   }
+  ],
+  "links": [
+   {
+    "label": "Paper · Science 2026",
+    "url": "https://doi.org/10.1126/science.aeh2982"
+   },
+   {
+    "label": "Code · RosettaCommons/foundry",
+    "url": "https://github.com/RosettaCommons/foundry"
+   },
+   {
+    "label": "AtomWorks and RF3 · bioRxiv 2025",
+    "url": "https://doi.org/10.1101/2025.08.14.670328"
+   },
+   {
+    "label": "Enzyme design pipelines",
+    "url": "https://github.com/baker-laboratory/Metallohydrolase_Enzyme_Design"
+   }
+  ]
  }
 ]

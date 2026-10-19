@@ -3,6 +3,8 @@
   const root = document.querySelector('.dg');
   if (!root) return;
   const data = JSON.parse(document.getElementById('dg-data').textContent);
+  const glossEl = document.getElementById('dg-gloss');
+  const gloss = glossEl ? JSON.parse(glossEl.textContent) : { role: {}, key: {} };
   const byId = Object.fromEntries(data.map((m) => [m.id, m]));
   const cards = [...root.querySelectorAll('.dg-card')];
   const rows = [...root.querySelectorAll('.dg-table tbody tr')];
@@ -111,25 +113,56 @@
   const EMPTY = '<p class="dg-insp-empty"><strong>Explore the drawing.</strong> Hover a block for its tensor shapes; ' +
     'click it to pin the full explanation and the paper it comes from.</p>';
 
+  // "What this kind of layer does": the same words wherever that layer type appears. Opening it
+  // once is a preference, so it stays open for the next block and the next visit.
+  const GLOSS_KEY = 'dg-gloss-open';
+  let glossOpen = false;
+  try { glossOpen = localStorage.getItem(GLOSS_KEY) === '1'; } catch (e) { /* private mode */ }
+  const glossFor = (b, k) => gloss.key[k] || gloss.role[b.role] || '';
+
   function renderInspector(k) {
     const m = byId[current];
     const b = k && m.blocks[k];
     if (!b) { insp.innerHTML = EMPTY; insp.classList.remove('on'); return; }
     insp.classList.add('on');
+    const g = glossFor(b, k);
     insp.innerHTML =
       `<div class="dg-insp-head"><span class="dg-role ${b.role}"><i></i>${ROLE[b.role] || b.role}</span>` +
       `<button class="dg-insp-x" aria-label="Clear selection">✕</button></div>` +
       `<h3>${b.title}</h3>` + (b.sub ? `<p class="dg-insp-sub">${b.sub}</p>` : '') +
       (b.dims ? `<div class="dg-insp-dims"><span>shape</span><code>${b.dims}</code></div>` : '') +
       (b.text ? `<p class="dg-insp-text">${b.text}</p>` : '') +
+      (g ? `<details class="dg-gloss"${glossOpen ? ' open' : ''}>` +
+           `<summary>What this kind of layer does</summary><p>${g}</p></details>` : '') +
       (b.refs.length ? `<p class="dg-insp-refs"><span>Read more</span>${b.refs.map((r) => ext(r.url, esc(r.label))).join('')}</p>` : '');
     insp.querySelector('.dg-insp-x').addEventListener('click', () => select(null));
+    const det = insp.querySelector('.dg-gloss');
+    if (det) det.addEventListener('toggle', () => {
+      glossOpen = det.open;
+      try { localStorage.setItem(GLOSS_KEY, glossOpen ? '1' : '0'); } catch (e) { /* private mode */ }
+    });
   }
 
   function mark(k, cls) {
     fig.querySelectorAll('.blk').forEach((g) => g.classList.toggle(cls, g.dataset.k === k));
   }
+
+  // Hover intent: sweeping the pointer across the drawing should not flash every block it
+  // crosses. Entering waits a moment before anything changes; leaving waits longer still, so
+  // moving between two blocks does not blank the panel in between.
+  const ENTER_MS = 110, LEAVE_MS = 240;
+  let hoverTimer = null, hovered = null;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function hover(k, ev) {
+    if (ev && k && k === hovered) { moveTip(ev); return; }  // same block: just follow the pointer
+    clearTimeout(hoverTimer);
+    const run = () => { hovered = k; applyHover(k, ev); };
+    if (reduceMotion || (k && hovered)) run();              // block → block switches at once
+    else hoverTimer = setTimeout(run, k ? ENTER_MS : LEAVE_MS);
+  }
+
+  function applyHover(k, ev) {
     mark(k, 'hl');
     figWrap.classList.toggle('focus', !!(k || pinned));
     if (!k) { tip.hidden = true; if (pinned) mark(pinned, 'hl'); return; }
@@ -212,6 +245,111 @@
   function close() {
     dlg.close();
   }
+  // ---------------------------------------------------------------- PNG export
+  // The drawings carry only class names, so a standalone copy needs the stylesheet, the resolved
+  // colour tokens and the fonts inlined: an SVG rendered through an <img> loads no external
+  // resources of its own.
+  const PNG_SCALE = 2;
+  const FONTS = [['/assets/vendor/fonts/inter/files/inter-latin-400-normal.woff2', 400],
+                 ['/assets/vendor/fonts/inter/files/inter-latin-600-normal.woff2', 600],
+                 ['/assets/vendor/fonts/inter/files/inter-latin-700-normal.woff2', 700],
+                 ['/assets/vendor/fonts/inter/files/inter-greek-400-normal.woff2', 400],
+                 ['/assets/vendor/fonts/inter/files/inter-greek-600-normal.woff2', 600]];
+  let fontCss = null;
+
+  async function inlineFonts() {
+    if (fontCss !== null) return fontCss;
+    try {
+      const faces = await Promise.all(FONTS.map(async ([url, weight]) => {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(url + ': ' + r.status);
+        const buf = new Uint8Array(await r.arrayBuffer());
+        let s = '';
+        for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+        return `@font-face{font-family:'Inter';font-style:normal;font-weight:${weight};` +
+               `src:url(data:font/woff2;base64,${btoa(s)}) format('woff2');}`;
+      }));
+      fontCss = faces.join('');
+    } catch (e) {
+      fontCss = '';  // fall back to the system sans rather than failing the download
+    }
+    return fontCss;
+  }
+
+  // Every rule the drawings depend on, read back out of the page's own stylesheet so the export
+  // cannot drift from what is on screen.
+  function svgCss() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let list;
+      try { list = sheet.cssRules; } catch (e) { continue; }  // a cross-origin sheet, if ever
+      if (!list) continue;
+      for (const rule of list) {
+        if (rule.selectorText && /(^|,)\s*\.dg-svg\b/.test(rule.selectorText)) rules.push(rule.cssText);
+      }
+    }
+    const css = rules.join('\n');
+    const style = getComputedStyle(document.documentElement);
+    const vars = [...new Set(css.match(/--dg-[\w-]+/g) || [])]
+      .map((v) => `${v}:${style.getPropertyValue(v).trim()};`).join('');
+    return `:root{${vars}}\n${css}`;
+  }
+
+  async function downloadPng() {
+    const src = fig.querySelector('svg');
+    if (!src) return;
+    const btn = dlg.querySelector('.dg-png');
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const svg = src.cloneNode(true);
+      // export the drawing as it is drawn, not as it is currently being explored
+      svg.querySelectorAll('.blk').forEach((g) => {
+        g.classList.remove('hl', 'sel');
+        g.removeAttribute('tabindex');
+        g.removeAttribute('role');
+      });
+      const [, , vw, vh] = svg.getAttribute('viewBox').split(/\s+/).map(Number);
+      svg.setAttribute('width', vw);
+      svg.setAttribute('height', vh);
+      const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      style.textContent = (await inlineFonts()) + svgCss();
+      svg.insertBefore(style, svg.firstChild);
+
+      const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>' + new XMLSerializer().serializeToString(svg)],
+                            { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      await new Promise((ok, fail) => {
+        img.onload = ok;
+        img.onerror = () => fail(new Error('the drawing could not be rasterised'));
+        img.src = url;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(vw * PNG_SCALE);
+      canvas.height = Math.round(vh * PNG_SCALE);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--dg-panel').trim() || '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      const png = await new Promise((ok) => canvas.toBlob(ok, 'image/png'));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(png);
+      a.download = `${current}-architecture.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } catch (e) {
+      btn.textContent = 'failed';
+      setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1600);
+      return;
+    }
+    btn.textContent = label;
+    btn.disabled = false;
+  }
+  dlg.querySelector('.dg-png').addEventListener('click', downloadPng);
+
   figWrap.addEventListener('click', () => { if (pinned) select(pinned); });
   dlg.addEventListener('close', () => history.replaceState(null, '', location.pathname));
   dlg.querySelectorAll('[data-step]').forEach((b) => b.addEventListener('click', () => step(+b.dataset.step)));

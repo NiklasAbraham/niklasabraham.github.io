@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Diffusion Architecture Gallery
-description: Fourteen diffusion models, from DDPM to AlphaFold 3, drawn in one visual language.
+description: Fifteen diffusion models, from DDPM to AlphaFold 3, drawn in one visual language.
 importance: 1
 category: research
 permalink: /projects/diffusion-architectures/
@@ -14,7 +14,7 @@ permalink: /projects/diffusion-architectures/
   <p class="dg-eyebrow">Project · Architecture gallery · companion to the <a href="{{ longread }}">long read</a></p>
   <h1 class="dg-title">Diffusion models, drawn the same way</h1>
   <p class="dg-lede">
-    Fourteen denoisers, from the DDPM U-Net to AlphaFold 3 and its open reproductions, drawn in one visual
+    Fifteen denoisers, from the DDPM U-Net to AlphaFold 3 and its open reproductions, drawn in one visual
     language. A block that does the same job looks the same in every drawing, so what changes from card to card
     is what changed between the models. The drawings show <em>what</em> each network is made of; the
     <a href="{{ longread }}">long read</a> explains <em>why</em>, with the ablations behind each choice.
@@ -198,6 +198,7 @@ permalink: /projects/diffusion-architectures/
         <button data-step="-1" aria-label="Previous model">←</button>
         <span class="dg-modal-count"></span>
         <button data-step="1" aria-label="Next model" autofocus>→</button>
+        <button class="dg-png" aria-label="Download this drawing as a PNG" title="Download this drawing as a PNG">PNG</button>
         <button class="dg-close" aria-label="Close">✕</button>
       </div>
       <div class="dg-modal-body"></div>
@@ -206,6 +207,7 @@ permalink: /projects/diffusion-architectures/
 </dialog>
 
 <script type="application/json" id="dg-data">{{ models | jsonify }}</script>
+<script type="application/json" id="dg-gloss">{{ site.data.diffusion_gallery_gloss | jsonify }}</script>
 </div>
 <script defer src="{{ '/assets/js/diffusion-gallery.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script defer src="{{ '/assets/js/dg-rail.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

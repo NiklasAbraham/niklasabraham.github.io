@@ -78,7 +78,7 @@ permalink: /projects/diffusion-architectures/walkthrough/
 <p class="eyebrow">Start here</p>
 <h2 id="fw-what">What this page is</h2>
 
-The figure above follows one prediction of a co-folding model as a guided tour: it plays by itself, one step at a time, and you can pause, go back or jump to any step in the list. It starts with just enough biology to follow the model, walks through an OpenFold3-style network (OpenFold3 reproduces AlphaFold&nbsp;3's architecture) from left to right, and ends with a sampler you run yourself. The layout borrows from the [Transformer Explainer](https://poloclub.github.io/transformer-explainer/) (Cho et al.). It is the third way into the same material: the [gallery]({{ g }}) draws fourteen diffusion models side by side, and the [long read]({{ art }}) explains every part with the papers' numbers.
+The figure above follows one prediction of a co-folding model as a guided tour: it plays by itself, one step at a time, and you can pause, go back or jump to any step in the list. It starts with just enough biology to follow the model, walks through an OpenFold3-style network (OpenFold3 reproduces AlphaFold&nbsp;3's architecture) from left to right, and ends with a sampler you run yourself. The layout borrows from the [Transformer Explainer](https://poloclub.github.io/transformer-explainer/) (Cho et al.). It is the third way into the same material: the [gallery]({{ g }}) draws fifteen diffusion models side by side, and the [long read]({{ art }}) explains every part with the papers' numbers.
 
 <div class="fw-noteb" markdown="1">
 **A note before you start.** I made this page while learning the material, and it will contain mistakes. If you find one, or a step is unclear, please [drop me a message on LinkedIn](https://www.linkedin.com/in/niklas-abraham-05983b247). Corrections are very welcome. I am not affiliated with the authors or companies behind these models, and nothing here is endorsed by them; AlphaFold is a trademark of Google DeepMind.
@@ -124,7 +124,7 @@ The sampler starts from pure noise, far larger than the complex, and walks the n
 <h2 id="fw-next">Where to go next</h2>
 
 <div class="fw-next">
-<a href="{{ g }}"><span class="k">Architecture gallery</span><b>Diffusion models, drawn the same way</b><span>Fourteen denoisers, DDPM to AlphaFold&nbsp;3, in one visual language.</span></a>
+<a href="{{ g }}"><span class="k">Architecture gallery</span><b>Diffusion models, drawn the same way</b><span>Fifteen denoisers, DDPM to AlphaFold&nbsp;3, in one visual language.</span></a>
 <a href="{{ art }}"><span class="k">Long read</span><b>Diffusion denoisers, from the noise up</b><span>Every part of this page explained, with the papers' numbers.</span></a>
 </div>
 

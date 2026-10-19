@@ -525,11 +525,19 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
   .dg-modal-svg { display: flex; justify-content: center; height: 100%; }
   .dg-svg { width: auto; max-width: 100%; height: 100%; max-height: 100%; }
 
-  .blk { cursor: pointer; outline: none; transition: opacity 0.15s ease; }
-  .blk .bx { transition: stroke-width 0.12s ease, filter 0.12s ease; }
+  // Hover is eased rather than instant: the drawings are dense, and a snap on every block the
+  // pointer crosses reads as flicker. The JS adds the matching enter/leave delay.
+  .blk { cursor: pointer; outline: none; transition: opacity 0.34s cubic-bezier(0.4, 0, 0.2, 1); }
+  .blk .bx {
+    transition: stroke-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
   .blk:hover .bx, .blk:focus-visible .bx, .blk.hl .bx { stroke-width: 2.6; filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.18)); }
   .blk.sel .bx { stroke: var(--global-theme-color); stroke-width: 2.8; }
   &.focus .blk:not(.hl) { opacity: 0.38; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blk, .blk .bx { transition: none; }
+  }
 }
 
 .dg-tip {
@@ -544,6 +552,8 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
   font-size: 0.8rem;
   line-height: 1.35;
   box-shadow: 0 10px 24px -10px rgba(15, 23, 42, 0.6);
+  animation: dg-tip-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  @media (prefers-reduced-motion: reduce) { animation: none; }
   strong { display: block; font-weight: 600; color: inherit; }
   code, span { display: block; margin-top: 0.15rem; font-size: 0.74rem; color: inherit; background: none; padding: 0; opacity: 0.85; }
   code { font-family: 'JetBrains Mono', ui-monospace, monospace; }
@@ -583,6 +593,28 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
     display: flex; flex-wrap: wrap; gap: 0.35rem 0.7rem; align-items: baseline; font-size: 0.82rem; margin-top: 0.5rem;
     span { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--global-text-color-light); }
   }
+  // what this kind of layer does — the same text wherever the layer type appears
+  .dg-gloss {
+    margin: 0.55rem 0 0.2rem;
+    border-top: 1px solid var(--global-card-border);
+    padding-top: 0.45rem;
+    summary {
+      cursor: pointer; list-style: none;
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--global-text-color-light);
+      transition: color 0.2s ease;
+      &::-webkit-details-marker { display: none; }
+      &::before { content: '+'; display: inline-block; width: 0.85em; font-size: 0.95rem; line-height: 1; }
+      &:hover { color: var(--global-theme-color); }
+    }
+    &[open] summary::before { content: '−'; }
+    p { margin: 0.4rem 0 0; font-size: 0.86rem; color: var(--global-text-color-light); }
+  }
+}
+
+@keyframes dg-tip-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
 }
 
 .dg-role {
@@ -617,6 +649,14 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
     font-size: 0.95rem; cursor: pointer;
     &:hover { border-color: var(--global-theme-color); color: var(--global-theme-color); }
   }
+  .dg-png {
+    margin-left: auto;
+    width: auto; padding: 0 0.6rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.68rem; letter-spacing: 0.06em;
+    &[disabled] { opacity: 0.55; cursor: default; }
+  }
+  .dg-png + .dg-close { margin-left: 0; }
   .dg-close { margin-left: auto; }
   .dg-modal-count { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.78rem; color: var(--global-text-color-light); padding: 0 0.3rem; }
 }

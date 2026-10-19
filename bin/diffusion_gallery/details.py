@@ -58,7 +58,98 @@ R = dict(
     boltz2=("Passaro et al. 2025 · Boltz-2", "https://doi.org/10.1101/2025.06.14.659707"),
     protenix=("Protenix technical report 2025", "https://doi.org/10.1101/2025.01.08.631967"),
     flash=("Dao et al. 2022 · FlashAttention", "https://arxiv.org/abs/2205.14135"),
+    rfd3=("Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3", "https://doi.org/10.1126/science.aeh2982"),
+    pallatom=("Qu et al. 2025 · P(all-atom)", "https://openreview.net/forum?id=xeZmxOBvW9"),
+    blt=("Pagnoni et al. 2025 · Byte Latent Transformer (cross-attention pooling)",
+         "https://arxiv.org/abs/2412.09871"),
+    atomworks=("Corley, Mathis et al. 2025 · AtomWorks and RF3",
+               "https://doi.org/10.1101/2025.08.14.670328"),
+    mpnn=("Dauparas et al. 2022 · ProteinMPNN", "https://doi.org/10.1126/science.add2187"),
 )
+
+
+# ----------------------------------------------------------------------------------------
+# What a kind of layer does, independent of the model it sits in. The detail view offers this
+# under "What this kind of layer does", so the same block type reads the same everywhere.
+# ROLE_GLOSS is the fallback (every block has a role); KEY_GLOSS overrides it where a block
+# key recurs across models and deserves its own words.
+# ----------------------------------------------------------------------------------------
+
+ROLE_GLOSS = {
+    "io": "An input or output of the network rather than a layer: what goes in, what comes back "
+          "out. Nothing is learned here.",
+    "embed": "A projection that turns raw inputs into vectors the network can work with, or maps "
+             "between two granularities (atoms and tokens, pixels and patches). Mostly linear "
+             "layers and lookup tables; cheap next to the stacks that follow.",
+    "attn": "An attention layer. Every position builds a query, compares it with the keys of the "
+            "positions it is allowed to see, and takes a weighted sum of their values. This is how "
+            "information moves between distant parts of the input; which positions may attend to "
+            "which is what distinguishes global, windowed and distance-gated variants.",
+    "mlp": "A position-wise feed-forward layer: the same small network applied independently at "
+           "every position, widening to an inner dimension and back. Attention moves information "
+           "between positions; this transforms it in place, and usually holds most of the "
+           "parameters.",
+    "norm": "A normalisation or modulation layer. It rescales activations to keep training stable, "
+            "and in diffusion models it is also where the conditioning enters: the scale and shift "
+            "are predicted from the noise level and the condition instead of being learned "
+            "constants (FiLM, AdaLN).",
+    "conv": "A convolution or residual block. It mixes a position with its spatial neighbours using "
+            "shared weights, so it is naturally translation-equivariant and cheap on grids. The "
+            "building block of U-Net denoisers.",
+    "cond": "The conditioning path: where everything the denoiser is told about the target enters, "
+            "and where the noise level is embedded. In a co-folding model this is also the boundary "
+            "between the part computed once per target and the part recomputed at every step.",
+    "latent": "An autoencoder stage. The diffusion process does not run on the data itself but on a "
+              "compressed latent, with an encoder in front and a decoder behind, so the denoiser "
+              "works at a much smaller resolution.",
+    "pair": "A pair representation: one vector per pair of tokens, holding what the network believes "
+            "about the relationship between them — typically distance and orientation. It is "
+            "quadratic in sequence length, which is why it dominates the cost of a folding trunk.",
+}
+
+KEY_GLOSS = {
+    "noise": "The starting point of the reverse process: pure Gaussian noise at the largest noise "
+             "level of the schedule. Each sample begins from a different draw, which is the only "
+             "source of diversity between samples of the same target.",
+    "xhat": "The denoiser's estimate of the clean data given the current noisy state. The sampler "
+            "does not jump to it; it takes a step toward it, re-noises a little, and asks again.",
+    "cond": "Where the condition and the noise level are injected. The noise level is turned into a "
+            "vector by a Fourier or sinusoidal embedding and added to the condition, so one network "
+            "can serve every noise level instead of one network per step.",
+    "aenc": "The atom encoder. It attends over atoms — only locally, since atoms far apart in the "
+            "structure have little to say to each other — and then pools each token's atoms into a "
+            "single token vector, handing a much shorter sequence to the transformer above.",
+    "tok": "The token transformer: the main body of the denoiser, attending globally over tokens. "
+           "The condition enters here twice over, as AdaLN scales and shifts from the single "
+           "representation and as a learned bias added to every attention logit from the pair "
+           "representation.",
+    "adec": "The atom decoder. It broadcasts the token features back down to the atoms they came "
+            "from and runs local attention again, ending in a linear layer that outputs a "
+            "coordinate update per atom.",
+    "c": "The condition handed to the denoiser. It is computed once per target and reused for every "
+         "sampling step and every sample, which is why the trunk is expensive but amortised, while "
+         "the denoiser is cheap but paid for hundreds of times.",
+    "pf": "The Pairformer: the folding trunk's main stack, alternating triangle updates on the pair "
+          "representation with attention on the single representation. Triangle updates enforce a "
+          "geometric consistency — if i is close to k and k to j, that constrains i and j — which is "
+          "what makes the stack expensive and what the lighter models drop.",
+    "msa": "The MSA module. A multiple sequence alignment holds evolutionary cousins of the input "
+           "sequence; positions that mutate together are usually in contact, and this module "
+           "distils that signal into the pair representation.",
+    "tmpl": "The template module. Known structures of related proteins are embedded as pair features "
+            "and averaged into the pair representation, giving the trunk a structural prior.",
+    "conf": "The confidence head. It does not change the structure; it predicts how much to trust "
+            "it, per atom and per pair, and its scores are what rank several samples of the same "
+            "target against each other.",
+    "emb": "The input embedder: raw inputs become the single and pair representations the trunk "
+           "works with, including the relative-position and bond features that tell the network how "
+           "the tokens are connected.",
+    "input": "What the user supplies. Everything downstream is a function of this plus the noise "
+             "draw, so what can be asked of the model is set here.",
+    "out": "What comes back, after any ranking or post-processing that is not part of the network.",
+    "mid": "The middle of a U-Net, at the lowest resolution and the widest channels. Attention is "
+           "affordable here, so this is where the most global reasoning happens.",
+}
 
 
 def unet_level_text(resblock):
@@ -698,3 +789,82 @@ DETAILS["esmfold2"] = _cofold_details(
      ("atom encoder", "N_{atom} → N_{tok} × 768"),
      ("token transformer", "12 blocks, N_{tok} × 768"),
      ("atom decoder", "→ N_{atom} × 3")])
+
+DETAILS["rfd3"] = _cofold_details(
+    {"input": P("design conditions: motif atoms, ligands, length, symmetry",
+                "The input is not a sequence. Motifs are given as atoms, without having to say which sequence "
+                "positions will carry them; the coordinates of the motif or binding partner are placed inside the "
+                "developing noise cloud so the network refines the structure in the motif's context.", R["rfd3"]),
+     "atomise": P("protein: 4 backbone + 10 sidechain atoms · RNA 12 + 11, DNA 11 + 11 · at most 23",
+                  "Side chains and bases have to be representable before the sequence is known, so every residue "
+                  "gets the atom count of the largest member of its class — tryptophan's 10 sidechain atoms, the "
+                  "11 atoms of the largest base — and virtual atoms on the Cβ pad the rest. Isosteric pairs such "
+                  "as Cys/Ser and the bases C and U are given distinct virtual atom indices, so the model can tell "
+                  "them apart despite identical bonded geometry.", R["rfd3"], R["pallatom"]),
+     "emb": P("atomic and residue-level features of the partially noised structure",
+              "Lighter than AF3's: no MSA search, no templates, no sequence.", R["rfd3"]),
+     "pf": P("2 layers · no triangle multiplicative or triangle attention updates",
+             "AF3 spends most of its trunk compute extracting distance information from a sequence. For design "
+             "the input is already a set of high-level conditions, so the paper shrinks the Pairformer from 48 "
+             "layers to 2 and drops the triangle updates used throughout prior design and prediction networks. "
+             "The whole network comes to 168 M trainable parameters against about 350 M for AF3, and RFD3 is an "
+             "order of magnitude faster than earlier design diffusion models.", R["rfd3"], R["af3"]),
+     "c": P("conditioning features for the diffusion module",
+            "Most of the compute is now spent in the denoiser rather than in the trunk.", R["rfd3"]),
+     "noise": P("N_{atom} × 3", "Training noises protein and nucleic acid structures to different extents and "
+                "predicts backbone and sidechain positions.", R["rfd3"]),
+     "cond": P("conditioning features ⊕ Fourier(σ) · classifier-free guidance scale γ_{CFG}",
+               "Two conditioning routes. The hard one is geometric: motif and partner atoms are present in the "
+               "noise cloud itself. The soft one is classifier-free guidance, which the paper reports improves "
+               "adherence to the conditioning information — at a price, see the sampler.", R["rfd3"], R["cfg"]),
+     "aenc": P("sparse attention between atom and token features · cross-attention down-pooling",
+               "Only residues and atoms that are geometrically close in the noise attend to each other. These "
+               "distance-based keys push the network toward local interactions, help prevent overfitting and "
+               "mitigate the artifacts seen with cropping. Pooling atoms into tokens is a cross-attention: each "
+               "atom's features are weighted before they are pooled, so the token-level transformer can focus on "
+               "specific atoms within a token — the mechanism comes from the Byte Latent Transformer.",
+               R["rfd3"], R["blt"]),
+     "tok": P("sparse attention over token features",
+              "The middle of a transformer U-Net, where the coarse-grained token representation is processed.",
+              R["rfd3"], R["unet"]),
+     "adec": P("token features modulate atom features → coordinate update",
+               "Token features are read back out by cross-attention with token splitting, then modulate the atom "
+               "features to predict coordinate updates.", R["rfd3"]),
+     "xhat": P("N_{atom} × 3, backbone and sidechain", "Fig. 1A shows a 100-step trajectory (t = 100, 50, 40, 20, "
+               "0). Recycling is introduced at every diffusion step, which buys inference compute without adding "
+               "parameters. Two inference-time settings trade conditioning adherence against diversity: raising "
+               "γ_{CFG} raises the weighted secondary-structure F1 of a design against its target while lowering "
+               "codesignability (Fig. 2D), and the step scale sets the sampling temperature (fig. S1C).",
+               R["rfd3"], R["cfg"]),
+     "out": P("designs, then sequence assignment",
+              "Protein designs get sequences from ProteinMPNN, or LigandMPNN where non-protein atoms are present, "
+              "and are filtered by structure prediction with AF3 or RF3. RNA is the exception: the sequences the "
+              "model codesigns are foldable and are used directly.", R["rfd3"], R["mpnn"])},
+    [("Paper · Science 2026", "https://doi.org/10.1126/science.aeh2982"),
+     ("Code · RosettaCommons/foundry", "https://github.com/RosettaCommons/foundry"),
+     ("AtomWorks and RF3 · bioRxiv 2025", "https://doi.org/10.1101/2025.08.14.670328"),
+     ("Enzyme design pipelines", "https://github.com/baker-laboratory/Metallohydrolase_Enzyme_Design")],
+    ["RFdiffusion3 designs proteins, RNA and DNA by diffusing free atoms rather than residue frames. Because "
+     "every residue carries a fixed atom budget — 4 backbone and 10 sidechain atoms, padded with virtual atoms "
+     "— an atomic motif can be specified without saying which sequence positions will carry it, which is what "
+     "RFdiffusion2's frame representation made awkward.",
+     "Architecturally it is the AlphaFold 3 diffusion module with the trunk removed. The reasoning is that "
+     "design conditions are not a sequence: there is no evolutionary signal to extract, so the Pairformer goes "
+     "from 48 layers to 2, the triangle updates go altogether, and the network lands at 168 M parameters "
+     "against roughly 350 M for AF3. The denoiser itself is a transformer U-Net — distance-gated sparse "
+     "attention, cross-attention pooling between atoms and tokens, coordinate updates on the way back up — and "
+     "recycling now happens at every diffusion step instead of in the trunk.",
+     "Conditioning comes in geometrically, with motif atoms placed in the noise cloud, and through "
+     "classifier-free guidance. Fig. 2D is the trade-off drawn explicitly: as γ_{CFG} rises, adherence to the "
+     "target secondary structure rises and codesignability falls. The step scale tunes diversity against "
+     "designability the same way.",
+     "Experimentally the paper reports zero-shot 96-construct campaigns giving active de novo "
+     "phosphotriesterases with a carbamylated-lysine, two-metal active site, and zinc proteases against "
+     "transthyretin."],
+    [("design conditions", "motif atoms, ligands, length"),
+     ("atomisation", "N_{res} × 14 atoms (23 with NA)"),
+     ("conditioning trunk", "2 Pairformer layers"),
+     ("noise", "x: N_{atom} × 3"),
+     ("downsample", "atoms → tokens, sparse + cross-attention"),
+     ("token transformer", "sparse attention over tokens"),
+     ("upsample", "→ Δx: N_{atom} × 3")])

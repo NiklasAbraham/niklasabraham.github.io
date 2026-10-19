@@ -21,11 +21,12 @@ import sys
 from html import escape
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from details import DETAILS  # noqa: E402
+from details import DETAILS, KEY_GLOSS, ROLE_GLOSS  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT_SVG = ROOT / "_includes" / "diffusion-gallery"
 OUT_DATA = ROOT / "_data" / "diffusion_gallery.json"
+OUT_GLOSS = ROOT / "_data" / "diffusion_gallery_gloss.json"
 
 W = 520  # every drawing is 520 user units wide; height varies
 
@@ -674,13 +675,14 @@ def _cofold(f, spec):
             y -= 12
     y_trunk_top = y
     tg_top = y - 34
-    f.group(xl - 10, tg_top, wl + 20, tg_bot - tg_top + 4, "trunk · once per target", spec["recycle"],
-            rep_cls="rep ink", rep_left=True, label_dy=24)
-    # recycling arrow on the left edge
-    f.curve(f"M{xl + 4:.1f},{tg_top + 40:.1f} C{xl - 30:.1f},{tg_top + 56:.1f} {xl - 30:.1f},{tg_bot - 40:.1f} "
-            f"{xl + 14:.1f},{tg_bot - 24:.1f}", "f dsh")
-    f.text(xl - 23, (tg_top + tg_bot) / 2 + 8, spec.get("recycle_label", "recycle"), "lab vert halo", "middle",
-           late=True)
+    f.group(xl - 10, tg_top, wl + 20, tg_bot - tg_top + 4, spec.get("trunk_label", "trunk · once per target"),
+            spec.get("recycle"), rep_cls="rep ink", rep_left=True, label_dy=24)
+    # recycling arrow on the left edge, where the trunk is recycled at all
+    if spec.get("recycle"):
+        f.curve(f"M{xl + 4:.1f},{tg_top + 40:.1f} C{xl - 30:.1f},{tg_top + 56:.1f} {xl - 30:.1f},{tg_bot - 40:.1f} "
+                f"{xl + 14:.1f},{tg_bot - 24:.1f}", "f dsh")
+        f.text(xl - 23, (tg_top + tg_bot) / 2 + 8, spec.get("recycle_label", "recycle"), "lab vert halo", "middle",
+               late=True)
     # trunk output
     yc = tg_top - 30
     lab = spec.get("c_label", "c = (s_i, z_{ij})")
@@ -722,16 +724,29 @@ def _cofold(f, spec):
     xin = xr + wr + 2
     f.arrow([(xr + wr - 10, yk + hk / 2), (xin, yk + hk / 2), (xin, yt_ + ht_ / 2), (xr + wr - 10, yt_ + ht_ / 2)],
             "w dsh")
-    # output + confidence on top
+    # output, and the confidence head where the model has one
     yt = min(yc - 11, dg_top - 9) - 196
+    xh = spec.get("xhat", ("structure x̂", "S samples"))
+    out = spec.get("out", ("S structures + confidence", "pLDDT · PAE · pTM"))
     f.arrow([(ex_d, y_den_top), (ex_d, yt + 140)])
-    f.box(xr, yt + 104, wr, 36, "structure x̂", "S samples", role="io", key="xhat")
-    f.box(xl, yt + 96, wl, 52, spec["conf"][0], spec["conf"][1], role="pair", diff="conf" in d, key="conf")
-    f.arrow([(ex_t, yc - 11), (ex_t, yt + 148)])
-    f.arrow([(xr, yt + 122), (xl + wl, yt + 122)])
-    f.box(150, yt + 14, 220, 40, "S structures + confidence", "pLDDT · PAE · pTM", role="io", key="out")
-    f.arrow([(cl, yt + 96), (cl, yt + 34), (150, yt + 34)])
+    f.box(xr, yt + 104, wr, 36, xh[0], xh[1], role="io", key="xhat")
+    if spec.get("conf"):
+        f.box(xl, yt + 96, wl, 52, spec["conf"][0], spec["conf"][1], role="pair", diff="conf" in d, key="conf")
+        f.arrow([(ex_t, yc - 11), (ex_t, yt + 148)])
+        f.arrow([(xr, yt + 122), (xl + wl, yt + 122)])
+    f.box(150, yt + 14, 220, 40, out[0], out[1], role="io", key="out")
+    if spec.get("conf"):
+        f.arrow([(cl, yt + 96), (cl, yt + 34), (150, yt + 34)])
     f.arrow([(cr, yt + 104), (cr, yt + 34), (370, yt + 34)])
+    # where the trunk is this short, say what the left column would hold in AF3 rather than
+    # leaving the space blank
+    if spec.get("absent"):
+        label, items = spec["absent"]
+        ay = yt + 70
+        ah = min(tg_top - 14, yc - 24) - ay   # stop short of the trunk frame and the c chip
+        f.group(xl - 10, ay, wl + 20, ah, label, cls="grp")
+        for i, it in enumerate(items):
+            f.text(cl, ay + ah / 2 - (len(items) - 1) * 9 + i * 18, it, "lab")
 
 
 AF3_TRUNK_PRE = [("input embedder", "atoms → tokens · 3 blocks", "embed", "emb")]
@@ -809,6 +824,30 @@ def draw_esmfold2(mid):
                           diff={"lm", "msa", "pair", "cond", "aenc", "tok", "conf"},
                           bus_label="c: no trunk single, only z",
                           step_label="x̂ → next x · Kabsch · from σ = 256 Å"))
+
+
+def draw_rfd3(mid):
+    """The same two columns as AF3, with the trunk cut down to two layers: the left column is
+    nearly empty, which is the point of the card."""
+    f = Fig(mid, 1000, crop=True)
+    trunk_pre = [("atomisation", "4 + 10 atoms per residue", "embed", "atomise"),
+                 ("input embedder", "atoms → tokens", "embed", "emb")]
+    trunk = [("Pairformer", "2 layers · no triangle updates", "pair", "pf")]
+    diff = [("conditioning", "motif atoms sit in the noise cloud\ns ⊕ Fourier(σ) · CFG γ_{CFG}", "cond", "cond"),
+            ("downsample · atom encoder", "sparse: geometric neighbours\ncross-attention atoms → tokens",
+             "attn", "aenc"),
+            ("token transformer", "sparse attention over tokens", "attn", "tok"),
+            ("upsample · atom decoder", "tokens modulate atoms\n→ coordinate update", "attn", "adec")]
+    return cofold(f, dict(trunk_pre=trunk_pre, trunk=trunk, diffusion=diff,
+                          input="design conditions", input_sub="motif atoms · ligands · symmetry",
+                          recycle=None, trunk_label="conditioning trunk · once per target",
+                          steps="× 100 steps · 168 M", conf=None,
+                          xhat=("designed structure x̂", "all atoms, backbone + sidechain"),
+                          out=("protein, RNA or DNA design", "sequence from MPNN, or codesigned"),
+                          diff={"input", "atomise", "pf", "cond", "aenc", "tok"},
+                          absent=("what AF3 has here", ["MSA module", "template module", "confidence head"]),
+                          bus_label="c from 2 layers, not 48",
+                          step_label="x̂ → next x · step scale · recycled every step"))
 
 
 def draw_rfdiffusion(mid):
@@ -1014,6 +1053,31 @@ MODELS = [
                 "Atom attention: sliding window of 128 with FlashAttention and 3D RoPE from the reference conformer.",
                 "No trunk single representation enters the denoiser; x is Kabsch-aligned onto x̂ before every step, as in Boltz."],
          vs='AlphaFold 3', draw=draw_esmfold2),
+    dict(id="rfd3", name="RFdiffusion3", year=2026, org="Baker lab, UW", domain="bio",
+         paper="Butcher, Krishna, Mitra et al. · Science 2026",
+         url="https://doi.org/10.1126/science.aeh2982",
+         space="free atoms (backbone + sidechain)",
+         backbone="2-layer Pairformer + AF3-style transformer U-Net",
+         params="168 M trainable", params_m=168,
+         conditioning="motif atoms placed in the noise cloud; classifier-free guidance",
+         objective="x̂ on atom coordinates",
+         steps="100 in Fig. 1A; recycling at every step",
+         novelty="The AF3 denoiser with the trunk cut from 48 Pairformer layers to 2.",
+         notes=["Design, not prediction: the input is design conditions, not a sequence, so the paper argues a much "
+                "lighter conditioning module suffices. 168 M parameters against about 350 M for AF3.",
+                "Triangle multiplicative and triangle attention updates are dropped entirely.",
+                "Sequence-agnostic atomisation: 4 backbone + 10 sidechain atoms per residue (tryptophan is the "
+                "largest canonical sidechain), virtual atoms on Cβ pad the shorter ones, with distinct virtual "
+                "indices for isosteres such as Cys/Ser and the bases C/U; 11–12 backbone + 11 base atoms for "
+                "nucleic acids, 23 at most.",
+                "Attention is distance-gated: only residues and atoms geometrically close in the noise attend to "
+                "each other, which the authors report prevents overfitting and cropping artifacts.",
+                "Recycling moves from the trunk into the sampler: each diffusion step recycles, buying inference "
+                "compute without new parameters.",
+                "Two inference-time knobs trade adherence against diversity: a higher classifier-free guidance "
+                "scale raises motif adherence while lowering codesignability (Fig. 2D), and the step scale sets "
+                "the sampling temperature (fig. S1C)."],
+         vs='AlphaFold 3', draw=draw_rfd3),
 ]
 
 
@@ -1044,7 +1108,15 @@ def main():
                    links=[dict(label=l, url=u) for l, u in det.get("links", [])])
         data.append(row)
     OUT_DATA.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")
-    print(f"wrote {len(MODELS)} drawings to {OUT_SVG.relative_to(ROOT)} and {OUT_DATA.relative_to(ROOT)}")
+    gloss = dict(role={r: hfmt(t) for r, t in ROLE_GLOSS.items()},
+                 key={slug(k): hfmt(t) for k, t in KEY_GLOSS.items()})
+    OUT_GLOSS.write_text(json.dumps(gloss, indent=1, ensure_ascii=False) + "\n")
+    # every block must resolve to some glossary entry, via its key or at least its role
+    missing = {b["role"] for m in data for b in m["blocks"].values()} - set(gloss["role"])
+    if missing:
+        print(f"  warning: no glossary for role(s) {sorted(missing)}", file=sys.stderr)
+    print(f"wrote {len(MODELS)} drawings to {OUT_SVG.relative_to(ROOT)}, {OUT_DATA.relative_to(ROOT)} "
+          f"and {OUT_GLOSS.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
