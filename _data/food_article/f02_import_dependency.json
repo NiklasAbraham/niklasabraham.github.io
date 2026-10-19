@@ -1,0 +1,23 @@
+{
+ "label": "Cereal import dependency",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "How much of a country's grain comes from abroad",
+  "main_latex": "\\mathrm{IDR} = \\frac{M}{P + M - X + \\Delta S}",
+  "steps": [
+   {
+    "latex": "P + M - X + \\Delta S",
+    "explanation": "Domestic supply: what the country grew (P), plus what it bought (M), minus what it sold (X), plus what it took out of stocks (ΔS). This is the grain that is available inside the borders as food, feed, seed, industrial input or waste."
+   },
+   {
+    "latex": "M",
+    "explanation": "Cereal imports in tonnes, wheat, rice, maize, barley and the rest taken together, flour and other products in grain equivalent."
+   },
+   {
+    "latex": "\\text{Egypt: } \\tfrac{17.1}{42.0} \\approx 41\\,\\%, \\qquad \\text{India: } \\tfrac{1.0}{335.6} \\approx 0.3\\,\\%, \\qquad \\text{Netherlands: } \\tfrac{24.8}{19.3} \\approx 129\\,\\%",
+    "explanation": "Egypt buys four tonnes in every ten it uses. India buys almost none. The Netherlands buys more than it uses, because grain is landed at Rotterdam and leaves again: the ratio can pass 100 % for a country that is a port."
+   }
+  ]
+ }
+}

@@ -1,0 +1,11 @@
+fetch cofog_S13.csv
+fetch soo_S13.csv
+fetch cofog_S1321.csv
+fetch soo_S1321.csv
+fetch cofog_S1311.csv
+fetch soo_S1311.csv
+fetch fm.csv
+fetch weo.csv
+fetch oecd11.csv
+fetch wb_MS.MIL.XPND.GD.ZS.json
+fetch wb_MS.MIL.XPND.CD.json

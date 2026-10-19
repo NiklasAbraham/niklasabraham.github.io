@@ -1,0 +1,27 @@
+{
+ "label": "Share of the harvest that crosses a border",
+ "type": "formula",
+ "spec": {
+  "type": "formula",
+  "title": "How much of a crop is traded",
+  "main_latex": "s_c = \\frac{\\sum_{i \\neq j} q_{c,\\,i \\to j}}{P_c}",
+  "steps": [
+   {
+    "latex": "q_{c,\\,i \\to j}",
+    "explanation": "Tonnes of commodity c that country i sold to country j in 2023. Every trade is reported twice, by the seller as an export and by the buyer as an import. Here the buyer's figure is used, and the seller's where the buyer reports nothing for that pair."
+   },
+   {
+    "latex": "\\sum_{i \\neq j} q_{c,\\,i \\to j}",
+    "explanation": "All those flows added up: the tonnes that crossed at least one border. A shipment that is bought and sold on is counted again each time it crosses one, so the sum can exceed what left its country of origin."
+   },
+   {
+    "latex": "P_c",
+    "explanation": "World production of the same product in the same year, from FAOSTAT's production tables. The ratio only means something when the traded good and the harvested good are the same thing (wheat grain against wheat grain), which is why milled rice, boneless beef and refined sugar have no share here."
+   },
+   {
+    "latex": "\\text{wheat: } \\tfrac{198\\ \\text{Mt}}{795\\ \\text{Mt}} \\approx 25\\,\\%, \\qquad \\text{coffee: } \\tfrac{7.5\\ \\text{Mt}}{11.1\\ \\text{Mt}} \\approx 67\\,\\%, \\qquad \\text{potatoes: } \\tfrac{17.8\\ \\text{Mt}}{387\\ \\text{Mt}} \\approx 5\\,\\%",
+    "explanation": "A quarter of the wheat harvest changes country, two thirds of the green coffee and one potato in twenty."
+   }
+  ]
+ }
+}

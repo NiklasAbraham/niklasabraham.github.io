@@ -1,0 +1,2 @@
+{%- comment -%} A source tag: {% include ai-ref.html k="cnbc-openai" %} renders [CNBC] linking to the entry in the reference list (_data/ai_article/refs.yml). {%- endcomment -%}
+{%- assign r = site.data.ai_article.refs | where: "key", include.k | first -%}<sup class="ai-ref"><a href="#r-{{ include.k }}" title="{{ r.title | escape }}">[{{ r.short | default: include.k }}]</a></sup>

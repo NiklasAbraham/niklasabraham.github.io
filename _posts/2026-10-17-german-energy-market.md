@@ -5,7 +5,7 @@ description: Where Germany's energy comes from, how the electricity market sets 
 date: 2026-10-17
 tags: [energy, electricity-markets, data]
 categories: [long-read]
-read_time: 45 # the word count would include the inlined map SVGs
+read_time: 50 # the word count would include the inlined map SVGs
 ---
 {%- assign media = '/assets/energy-article/media/' | relative_url -%}
 <article class="da en" markdown="1" data-stations="off" data-brand="Germany's energy market" data-brand-sub="from the well to the socket · a long read" data-contact="https://www.linkedin.com/in/niklas-abraham-05983b247">
@@ -13,15 +13,15 @@ read_time: 45 # the word count would include the inlined map SVGs
 <p class="da-eyebrow">Blog · Long read · data, maps and animations</p>
 <h1 class="da-title">How Germany's energy market works</h1>
 <p class="da-lede">Where the energy comes from, how a price is found for every quarter-hour, which laws decide who pays what, and how supply, demand and price move within a day, a week, a year and a decade — told with eleven years of hourly data.</p>
-<p class="da-meta">Niklas Abraham · 17 October 2026 · about 45 minutes · 5 animations, 3 derivations, 4 maps, 19 data figures, 1 explorer</p>
+<p class="da-meta">Niklas Abraham · 17 October 2026 · about 50 minutes · 5 animations, 3 derivations, 4 maps, 7 3D scenes, 19 data figures, 1 explorer</p>
 
-<div class="da-note" markdown="1">
-**A note before you start.** I am not an energy economist; I wrote this to understand a market I pay into every month. The time series are my own analysis of public data from [Energy-Charts](https://www.energy-charts.info) (Fraunhofer ISE, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), from ENTSO-E, EEX and the transmission operators), aggregated and plotted by me; figures from reports are quoted with their source. If you find a mistake, [message me on LinkedIn](https://www.linkedin.com/in/niklas-abraham-05983b247) and I will fix it. Nothing here is investment, tax or energy-procurement advice; the data run to 16 October 2026.
+<div class="da-note ai-note" markdown="1">
+**This article was written by an AI.** I am curious about how the German energy market works, so I asked Claude (an AI model from Anthropic) to research, write and code this article to help me learn more. The time series come from [Energy-Charts](https://www.energy-charts.info) (Fraunhofer ISE, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), from ENTSO-E, EEX and the transmission operators) and are plotted by script; figures from reports are quoted with their source. The prose may contain mistakes, so check what you rely on at its source. If you find one, [message me on LinkedIn](https://www.linkedin.com/in/niklas-abraham-05983b247). Nothing here is investment, tax or energy-procurement advice; the data run to 16 October 2026.
 </div>
 
 **The question.** Germany burns oil in its cars, gas in its boilers and factories, and makes about three fifths of its public electricity from wind, sun, water and biomass. Electricity is only a fifth of final energy, but it is where the energy transition happens first, where prices are set every quarter-hour, and where the swings are largest. So this long read starts with the whole energy system and then spends most of its time on electricity: how the market works, who regulates it, and what eleven years of hourly data say about how it moves.
 
-1. **Where the energy comes from.** Primary energy, imports of gas and oil, the electricity mix and where in the country it is produced.
+1. **Where the energy comes from.** Primary energy, imports of gas and oil, the electricity mix, where in the country it is produced, and the grid from the power plant to your socket.
 2. **How the electricity market works.** The merit order, the sequence of markets from futures to balancing, Europe's coupled bidding zones, frequency control and redispatch.
 3. **How it moves.** Fluctuations within a day, within a quarter-hour, a week, a month, a year and a decade — with an explorer for any day since 2015.
 4. **The rules.** The laws behind the market, how renewables are paid, and what a household's 37 cents per kWh consist of.
@@ -35,6 +35,7 @@ read_time: 45 # the word count would include the inlined map SVGs
 <li><a href="#mix">The electricity mix, 2015 to 2025</a></li>
 <li><a href="#capacity">Capacity: what is installed</a></li>
 <li><a href="#where">Where the power is made</a></li>
+<li><a href="#grid">From the plant to your socket</a></li>
 <li><a href="#merit">The merit order</a></li>
 <li><a href="#timeline">From futures to balancing</a></li>
 <li><a href="#europe">One market across Europe</a></li>
@@ -118,14 +119,70 @@ Wind sits in the flat, windy north: Lower Saxony alone has 14.0 GW, Schleswig-Ho
 
 {% include en-map.html file="map_grid.svg" title="The grid: four operators, the north–south corridors, the coal regions" wide=true caption="The four transmission system operators (TSOs) and their control areas, shown by state; the real borders cut through Bavaria, Hesse, Lower Saxony and Baden-Württemberg. HVDC lines: end points approximate, commissioning dates from the Bundesnetzagentur and the TSOs (SuedOstLink 2027, SuedLink end of 2028). The offshore clusters are schematic." %}
 
-Four companies run the extra-high-voltage grid, each in its own control area: **TenneT** (from the North Sea coast to Bavaria), **50Hertz** (the east and Hamburg), **Amprion** (the west) and **TransnetBW** (Baden-Württemberg). Below them, several hundred distribution system operators run the local grids, from city utilities to regional companies. The planned high-voltage direct-current lines — **SuedLink** (2 × 2 GW from Schleswig-Holstein to Bavaria and Baden-Württemberg), **SuedOstLink** (2 GW from Saxony-Anhalt to Bavaria), **A-Nord** and **Ultranet** — are the backbone that should carry northern wind south. They are late; the consequences are in [section 10](#redispatch).
+Four companies run the extra-high-voltage grid, each in its own control area: **TenneT** (from the North Sea coast to Bavaria), **50Hertz** (the east and Hamburg), **Amprion** (the west) and **TransnetBW** (Baden-Württemberg). Below them, several hundred distribution system operators run the local grids, from city utilities to regional companies. The planned high-voltage direct-current lines — **SuedLink** (2 × 2 GW from Schleswig-Holstein to Bavaria and Baden-Württemberg), **SuedOstLink** (2 GW from Saxony-Anhalt to Bavaria), **A-Nord** and **Ultranet** — are the backbone that should carry northern wind south. They are late; the consequences are in [section 11](#redispatch).
+
+{: .da-bridge}
+That is the map of who is where. The next section follows a single kilowatt-hour along it, from the generator to your socket, through four voltage levels and three transformers.
+
+<h2 id="grid"><span class="num">06</span>From the plant to your socket</h2>
+
+Electricity does not travel at one voltage. Between a power plant and a wall socket it is transformed up once and down three times, and each step is a place with its own hardware, its own operator and its own line in the network charges. The renderings below are schematic, drawn by me in Blender: nothing is to scale between scenes, the cable trench is deeper than a real one so that you can see into it, and the colour marks the voltage level (violet 380 kV, blue 110 kV, green 20 kV, orange 0.4 kV).
+
+{% include en-fig.html src="grid_overview.webp" kind="3D" title="One kilowatt-hour, from the generator to the socket" wide=true caption="Schematic, not to scale. A thermal plant steps its generator voltage up to 380 kV; the transmission grid carries it across the country; two substations step it down to 110 kV and 20 kV; the village station makes it 0.4 kV. Wind and solar parks feed in at 110 kV and 20 kV, not at the top." %}
+
+**Why so many voltages?** A three-phase line carrying power $$P$$ at voltage $$U$$ (between phases) and power factor $$\cos\varphi$$ carries the current
+
+$$I = \frac{P}{\sqrt{3}\,U\cos\varphi}$$
+
+and loses $$3 I^2 R$$ as heat in its resistance $$R$$. Dividing the loss by the power transported gives
+
+$$\frac{P_{\text{loss}}}{P} = \frac{R\,P}{U^2 \cos^2\varphi}$$
+
+For the same line and the same power, the relative loss falls with the **square** of the voltage. Take 1 GW over 100 km of a four-conductor 380 kV phase, whose resistance is roughly $$0.03\ \Omega/\text{km}$$: the current is about 1.5 kA and the loss about 2 % of the power. Send the same gigawatt through the same conductors at 20 kV and the loss is $$(380/20)^2 = 361$$ times larger, seven times the power transported, which is another way of saying that it cannot be done. Higher voltage is cheaper to transport, but it needs bigger insulators, wider clearances and larger substations. So the grid sits at the highest voltage that the distance and the amount of power justify, and uses a **transformer** to change voltage, which only works with alternating current. (Long direct-current lines such as SuedLink avoid some of AC's limits and need converter stations at both ends instead.)
+
+Technicians count **seven grid levels**: the four voltage levels and the three transformer levels between them. Network charges are set per level, which is why they appear again in [the household bill](#bill).
+
+| Level | Voltage | Run by | Carries | Circuit length (2017) |
+|---|---|---|---|---|
+| <span class="lvl lvl-ehv"></span>**Extra-high voltage** (Höchstspannung) | 380 kV, 220 kV in older parts | the four transmission operators | bulk transport over hundreds of kilometres; large plants, offshore wind, interconnectors to neighbours | 36,675 km |
+| <span class="lvl lvl-hv"></span>**High voltage** (Hochspannung) | 110 kV | regional distribution operators | a region: cities, large industry, wind and solar parks | 86,121 km |
+| <span class="lvl lvl-mv"></span>**Medium voltage** (Mittelspannung) | 10–30 kV, mostly 20 kV | distribution operators, often a city utility | a town or a group of villages; commercial and mid-size renewable plants | 521,095 km |
+| <span class="lvl lvl-lv"></span>**Low voltage** (Niederspannung) | 400 V between phases, 230 V to neutral | distribution operators | the street: households, shops, rooftop solar | 1,193,604 km |
+
+The lengths are the BDEW's circuit lengths as of 2017, as collected by [stromauskunft.de](#sources): 1.84 million km in total, of which more than 82 % is buried cable. Almost all of the length is in the two lowest levels; the two highest, which carry the bulk of the energy, are about 7 % of it.
+
+**The plant: generator voltage.** A generator cannot make 380 kV: the winding of a rotating machine is limited to a few tens of kilovolts by its insulation, so large units produce between about 10 and 27 kV. A short busbar duct carries the full current to the step-up transformer next to the turbine hall, which lifts it to 380 kV. Large transformers are among the most efficient machines there are (well above 99 %), and they are why the plant's output can leave the site on thin conductors instead of fat busbars.
+
+{% include en-fig.html src="grid_plant.webp" kind="3D" title="The plant: turbine, generator, step-up transformer" wide=true caption="A thermal power plant with the turbine hall cut open. The steam turbine drives the generator (orange); a busbar duct at generator voltage (10–27 kV) leads to the step-up transformer, whose three bushings feed the 380 kV line leaving through the first pylon. The same picture holds for a nuclear or a gas plant; a wind turbine or a solar park has a transformer too, at a lower level." %}
+
+**The transmission grid: 380 kV.** Out of the plant the power travels on a lattice pylon with two circuits, each of three phases. Each phase is a **bundle** of two to four conductors: splitting the current over several wires keeps the electric field at their surface below the point where the air starts to ionise (corona losses and noise), and it lowers the line's impedance. A circuit of this kind is rated for roughly 2–3 kA, which is 1.3–2 GVA. The conductors hang from **insulator strings** several metres long, made of glass or porcelain discs; the thinner **earth wire** on the top of the pylon takes lightning strikes. This level is run by the four transmission operators of [the map above](#where), and it is the level of the interconnectors to the neighbours.
+
+{% include en-fig.html src="grid_line.webp" kind="3D" title="A 380 kV line" wide=true caption="Four lattice pylons of a 380 kV line: two circuits of three phases, each phase a bundle of conductors, an earth wire on top. Vertical scale as drawn, spans shortened for the picture." %}
+
+**The substation: 380 to 110 kV.** Lines end in substations, which are the grid's junctions. Inside the fence sit the busbars, to which each line connects through a **circuit breaker** (which can interrupt a fault current, in a few cycles of the 50 Hz) and **disconnectors** (which isolate a section so that people can work on it), and the large transformers, rated at a few hundred MVA each. There are always at least two, because the grid is planned to the **(n−1) rule**: any single line or transformer may fail without any other one being overloaded. A substation is also where congestion shows up in [redispatch](#redispatch).
+
+{% include en-fig.html src="grid_sub380.webp" kind="3D" title="A substation: 380 kV in, 110 kV out" wide=true caption="The 380 kV line enters on the left over the large pylon and reaches the 380 kV busbars and bays; two 380/110 kV transformers connect them to the 110 kV busbar, from which a lighter mast carries the power on. The control building holds protection and remote control." %}
+
+**The regional grid: 110 kV to 20 kV.** The 110 kV level is the regional grid of the distribution operators. At its end sits another substation: a 110/20 kV transformer and the **switchgear** that divides the 20 kV into a dozen **feeders**, one per village, farm cluster or industrial plant, laid as buried cable. This is also where most **wind and solar parks** connect: the great majority of renewable capacity feeds into the distribution grid, at 110 kV, 20 kV or 0.4 kV, rather than the transmission grid, with offshore wind as the main exception. So the substation is a two-way street. On a sunny noon the village is a net producer, and power flows from 0.4 kV *up* through the 20 kV and 110 kV levels to the transmission grid, the reverse of the direction for which the grids were built ([section 13](#day)).
+
+{% include en-fig.html src="grid_sub110.webp" kind="3D" title="A 110/20 kV substation with wind and solar" wide=true caption="The 110 kV line arrives on the mast at the left; two 110/20 kV transformers feed the 20 kV switchgear, from which buried cables leave towards villages. The wind turbine and the solar park at the right connect to the same 20 kV feeders." %}
+
+**The village: 20 kV to 0.4 kV.** The last transformer sits in the village's **transformer station**, a small concrete building (or a box on a pole in the countryside). Germany has about 600,000 of them ([BDEW and ZVEI via pv magazine 2026](#sources)). Each holds a transformer of a few hundred kVA, enough for some tens to a couple of hundred homes. It lowers 20 kV to **400 V between the phases, 230 V between a phase and the neutral** ($$400/\sqrt{3} \approx 231\ \text{V}$$), and four cables, three phases and the neutral, run from it along the street in the same trench as the water pipe or the fibre. The branches to the houses leave from there.
+
+{% include en-fig.html src="grid_village.webp" kind="3D" title="The village: 20 kV in, 0.4 kV out" wide=true caption="The street with its cable trench open (and drawn deeper than it is). The thick green cable is the 20 kV feeder, the three phases in one sheath. It rises into the transformer station, which sends the 0.4 kV cable (orange) along the street; each house gets a branch from it." %}
+
+**The house.** The service cable ends at the **house connection box** (Hausanschlusskasten) in the cellar or a niche at the wall: that is where the distribution operator's property ends. Behind it come the **meter**, the **fuses** (one miniature circuit breaker per circuit, typically 16 A, which is $$16\ \text{A} \times 230\ \text{V} \approx 3.7\ \text{kW}$$ per circuit) and the cables in the walls to the **sockets**. The 50 Hz at the socket is the same 50 Hz as in [section 10](#frequency): every generator and every motor in continental Europe runs in step with it, so a kettle in Freiburg is, in a small way, a brake on a turbine in Poland.
+
+{% include en-fig.html src="grid_house.webp" kind="3D" title="The last metres: from the street to the lamp" wide=true caption="A house cut open. The orange service cable comes up from the street into the connection box on the wall; the meter and the fuses are behind it; the cable in the wall ends at the socket, to which the lamp is plugged in." %}
+
+The market of the following sections knows none of this: it sees one price for the whole of Germany, whether the power is made at the north coast or consumed behind a village transformer in Bavaria. What the picture shows is why that is a simplification: a 380 kV line, a 110 kV ring and a 20 kV feeder can each be full separately.
 
 {: .da-bridge}
 With the physical system in place, the question is how it is coordinated: who decides which plant runs, every quarter-hour, and at what price.
 
 <p class="da-part">Part II<strong>How the electricity market works</strong></p>
 
-<h2 id="merit"><span class="num">06</span>The merit order</h2>
+<h2 id="merit"><span class="num">07</span>The merit order</h2>
 
 Electricity is traded like other commodities, with one twist: it must be produced the moment it is consumed. The central market is the **day-ahead auction**. Every day at noon, producers offer power for each quarter-hour of the next day, buyers bid for it, and an algorithm finds the price at which supply meets demand. **Every accepted seller gets the same price**, the price of the most expensive offer still needed (uniform pricing, "pay-as-cleared").
 
@@ -145,7 +202,7 @@ $$L^{\text{res}}_t = L_t - W_t - S_t$$
 
 Why do German prices often sit near 90–100 EUR/MWh? Because at 2025 fuel and carbon prices, combined-cycle gas, hard coal and lignite all have a marginal cost in that range, as the formula card shows. Lignite, once the cheapest thermal fuel, has become one of the most expensive per MWh, because it emits the most carbon.
 
-<h2 id="timeline"><span class="num">07</span>From futures to balancing</h2>
+<h2 id="timeline"><span class="num">08</span>From futures to balancing</h2>
 
 The day-ahead auction is one stage in a sequence that starts years before delivery and ends after it.
 
@@ -157,7 +214,7 @@ The day-ahead auction is one stage in a sequence that starts years before delive
 - **Balancing**: whatever remains is balanced by the transmission operators with reserves bought in advance ([next sections](#frequency)).
 - **Imbalance settlement**: every supplier, trader and producer belongs to a **balancing group** (Bilanzkreis) that must be in balance each quarter-hour. Deviations are charged at the imbalance price (reBAP), which can be far above the spot price. That penalty is what makes everyone forecast carefully.
 
-<h2 id="europe"><span class="num">08</span>One market across Europe</h2>
+<h2 id="europe"><span class="num">09</span>One market across Europe</h2>
 
 Germany and Luxembourg form one **bidding zone**: one price for the whole area, no matter where in Germany a plant or consumer is. Until 30 September 2018 Austria was in the zone too; it was split off because flows to Austria overloaded the grid. Bidding zones are linked by interconnectors, and the day-ahead auction computes all European prices at once. In central western Europe it does so with a **flow-based** model of the grid (Core flow-based market coupling, since June 2022): power flows from cheap to expensive zones until the lines are full, and prices differ only where lines are congested.
 
@@ -165,9 +222,9 @@ Germany and Luxembourg form one **bidding zone**: one price for the whole area, 
 
 The pattern follows the generation mix. Hydro-rich Norway and Sweden and nuclear France were cheap in 2025 (France 61 EUR/MWh); Germany (89) sat in the middle; Poland, Italy and southeastern Europe, which burn more coal and gas or import more, were dearer. Power flows accordingly: in 2025 Germany imported 20.0 TWh net from France, 7.7 from Denmark, 7.0 from Norway and 5.9 from the Netherlands, and exported 9.2 TWh to Poland, 7.6 to Austria and 5.3 to Czechia. Over the year the net physical import was 18 TWh, about 4 % of load.
 
-Germany's single zone is contested. In 2025 a European review by the transmission operators examined splitting it into two to five zones; ACER, the EU regulators' agency, estimated the gains of a split at 450–540 million EUR a year. Germany informed the European Commission in late October 2025 that it would keep one zone ([ACER 2025; oenergetice.cz 2025](#sources)). Why that matters is the subject of [section 10](#redispatch).
+Germany's single zone is contested. In 2025 a European review by the transmission operators examined splitting it into two to five zones; ACER, the EU regulators' agency, estimated the gains of a split at 450–540 million EUR a year. Germany informed the European Commission in late October 2025 that it would keep one zone ([ACER 2025; oenergetice.cz 2025](#sources)). Why that matters is the subject of [section 11](#redispatch).
 
-<h2 id="frequency"><span class="num">09</span>50 hertz: keeping the grid in balance</h2>
+<h2 id="frequency"><span class="num">10</span>50 hertz: keeping the grid in balance</h2>
 
 Supply and demand must match every second, not just every quarter-hour. The signal is the grid frequency, 50 Hz across Continental Europe. If generation falls short, the spinning machines slow down and the frequency drops; if there is too much, it rises. The transmission operators hold three kinds of **balancing reserve**, bought in daily auctions on regelleistung.net:
 
@@ -185,7 +242,7 @@ The frequency is never exactly 50 Hz. Real 1-second measurements show a jagged s
 
 The sawtooth on the right is made by the market. Schedules change in steps at the full hour (and quarter-hours), while consumption changes smoothly. When many power plants ramp to a new schedule at the same moment, generation and load briefly diverge, and the frequency jumps. With 15-minute day-ahead products since October 2025 the steps get smaller, which is one of the reasons for the change.
 
-<h2 id="redispatch"><span class="num">10</span>Redispatch: one price, one country, too few lines</h2>
+<h2 id="redispatch"><span class="num">11</span>Redispatch: one price, one country, too few lines</h2>
 
 The single bidding zone assumes power can flow freely within Germany. It cannot. On a windy day the market schedules cheap northern wind to serve southern demand, but the north–south lines are full. The transmission operators then intervene after the market has cleared: they **curtail** plants in front of the bottleneck and **start** plants behind it, and pay both for it. This is **redispatch**.
 
@@ -198,7 +255,7 @@ That is the machinery. The rest of this text uses it to read eleven years of hou
 
 <p class="da-part">Part III<strong>How it moves</strong></p>
 
-<h2 id="explorer"><span class="num">11</span>Explore any day since 2015</h2>
+<h2 id="explorer"><span class="num">12</span>Explore any day since 2015</h2>
 
 Pick a date, a day, a week or four weeks, and see what was produced, what was consumed and what it cost. Hover for the values at any hour; the presets jump to the days discussed below.
 
@@ -208,7 +265,7 @@ Pick a date, a day, a week or four weeks, and see what was produced, what was co
 <figcaption>Hourly means of Energy-Charts public net generation by source (stacked), load (black) and day-ahead price (red). Hatched grey on top: net imports. Times are German local time. Data from January 2015 to 16 October 2026; each year loads when you first look at it (about 400 KB).</figcaption>
 </figure>
 
-<h2 id="day"><span class="num">12</span>Within a day</h2>
+<h2 id="day"><span class="num">13</span>Within a day</h2>
 
 The daily cycle has two drivers: people (demand rises at 6 in the morning, dips at lunch, peaks in the early evening) and the sun.
 
@@ -224,7 +281,7 @@ The shape has changed fast. Normalising each year's hourly prices by the yearly 
 
 In 2015 the cheapest hours were at night, when demand was low. Today they are at noon. The average spread between a day's most and least expensive hour was **124 EUR/MWh in 2025, against 30 in 2019**. That spread is the business case for batteries, which buy at noon and sell in the evening; installed battery power reached 17 GW (26 GWh) at the end of 2025, most of it home storage ([Energy-Charts](#sources)).
 
-<h2 id="quarter"><span class="num">13</span>Within an hour: the quarter-hour</h2>
+<h2 id="quarter"><span class="num">14</span>Within an hour: the quarter-hour</h2>
 
 Since 1 October 2025 the day-ahead auction prices quarter-hours. Within each hour the price now follows the ramp of the sun.
 
@@ -232,13 +289,13 @@ Since 1 October 2025 the day-ahead auction prices quarter-hours. Within each hou
 
 Between 9 and 12 h, while solar output rises, the first quarter-hour of each hour is on average about 15 EUR/MWh above the hour's mean and the last about 14 below. Between 16 and 19 h, as solar fades, the pattern reverses: the last quarter-hour is 20 EUR/MWh dearer than the hour's mean. With hourly products, a plant or a battery could not see this; now it is paid for following it.
 
-<h2 id="week"><span class="num">14</span>Within a week</h2>
+<h2 id="week"><span class="num">15</span>Within a week</h2>
 
 {% include en-fig.html src="week_profile.webp" title="The average week, 2025" caption="Hourly means by hour of the week, 2025 (Energy-Charts). Black: load (left axis); dashed red: price (right axis); shaded: wind plus solar." %}
 
 Factories and offices make the week. Average load was 55.8 GW on weekdays and 45.4 GW on Sundays, 19 % less. Wind and sun do not know the day of the week, so on weekends the same renewable output meets lower demand: Sunday prices between 12 and 15 h averaged 18 EUR/MWh in 2025, and most negative prices fall on weekends and public holidays.
 
-<h2 id="weeks"><span class="num">15</span>Within a month: weather</h2>
+<h2 id="weeks"><span class="num">16</span>Within a month: weather</h2>
 
 On the scale of days to weeks, weather dominates. A high-pressure system in winter can bring days of fog and calm — the **Dunkelflaute**, "dark doldrums" — when wind and solar together produce almost nothing. November and December 2024 had two textbook cases.
 
@@ -250,7 +307,7 @@ From 2 to 8 November 2024, wind output stayed below a few GW for days; the price
 
 Wind output in 2025 averaged 15 GW but was below 5 GW in 18 % of all hours and above 40 GW in only 207 hours; its maximum was 51 GW on 26 October 2025. Day by day, wind plus solar covered between **7 % of load (8 November 2025) and 98 % (26 October 2025)**. Any system built on these sources needs something for the low end: storage, imports, flexible demand, or plants that run a few hundred hours a year.
 
-<h2 id="year"><span class="num">16</span>Within a year</h2>
+<h2 id="year"><span class="num">17</span>Within a year</h2>
 
 {% include en-fig.html src="months_2025.webp" title="Monthly generation by source, 2025" caption="Monthly sums, 2025 (Energy-Charts). Black: load." %}
 
@@ -260,7 +317,7 @@ Solar and wind are seasonal complements: solar produced 8–10 TWh a month from 
 
 In 2019 the year is a uniform 30–50 EUR/MWh. In 2022 it is dark from spring to autumn, the gas crisis. In 2025 a pale window opens in the middle of every spring and summer day: solar hours at or below zero, framed by expensive mornings and evenings.
 
-<h2 id="decade"><span class="num">17</span>Across the decade</h2>
+<h2 id="decade"><span class="num">18</span>Across the decade</h2>
 
 {% include en-fig.html src="monthly_price.webp" title="Monthly and yearly day-ahead prices, January 2015 to October 2026" wide=true caption="Monthly mean (step) and yearly mean (horizontal bars, labelled) of the day-ahead price, Germany(-Austria)-Luxembourg (Energy-Charts). 2026: January to 16 October." %}
 
@@ -268,7 +325,7 @@ From 2015 to 2020 the price averaged 29–44 EUR/MWh. In autumn 2021 European ga
 
 The merit order explains why one fuel moves the whole price: in most hours a gas plant is the marginal producer, so the gas price is passed through to every MWh, including wind and solar.
 
-<h2 id="negative"><span class="num">18</span>Negative prices and cannibalisation</h2>
+<h2 id="negative"><span class="num">19</span>Negative prices and cannibalisation</h2>
 
 A negative price means producers pay to deliver. It happens when inflexible generation — must-run combined heat and power plants, plants providing grid services, and, until recently, renewables paid per MWh regardless of price — exceeds demand plus export capacity.
 
@@ -286,14 +343,14 @@ In 2018 solar still earned 99 % of the average price. In 2025 it earned **52 %**
 
 {% include en-fig.html src="duration_curves.webp" title="Residual load duration curves, 2015, 2020, 2025" caption="Each year's hourly residual load (load minus wind and solar) sorted from the highest to the lowest hour (Energy-Charts). Dashed: the load itself in 2025." %}
 
-The duration curve summarises the decade. The peak of residual load barely moved (75 GW in 2015, 68 GW in 2025): on a calm winter evening almost the whole demand must still come from controllable plants or imports. But the curve sank everywhere else, and in 2025 it dipped below zero. Germany needs about the same amount of firm capacity as ten years ago, running for far fewer hours — which is why the government is now paying for new gas plants ([section 22](#outlook)).
+The duration curve summarises the decade. The peak of residual load barely moved (75 GW in 2015, 68 GW in 2025): on a calm winter evening almost the whole demand must still come from controllable plants or imports. But the curve sank everywhere else, and in 2025 it dipped below zero. Germany needs about the same amount of firm capacity as ten years ago, running for far fewer hours — which is why the government is now paying for new gas plants ([section 23](#outlook)).
 
 {: .da-bridge}
 Who pays for all this, and under which rules, is decided by a dense body of law.
 
 <p class="da-part">Part IV<strong>The rules</strong></p>
 
-<h2 id="laws"><span class="num">19</span>The laws</h2>
+<h2 id="laws"><span class="num">20</span>The laws</h2>
 
 The German electricity market rests on a handful of federal laws and a growing layer of EU regulation.
 
@@ -308,20 +365,20 @@ The German electricity market rests on a handful of federal laws and a growing l
 | **EU Emissions Trading (ETS)**, and the national **BEHG** | 2005; 2021 | A cap and price for carbon from power plants and industry (about 74 EUR/t in 2025), and a national carbon price for heating and transport fuels (55–65 EUR/t corridor in 2026) |
 | **Stromsteuergesetz** | 1999 | Electricity tax: 2.05 ct/kWh for households; since 2026 the EU minimum of 0.05 ct/kWh for manufacturing and agriculture |
 | **Messstellenbetriebsgesetz (MsbG)** | 2016, relaunched 2023 | Smart meter rollout, the precondition for time-variable tariffs |
-| **Strom-Versorgungssicherheits- und Kapazitätengesetz (StromVKG)** | July 2026 | Tenders for new controllable capacity, mostly gas plants that must later switch to hydrogen ([section 22](#outlook)) |
+| **Strom-Versorgungssicherheits- und Kapazitätengesetz (StromVKG)** | July 2026 | Tenders for new controllable capacity, mostly gas plants that must later switch to hydrogen ([section 23](#outlook)) |
 | **EU Electricity Market Regulation 2019/943 and the 2024 market design reform** | 2019, 2024 | Market coupling, bidding zones, balancing rules; two-sided contracts for difference for new publicly supported plants |
 
 The **Bundesnetzagentur** in Bonn regulates grids and monitors the market, the **Bundeskartellamt** watches for market power, and **ACER** coordinates the national regulators at EU level.
 
-<h2 id="eeg"><span class="num">20</span>How renewables are paid</h2>
+<h2 id="eeg"><span class="num">21</span>How renewables are paid</h2>
 
 Most new wind and solar plants above 100 kW sell their power on the market through a direct marketer and receive a **sliding market premium** on top, sized in an auction:
 
 {% include en-concept.html id="f02_premium" %}
 
-Two changes made in 2025 respond directly to the negative-price problem of [section 18](#negative). The **Solarspitzengesetz**, in force since 25 February 2025, removes the premium for new plants in every quarter-hour with a negative price (the lost periods are added to the end of the 20-year support) and caps the feed-in of new small rooftop systems without a smart meter. The cost of the premiums, which used to be paid by consumers as the EEG surcharge, has been paid from the federal budget since July 2022; the surcharge is zero.
+Two changes made in 2025 respond directly to the negative-price problem of [section 19](#negative). The **Solarspitzengesetz**, in force since 25 February 2025, removes the premium for new plants in every quarter-hour with a negative price (the lost periods are added to the end of the 20-year support) and caps the feed-in of new small rooftop systems without a smart meter. The cost of the premiums, which used to be paid by consumers as the EEG surcharge, has been paid from the federal budget since July 2022; the surcharge is zero.
 
-<h2 id="bill"><span class="num">21</span>What a household pays for</h2>
+<h2 id="bill"><span class="num">22</span>What a household pays for</h2>
 
 {% include en-fig.html src="household_price.webp" title="The household electricity price, 2026" caption="BDEW Strompreisanalyse, August 2026: average price for a household using 3,500 kWh a year, including the standing charge. 'Procurement & retail' includes the supplier's margin; network charges include metering." %}
 
@@ -331,7 +388,7 @@ The wholesale swings of Part III reach households slowly, because suppliers buy 
 
 <p class="da-part">Part V<strong>Where it is heading</strong></p>
 
-<h2 id="outlook"><span class="num">22</span>2030 and the open questions</h2>
+<h2 id="outlook"><span class="num">23</span>2030 and the open questions</h2>
 
 | | End of 2025 | Target 2030 | Source of target |
 |---|---|---|---|
@@ -351,7 +408,7 @@ Solar is roughly on its path; onshore wind is behind, but approvals hit a record
 
 Germany's electricity system has changed more in the last decade than in the fifty years before. What has not changed is the logic of the market at its centre: one price per quarter-hour, set by the most expensive plant still needed. Everything else — negative prices, Dunkelflaute spikes, the value of a battery, the cost of a missing line — follows from it.
 
-<h2 id="sources"><span class="num">23</span>Sources</h2>
+<h2 id="sources"><span class="num">24</span>Sources</h2>
 
 <div class="da-note" markdown="1">
 **Data.** All time series are from the [Energy-Charts API](https://api.energy-charts.info) of Fraunhofer ISE, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); I aggregated, combined and plotted them, and the figures and explorer data are my processing, not Energy-Charts' originals: public net generation per source and load (15-minute, 2015 to 16 October 2026), day-ahead prices (DE-AT-LU until September 2018, DE-LU since), cross-border physical flows, installed capacity, 1-second grid frequency, and the 2025 prices of 32 European bidding zones. The scripts that download, process and plot them are part of this site's source (`bin/energy_article/`). Maps are drawn with my map kit (Natural Earth, public domain).

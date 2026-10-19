@@ -11,3 +11,6 @@ vendor
 
 bin/energy_article/cache/
 __pycache__/
+bin/budget_article/cache/
+bin/food_article/cache/
+bin/ai_article/cache/

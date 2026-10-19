@@ -20,3 +20,12 @@ plus the shared `concepts.js` and `da-guide.js` (rail; `data-stations="off"`, `d
 
 Numbers taken from reports (AGEB, BNetzA, BDEW, FA Wind und Solar, strom-report/MaStR) are written into the
 scripts next to their source.
+
+## 3D grid scenes (section 06, "From the plant to your socket")
+
+| Script | What it does | Output |
+|---|---|---|
+| `grid3d.py [scenes] [--res WxH] [--samples N]` | Run in Blender (`blender -b --python bin/energy_article/grid3d.py -- plant line sub380 sub110 village house overview`). Procedural isometric dioramas (Cycles, CPU, ~15 s per scene), plus a json of anchor pixel positions | `cache/grid3d/<scene>.png/.json` |
+| `grid3d_label.py [scenes]` | Pills with leader lines at those anchors (Inter; colour = voltage level), written as webp | `assets/energy-article/media/grid_<scene>.webp` |
+
+Not to scale; the cable trench is deeper than a real one. Level colours: 380 kV violet, 110 kV blue, 20 kV teal, 0.4 kV warm (`.lvl-*` in `_sass/_energy_article.scss`).

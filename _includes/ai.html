@@ -1,0 +1,3 @@
+{%- comment -%} An interactive figure of the AI-money long read: kind= (capex|labs|web|commit|curves|ladder|deals|rates|calc|nasdaq|sov), title=, caption=, plus presets: view=, metric=, range=, sel= (read by assets/js/ai-explorer.js) {%- endcomment -%}
+{%- assign base = '/assets/ai-article/' | relative_url -%}
+<figure data-ai="{{ include.kind }}" data-base="{{ base }}" data-title="{{ include.title }}" data-caption="{{ include.caption }}"{% if include.view %} data-view="{{ include.view }}"{% endif %}{% if include.metric %} data-metric="{{ include.metric }}"{% endif %}{% if include.range %} data-range="{{ include.range }}"{% endif %}{% if include.sel %} data-sel="{{ include.sel }}"{% endif %}{% if include.id %} id="{{ include.id }}"{% endif %}></figure>

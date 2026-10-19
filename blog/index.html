@@ -20,6 +20,8 @@ pagination:
     <h2>{{ site.blog_description }}</h2>
   </div>
 
+  {% include ai-notice.html %}
+
 
   <ul class="post-list">
     {% for post in paginator.posts %}

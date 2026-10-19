@@ -39,3 +39,10 @@
   i.ln.pr { background: #b4552f; }
 }
 @media (max-width: 640px) { .ee-stage { height: 360px; } .ee-controls .ee-preset { margin-left: 0; } }
+
+// voltage-level dots of the grid section (the colours of the 3D scenes)
+.da.en .lvl { display: inline-block; width: 0.7em; height: 0.7em; border-radius: 50%; margin-right: 0.45em; vertical-align: -0.04em; }
+.da.en .lvl-ehv { background: #6a47c2; }
+.da.en .lvl-hv { background: #0b4fc0; }
+.da.en .lvl-mv { background: #138374; }
+.da.en .lvl-lv { background: #b4552f; }
