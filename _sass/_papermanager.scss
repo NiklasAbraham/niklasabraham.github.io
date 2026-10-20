@@ -1,0 +1,303 @@
+/*******************************************************************************
+ * PaperManager project page (/projects/papermanager/).
+ * Screenshots sit in a browser frame; text columns alternate with them.
+ ******************************************************************************/
+
+:root {
+  --pm-ink: #1f2430;
+  --pm-ink-2: #4b5363;
+  --pm-muted: #6b7280;
+  --pm-accent: #7c3aed;
+  --pm-accent-soft: #f3eefe;
+  --pm-panel: #f6f7f9;
+  --pm-border: rgba(15, 23, 42, 0.1);
+  --pm-frame: #e9ebef;
+  --pm-code-bg: #0f172a;
+  --pm-code-ink: #e2e8f0;
+  --pm-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 24px 48px -28px rgba(15, 23, 42, 0.35);
+}
+
+html[data-theme='dark'] {
+  --pm-ink: #e6e8ec;
+  --pm-ink-2: #b9bfca;
+  --pm-muted: #9aa1ad;
+  --pm-accent: #a78bfa;
+  --pm-accent-soft: #241c3a;
+  --pm-panel: #16191f;
+  --pm-border: rgba(255, 255, 255, 0.09);
+  --pm-frame: #262a32;
+  --pm-code-bg: #0b0e14;
+  --pm-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 24px 48px -28px rgba(0, 0, 0, 0.8);
+}
+
+.pm {
+  // wider than the site's text column, so screenshots stay readable
+  width: unquote("min(1180px, calc(100vw - 32px))");
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--pm-ink-2);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.65;
+  padding-bottom: 3rem;
+
+  a { color: var(--pm-accent); }
+  h2, h3 { color: var(--pm-ink); font-weight: 700; letter-spacing: -0.01em; }
+  h2 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 0.8rem; }
+  h3 { font-size: 1.12rem; margin: 0 0 0.4rem; }
+  p { margin: 0 0 0.9rem; }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.86em; }
+}
+
+.pm-eyebrow, .pm-kicker {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pm-accent);
+  margin-bottom: 0.5rem;
+}
+
+// ---------------------------------------------------------------- hero
+
+.pm-hero {
+  text-align: center;
+  padding: 2.5rem 0 1rem;
+
+  .pm-title {
+    font-size: clamp(2.1rem, 5vw, 3.3rem);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--pm-ink);
+    margin: 0.3rem auto 1rem;
+    max-width: 16ch;
+  }
+  .pm-lede { font-size: 1.15rem; max-width: 44rem; margin: 0 auto 1.4rem; }
+}
+
+.pm-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.pm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none !important;
+  border: 1px solid var(--pm-border);
+  color: var(--pm-ink) !important;
+  background: var(--global-bg-color);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  &:hover { transform: translateY(-1px); box-shadow: var(--pm-shadow); }
+  &.pm-btn-primary { background: var(--pm-accent); border-color: var(--pm-accent); color: #fff !important; }
+  html[data-theme='dark'] &.pm-btn-primary { color: #14101f !important; }
+}
+
+.pm-meta {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.74rem;
+  color: var(--pm-muted);
+}
+
+// ---------------------------------------------------------------- screenshots
+
+.pm-shot {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--pm-border);
+  background: var(--pm-frame);
+  box-shadow: var(--pm-shadow);
+
+  &::before {
+    // browser chrome: three dots
+    content: '';
+    display: block;
+    height: 26px;
+    background:
+      radial-gradient(circle at 16px 13px, #ff5f57 4.5px, transparent 5px),
+      radial-gradient(circle at 32px 13px, #febc2e 4.5px, transparent 5px),
+      radial-gradient(circle at 48px 13px, #28c840 4.5px, transparent 5px),
+      var(--pm-frame);
+  }
+  a { display: block; }
+  img { display: block; width: 100%; height: auto; }
+}
+
+.pm-shot-hero { margin: 2rem auto 0; }
+
+.pm-caption {
+  font-size: 0.82rem;
+  color: var(--pm-muted);
+  text-align: center;
+  margin: 0.7rem 0 0;
+}
+
+// ---------------------------------------------------------------- feature rows
+
+.pm-section { margin: 4.5rem 0 0; }
+.pm-section-head { max-width: 44rem; margin: 0 auto 2rem; text-align: center; }
+
+.pm-feature {
+  margin: 0 0 4.5rem;
+
+  .pm-feature-text {
+    display: grid;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    gap: 2.5rem;
+    margin-bottom: 1.6rem;
+  }
+  h3 { font-size: 1.55rem; line-height: 1.2; }
+  ul { padding-left: 1.1rem; margin: 0 0 0.6rem; }
+  li { margin-bottom: 0.3rem; }
+}
+
+.pm-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+// ---------------------------------------------------------------- small cards
+
+.pm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.pm-card {
+  background: var(--pm-panel);
+  border: 1px solid var(--pm-border);
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem 0.9rem;
+  p { font-size: 0.93rem; margin-bottom: 0.4rem; }
+  .pm-icon { font-size: 1.15rem; color: var(--pm-accent); margin-bottom: 0.45rem; display: block; }
+}
+
+// ---------------------------------------------------------------- how it works
+
+.pm-arch {
+  background: var(--pm-panel);
+  border: 1px solid var(--pm-border);
+  border-radius: 14px;
+  padding: 1.4rem;
+  svg { display: block; width: 100%; height: auto; }
+  .a-box { fill: var(--global-bg-color); stroke: var(--pm-border); stroke-width: 1.2; }
+  .a-hi { stroke: var(--pm-accent); stroke-width: 1.6; }
+  .a-t { fill: var(--pm-ink); font: 600 15px 'Inter', system-ui, sans-serif; }
+  .a-s { fill: var(--pm-muted); font: 12px 'Inter', system-ui, sans-serif; }
+  .a-line { stroke: var(--pm-muted); stroke-width: 1.3; fill: none; }
+  .a-head { fill: var(--pm-muted); }
+}
+
+.pm-steps {
+  max-width: 860px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  counter-reset: pmstep;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  > li {
+    counter-increment: pmstep;
+    position: relative;
+    padding: 0 0 1.4rem 3rem;
+    &::before {
+      content: counter(pmstep);
+      position: absolute;
+      left: 0;
+      top: -0.1rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--pm-accent-soft);
+      color: var(--pm-accent);
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+  }
+}
+
+.pm pre {
+  background: var(--pm-code-bg);
+  color: var(--pm-code-ink);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  margin: 0.4rem 0 0.8rem;
+  border: 1px solid var(--pm-border);
+  code { color: inherit; background: none; padding: 0; font-size: inherit; }
+  .c { color: #94a3b8; }
+}
+
+.pm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  span {
+    font-size: 0.84rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    border: 1px solid var(--pm-border);
+    background: var(--pm-panel);
+    color: var(--pm-ink-2);
+  }
+}
+
+.pm-end {
+  margin: 4.5rem 0 0;
+  text-align: center;
+  padding: 2.4rem 1.4rem;
+  border-radius: 16px;
+  background: var(--pm-accent-soft);
+  border: 1px solid var(--pm-border);
+}
+
+// ---------------------------------------------------------------- projects page card
+
+.dg-feature .pm-feature-art {
+  display: block;
+  padding: 1.2rem 0 0 1.2rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f3eefe, #e8f0ff);
+  html[data-theme='dark'] & { background: linear-gradient(135deg, #241c3a, #16213a); }
+  img {
+    display: block;
+    width: 112%;
+    max-width: none;
+    height: auto;
+    border-radius: 8px 0 0 0;
+    box-shadow: 0 12px 30px -12px rgba(15, 23, 42, 0.45);
+    transition: transform 0.3s ease;
+  }
+}
+.dg-feature:hover .pm-feature-art img { transform: translateY(-3px); }
+
+// ---------------------------------------------------------------- small screens
+
+@media (max-width: 1000px) and (min-width: 861px) {
+  .pm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 860px) {
+  .pm-feature .pm-feature-text { grid-template-columns: 1fr; gap: 0.4rem; }
+  .pm-feature h3 { font-size: 1.3rem; }
+  .pm-pair, .pm-grid { grid-template-columns: 1fr; }
+  .pm-arch { overflow-x: auto; padding: 1rem; svg { min-width: 640px; } }
+  .pm h2 { font-size: 1.45rem; }
+  .pm-section { margin-top: 3rem; }
+}

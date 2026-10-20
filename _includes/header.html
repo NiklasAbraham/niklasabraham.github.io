@@ -77,9 +77,9 @@
               {%- endif -%}
               {% endfor -%}
               
-              <!-- PaperManager link -->
-              <li class="nav-item">
-                <a class="nav-link" href="https://papermanager.niklas-abraham.de" rel="noopener">PaperManager</a>
+              <!-- PaperManager project page -->
+              <li class="nav-item {% if page.url == '/projects/papermanager/' %}active{% endif %}">
+                <a class="nav-link" href="{{ '/projects/papermanager/' | relative_url }}">PaperManager</a>
               </li>
 
               <!-- CV link -->
