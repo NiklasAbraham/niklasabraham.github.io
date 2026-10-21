@@ -278,7 +278,7 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
       <p>
         The animations run in a sandboxed frame, and plots carry data rather than code. The
         feature is adapted from the open-source project
-        <a href="https://github.com/beltromatti/get-it">Get It.</a> (Apache-2.0).
+        <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0).
       </p>
     </div></div>
     <figure class="pm-shot"><a href="{{ img }}concepts.webp"><img src="{{ img }}concepts.webp" width="1600" height="1000" loading="lazy"
@@ -328,19 +328,61 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
       <h3>Ask your whole library</h3></div>
       <div class="pm-feature-body">
       <p>
-        The knowledge chat answers across papers. Scope a question with mentions:
-        <code>@project:</code>, <code>@topic:</code>, <code>@tag:</code>, <code>@paper:</code>,
-        or <code>@user:</code> to ask what a teammate has been reading. It pulls in full texts,
-        follows the graph, can run its own graph queries, and can search the web when the library
-        is not enough.
+        The knowledge chat answers across papers and is laid out like a desk. Citations in an
+        answer are links: click one and the paper opens beside the conversation with its summary,
+        a link to the PDF and a jump into the library. Under each section of an answer it can
+        draw <strong>concept cards</strong>, the same visualisations as on the PDF pages, and
+        show molecules in 3D: <strong>structure cards</strong> load an entry from the PDB or an
+        AlphaFold DB prediction (coloured by pLDDT), highlight chains and residues, and can be
+        spun, surfaced and saved as an image.
       </p>
       <p>
-        Choose the model per conversation: Claude through the API, Claude Code on a Claude
-        subscription, or any OpenAI-compatible model through LiteLLM.
+        Scope a question with <code>@project:</code>, <code>@topic:</code>, <code>@tag:</code>,
+        <code>@paper:</code>, <code>@person:</code>, or <code>@user:</code> to ask what a teammate
+        has been reading. It pulls in full texts, follows the graph, runs its own graph queries
+        and searches the web when the library is not enough. Any answer can start a new strand,
+        so a side question does not lose the main thread. Choose the model per conversation:
+        Claude through the API, Claude Code on a Claude subscription, or any OpenAI-compatible
+        model through LiteLLM.
       </p>
     </div></div>
-    <figure class="pm-shot"><a href="{{ img }}chat.webp"><img src="{{ img }}chat.webp" width="1376" height="934" loading="lazy"
-      alt="Knowledge chat answering how HippoRAG treats concept nodes during retrieval, with headings and bullet points"></a></figure>
+    <figure class="pm-shot"><a href="{{ img }}chat-preview.webp"><img src="{{ img }}chat-preview.webp" width="1600" height="1000" loading="lazy"
+      alt="Knowledge chat comparing AlphaFold 2 and AlphaFold 3, with the cited AlphaFold 3 paper open in a pane beside the answer"></a></figure>
+    <p class="pm-caption">A citation opened beside the answer: the AlphaFold 3 paper's summary, with links to the PDF and the library.</p>
+
+    <div class="pm-pair pm-chat-pair">
+      <figure class="pm-shot"><a href="{{ img }}chat-concepts.webp"><img src="{{ img }}chat-concepts.webp" width="1600" height="1000" loading="lazy"
+        alt="Chat answer on denoising score matching with a concept card plotting log-SNR for three noise schedules"></a>
+        <figcaption>A concept card inside an answer: log-SNR of three noise schedules.</figcaption></figure>
+      <figure class="pm-shot"><a href="{{ img }}chat-structure.webp"><img src="{{ img }}chat-structure.webp" width="1600" height="1000" loading="lazy"
+        alt="Structure card showing the SARS-CoV-2 spike glycoprotein, PDB 6VXX, with the three receptor-binding domains and the glycans highlighted"></a>
+        <figcaption>A structure card: the SARS-CoV-2 spike (PDB 6VXX), receptor-binding domains highlighted.</figcaption></figure>
+    </div>
+
+    <div class="pm-asks">
+      <p class="pm-kicker">Questions to try</p>
+      <ul>
+        <li>Explain the denoising score-matching objective behind diffusion models, with the derivation, and how the noise schedule enters it.</li>
+        <li>How does AlphaFold 3 model protein structures differently from AlphaFold 2? Show the SARS-CoV-2 spike glycoprotein (PDB 6VXX) in 3D with the receptor-binding domain highlighted, and cite the papers in my library.</li>
+        <li><code>@project:</code><em>your-project</em> Which papers disagree about how to evaluate this, and what does each one measure?</li>
+        <li><code>@topic:</code><em>Flow Matching</em> What do the most recent papers in my library add, and how do they build on each other?</li>
+      </ul>
+    </div>
+
+    <div class="pm-cardtypes">
+      <figure><img src="{{ img }}card-formula.webp" width="1100" height="1150" loading="lazy" alt="Formula card deriving the denoising score-matching loss step by step">
+        <figcaption><strong>Formula</strong> walked through step by step</figcaption></figure>
+      <figure><img src="{{ img }}card-graph.webp" width="1100" height="713" loading="lazy" alt="Graph card plotting log-SNR against diffusion time for VP, VE and linear-interpolant schedules">
+        <figcaption><strong>Plot</strong> drawn from data, not code</figcaption></figure>
+      <figure><img src="{{ img }}card-text.webp" width="1100" height="865" loading="lazy" alt="Short note comparing the Evoformer of AlphaFold 2 with the Pairformer of AlphaFold 3, with two references">
+        <figcaption><strong>Short note</strong> with its sources</figcaption></figure>
+      <figure><img src="{{ img }}card-anim.webp" width="1100" height="830" loading="lazy" alt="Animation card: atoms of a stylised spike trimer denoised from Gaussian noise over 20 steps">
+        <figcaption><strong>Animation</strong> in a sandboxed frame</figcaption></figure>
+    </div>
+    <p class="pm-caption">
+      Concept visualisations are adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0);
+      structures are drawn with <a href="https://3dmol.csb.pitt.edu">3Dmol.js</a> (BSD-3-Clause).
+    </p>
   </div>
 
   <div class="pm-grid">

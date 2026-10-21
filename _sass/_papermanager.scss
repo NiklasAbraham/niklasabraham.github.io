@@ -213,6 +213,60 @@ $pm-themes: (
   gap: 1rem;
 }
 
+// ---------------------------------------------------------------- knowledge chat gallery
+
+.pm-chat-pair { margin-top: 1.4rem; }
+.pm-shot figcaption {
+  padding: 0.55rem 0.8rem;
+  font-size: 0.82rem;
+  color: var(--pm-muted);
+  background: var(--global-bg-color);
+  border-top: 1px solid var(--pm-border);
+}
+
+.pm-asks {
+  margin: 2rem 0 0;
+  padding: 1.1rem 1.3rem 0.6rem;
+  border: 1px solid var(--pm-border);
+  border-radius: 12px;
+  background: var(--pm-panel);
+  ul { list-style: none; padding: 0; margin: 0; }
+  li {
+    position: relative;
+    padding: 0.55rem 0 0.55rem 1.6rem;
+    border-top: 1px solid var(--pm-border);
+    color: var(--pm-ink);
+    font-size: 0.95rem;
+    &::before { content: '›'; position: absolute; left: 0.3rem; top: 0.45rem; color: var(--pm-accent); font-weight: 700; }
+  }
+  em { color: var(--pm-muted); }
+}
+
+.pm-cardtypes {
+  margin-top: 1.4rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+  figure { margin: 0; }
+  img {
+    display: block;
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    object-position: top left;
+    border-radius: 10px;
+    border: 1px solid var(--pm-border);
+    box-shadow: var(--pm-shadow);
+    background: #fff;
+  }
+  figcaption { margin-top: 0.5rem; font-size: 0.85rem; color: var(--pm-muted); strong { color: var(--pm-ink); } }
+}
+
+@media (max-width: 860px) {
+  .pm-cardtypes { grid-template-columns: repeat(2, minmax(0, 1fr)); img { height: 180px; } }
+}
+
 // ---------------------------------------------------------------- small cards
 
 .pm-grid {
