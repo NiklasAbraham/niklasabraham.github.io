@@ -10,30 +10,200 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
 {%- assign img = '/assets/papermanager/' | relative_url -%}
 {%- assign repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
 {%- assign docs = 'https://niklasabraham.github.io/PaperManager/' -%}
-<div class="pm">
+<div class="pm" id="pm" data-hero="a">
+<script>(function(){var r=document.getElementById('pm'),H='abcdef',T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(H.indexOf(h)<0||h.length!==1)h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(h.length===1&&H.indexOf(h)>=0)r.setAttribute('data-hero',h);if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);})();</script>
 
-<header class="pm-hero">
-  <p class="pm-eyebrow">Project · open source · self-hosted</p>
-  <h1 class="pm-title">A second brain for research papers</h1>
-  <p class="pm-lede">
-    PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
-    Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
-    draws the ideas on each page as interactive visualisations, and maps how every paper in a
-    project connects to the others.
-  </p>
-  <div class="pm-ctas">
-    <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
-    <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
-    <a class="pm-btn" href="{{ docs }}"><i class="fas fa-book"></i> Documentation</a>
+<!-- Design preview: pick a hero and a colour theme for this page (owner tool, not part of the content) -->
+<div class="pm-switch" id="pm-switch" role="group" aria-label="Design preview">
+  <button type="button" class="pm-switch-toggle" aria-expanded="true" aria-controls="pm-switch-body" title="Hide the design switcher">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z"/></svg>
+  </button>
+  <div class="pm-switch-body" id="pm-switch-body">
+    <span class="pm-switch-label">Hero</span>
+    <div class="pm-switch-set">
+      <button type="button" data-set-hero="a" title="A · Classic">A</button>
+      <button type="button" data-set-hero="b" title="B · Cinematic">B</button>
+      <button type="button" data-set-hero="c" title="C · Living infinity">C</button>
+      <button type="button" data-set-hero="d" title="D · Knowledge constellation">D</button>
+      <button type="button" data-set-hero="e" title="E · Editorial">E</button>
+      <button type="button" data-set-hero="f" title="F · Page to graph">F</button>
+    </div>
+    <span class="pm-switch-name" aria-live="polite"></span>
+    <span class="pm-switch-sep" aria-hidden="true"></span>
+    <span class="pm-switch-label">Colour</span>
+    <div class="pm-switch-set pm-switch-swatches">
+      <button type="button" data-set-theme="violet" title="Violet" style="--sw:#7c3aed"></button>
+      <button type="button" data-set-theme="teal" title="Teal" style="--sw:#0f9488"></button>
+      <button type="button" data-set-theme="amber" title="Amber" style="--sw:#d97706"></button>
+      <button type="button" data-set-theme="rose" title="Rose" style="--sw:#e11d48"></button>
+      <button type="button" data-set-theme="blue" title="Blue" style="--sw:#2563eb"></button>
+      <button type="button" data-set-theme="graphite" title="Graphite" style="--sw:#475569"></button>
+    </div>
   </div>
-  <p class="pm-meta">FastAPI · Neo4j · React · Claude · Docker &nbsp;·&nbsp; runs on your own machine with your own keys</p>
-</header>
+</div>
 
-<figure class="pm-shot pm-shot-hero">
-  <a href="{{ img }}concepts.webp"><img src="{{ img }}concepts.webp" width="1600" height="1000"
-    alt="PaperManager paper view: the EDM paper's PDF on the left, and on the right an animated visualisation of the probability flow ODE, generated for page 2"></a>
-</figure>
-<p class="pm-caption">Reading <em>Elucidating the Design Space of Diffusion-Based Generative Models</em>: the panel on the right animates the probability-flow ODE that page 2 describes.</p>
+<div class="pm-heroes">
+
+<!-- ============================================================ hero A: classic -->
+<section class="pm-hv pm-hv-a" data-hero="a" data-name="Classic">
+  <header class="pm-hero">
+    <a class="pm-pill" href="#features"><span class="pm-pill-tag">New</span> Interactive concepts and quick tours <span aria-hidden="true">→</span></a>
+    <h1 class="pm-title">A second brain for research papers</h1>
+    <p class="pm-lede">
+      PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
+      Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
+      draws the ideas on each page as interactive visualisations, and maps how every paper in a
+      project connects to the others.
+    </p>
+    <div class="pm-ctas">
+      <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
+      <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
+      <a class="pm-btn" href="{{ docs }}"><i class="fas fa-book"></i> Documentation</a>
+    </div>
+    <p class="pm-meta">FastAPI · Neo4j · React · Claude · Docker &nbsp;·&nbsp; runs on your own machine with your own keys</p>
+  </header>
+  <figure class="pm-shot pm-shot-hero">
+    <a href="{{ img }}concepts.webp"><img src="{{ img }}concepts.webp" width="1600" height="1000" fetchpriority="high"
+      alt="PaperManager paper view: the EDM paper's PDF on the left, and on the right an animated visualisation of the probability flow ODE, generated for page 2"></a>
+  </figure>
+  <p class="pm-caption">Reading <em>Elucidating the Design Space of Diffusion-Based Generative Models</em>: the panel on the right animates the probability-flow ODE that page 2 describes.</p>
+</section>
+
+<!-- ============================================================ hero B: cinematic -->
+<section class="pm-hv pm-hv-b pm-bleed" data-hero="b" data-name="Cinematic">
+  <div class="pm-b-bg" aria-hidden="true"></div>
+  <div class="pm-b-inner">
+    <nav class="pm-b-nav" aria-label="On this page">
+      <span class="pm-b-brand"><span class="pm-b-dot"></span>PaperManager</span>
+      <span class="pm-b-links">
+        <a href="#features">Features</a><a href="#pipeline">Pipeline</a><a href="#how">How it works</a><a href="#setup">Set it up</a>
+      </span>
+      <a class="pm-b-navgh" href="{{ repo }}" aria-label="PaperManager on GitHub"><i class="fab fa-github"></i></a>
+    </nav>
+    <div class="pm-b-copy">
+      <a class="pm-pill pm-pill-glass" href="#features"><span class="pm-pill-tag">New</span> Interactive concepts and quick tours <span aria-hidden="true">→</span></a>
+      <h1 class="pm-b-title">A second brain<br><span>for research papers</span></h1>
+      <p class="pm-b-lede">
+        PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
+        Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
+        draws the ideas on each page as interactive visualisations, and maps how every paper in a
+        project connects to the others.
+      </p>
+      <div class="pm-b-ctas">
+        <a class="pm-b-btn pm-b-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
+        <a class="pm-b-btn" href="#setup">Set it up <span aria-hidden="true">→</span></a>
+        <a class="pm-b-link" href="{{ docs }}">Documentation</a>
+      </div>
+    </div>
+    <div class="pm-b-built">
+      <span class="pm-b-built-label">Built with</span>
+      <span class="pm-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path class="f" d="M13.2 4.8 7.6 13h4l-1 6.2L16.4 11h-4z"/></svg>FastAPI</span>
+      <span class="pm-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5 12 6.5l6 10M6 16.5h12"/><circle class="f" cx="12" cy="6.5" r="3"/><circle class="f" cx="6" cy="16.5" r="3"/><circle class="f" cx="18" cy="16.5" r="3"/></svg>Neo4j</span>
+      <span class="pm-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/><circle class="f" cx="12" cy="12" r="1.8"/></svg>React</span>
+      <span class="pm-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5v19M2.5 12h19M5.3 5.3l13.4 13.4M18.7 5.3 5.3 18.7"/></svg>Claude</span>
+      <span class="pm-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12.5h17c1 0 2-1 2-2.4M3 12.5c.6 4 3.8 6.5 8.5 6.5 5 0 8-2.6 9.4-6.6"/><rect class="f" x="5" y="8.6" width="3" height="2.6" rx=".4"/><rect class="f" x="8.7" y="8.6" width="3" height="2.6" rx=".4"/><rect class="f" x="12.4" y="8.6" width="3" height="2.6" rx=".4"/><rect class="f" x="8.7" y="5.2" width="3" height="2.6" rx=".4"/><rect class="f" x="12.4" y="5.2" width="3" height="2.6" rx=".4"/></svg>Docker</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ hero C: living infinity -->
+<section class="pm-hv pm-hv-c" data-hero="c" data-name="Living infinity">
+  <div class="pm-c-grid">
+    <div class="pm-c-copy">
+      <p class="pm-eyebrow">Project · open source · self-hosted</p>
+      <h1 class="pm-c-title">A second brain for research papers</h1>
+      <p class="pm-lede">
+        PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
+        Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
+        draws the ideas on each page as interactive visualisations, and maps how every paper in a
+        project connects to the others.
+      </p>
+      <div class="pm-ctas pm-ctas-left">
+        <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
+        <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
+        <a class="pm-btn" href="{{ docs }}"><i class="fas fa-book"></i> Documentation</a>
+      </div>
+    </div>
+    <div class="pm-c-stage">
+      <canvas class="pm-canvas" data-scene="infinity" role="img"
+        aria-label="An infinity loop of flowing particles. Paper cards travel along it through four stations: read, understand, connect and ask."></canvas>
+      <p class="pm-c-note">read → understand → connect → ask, and round again</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ hero D: knowledge constellation -->
+<section class="pm-hv pm-hv-d pm-bleed" data-hero="d" data-name="Knowledge constellation">
+  <canvas class="pm-canvas pm-d-canvas" data-scene="constellation" aria-hidden="true"></canvas>
+  <div class="pm-d-copy">
+    <a class="pm-pill" href="#features"><span class="pm-pill-tag">New</span> Interactive concepts and quick tours <span aria-hidden="true">→</span></a>
+    <h1 class="pm-d-title">A second brain<br>for research papers</h1>
+    <p class="pm-lede">
+      PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
+      Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
+      draws the ideas on each page as interactive visualisations, and maps how every paper in a
+      project connects to the others.
+    </p>
+    <div class="pm-ctas">
+      <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
+      <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
+      <a class="pm-btn" href="{{ docs }}"><i class="fas fa-book"></i> Documentation</a>
+    </div>
+    <p class="pm-d-hint"><span class="pm-d-sq"></span> paper &nbsp; <span class="pm-d-ci"></span> concept <span class="pm-d-move">&nbsp;·&nbsp; move the pointer to pull the graph together</span></p>
+  </div>
+</section>
+
+<!-- ============================================================ hero E: editorial -->
+<section class="pm-hv pm-hv-e" data-hero="e" data-name="Editorial">
+  <div class="pm-e-rule"><span>PaperManager</span><span>Open source · self-hosted</span><span>2026</span></div>
+  <div class="pm-e-grid">
+    <div class="pm-e-copy">
+      <h1 class="pm-e-title">A second brain for <em>research papers</em></h1>
+      <p class="pm-e-lede">
+        PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
+        Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
+        draws the ideas on each page as interactive visualisations, and maps how every paper in a
+        project connects to the others.
+      </p>
+      <div class="pm-ctas pm-ctas-left">
+        <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
+        <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
+        <a class="pm-e-link" href="{{ docs }}">Documentation <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+    <div class="pm-e-fan" tabindex="0" aria-label="Three screenshots: concept tour, interactive concept, project concept map">
+      <figure class="pm-shot pm-e-card pm-e-1"><img src="{{ img }}tour.webp" width="1600" height="1000" loading="lazy" alt="Quick tour of the Feynman-Kac Correctors paper"><figcaption>Quick tour</figcaption></figure>
+      <figure class="pm-shot pm-e-card pm-e-2"><img src="{{ img }}concept-map.webp" width="1600" height="1000" loading="lazy" alt="Concept map of 210 papers"><figcaption>Concept map</figcaption></figure>
+      <figure class="pm-shot pm-e-card pm-e-3"><img src="{{ img }}concepts.webp" width="1600" height="1000" loading="lazy" alt="Interactive concept: the probability flow ODE next to its PDF page"><figcaption>Concepts</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ hero F: page to graph -->
+<section class="pm-hv pm-hv-f" data-hero="f" data-name="Page to graph">
+  <header class="pm-hero pm-f-head">
+    <p class="pm-eyebrow">Project · open source · self-hosted</p>
+    <h1 class="pm-title">A second brain for research papers</h1>
+    <p class="pm-lede">
+      PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
+      Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
+      draws the ideas on each page as interactive visualisations, and maps how every paper in a
+      project connects to the others.
+    </p>
+    <div class="pm-ctas">
+      <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
+      <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
+      <a class="pm-btn" href="{{ docs }}"><i class="fas fa-book"></i> Documentation</a>
+    </div>
+  </header>
+  <div class="pm-f-stage">
+    <div class="pm-f-bar" aria-hidden="true"><span></span><span></span><span></span><em>paper → concepts → one graph</em></div>
+    <canvas class="pm-canvas" data-scene="pagegraph" role="img"
+      aria-label="A paper page is scanned line by line; its key ideas lift off as concept nodes and join a growing graph shared with earlier papers."></canvas>
+  </div>
+</section>
+
+</div>
 
 <!-- ============================================================ why -->
 <section class="pm-section">
@@ -51,7 +221,7 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
 </section>
 
 <!-- ============================================================ features -->
-<section class="pm-section">
+<section class="pm-section" id="features">
   <div class="pm-section-head">
     <p class="pm-kicker">Features</p>
     <h2>What it does</h2>
@@ -213,8 +383,84 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   </div>
 </section>
 
+<!-- ============================================================ pipeline timeline -->
+<section class="pm-section" id="pipeline">
+  <div class="pm-section-head">
+    <p class="pm-kicker">Step by step</p>
+    <h2>What happens when you add a paper</h2>
+    <p>Most of the work runs while the paper waits in the upload queue, so saving it is quick. You check the details once; the rest happens on its own or when you ask for it.</p>
+  </div>
+
+  <ol class="pm-tl">
+    <li class="pm-tl-item">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14v4.5c0 .8.7 1.5 1.5 1.5h13c.8 0 1.5-.7 1.5-1.5V14"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">Instant</span><span class="pm-tl-badge">Automatic</span></div>
+        <h3>Drop a PDF or paste a link</h3>
+        <p>Processing starts the moment the file lands in the upload queue, and nothing is saved yet. Links from arXiv, DOI, PubMed and bioRxiv work too, as do bulk lists.</p>
+      </div>
+    </li>
+    <li class="pm-tl-item">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">Seconds</span><span class="pm-tl-badge">Automatic</span></div>
+        <h3>Metadata and duplicate check</h3>
+        <p>The DOI or arXiv id on the first page is looked up in Semantic Scholar, then CrossRef. Without one, a language model reads the first page, with simple heuristics as the last resort. A paper already in your library is flagged before you go any further.</p>
+      </div>
+    </li>
+    <li class="pm-tl-item">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 21 8l-9 4.5L3 8z"/><path d="m3 12 9 4.5 9-4.5M3 16l9 4.5 9-4.5"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">In the queue</span><span class="pm-tl-badge">Automatic</span></div>
+        <h3>Layout and analysis, done ahead</h3>
+        <p>Docling finds the figures and tables, and the language models write the summary and suggest topics, claims, references, affiliations and tags. Results are cached by the PDF's hash; the queue row turns green when everything is ready.</p>
+      </div>
+    </li>
+    <li class="pm-tl-item">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8 12.3 2.7 2.7L16 9.5"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">When you are ready</span><span class="pm-tl-badge pm-tl-badge-you">You confirm</span></div>
+        <h3>Check the details</h3>
+        <p>A form shows the metadata it found. Fix anything that is off, choose paper, book or lecture deck, and optionally change the instructions for the summary. Nothing is stored until you click Upload.</p>
+      </div>
+    </li>
+    <li class="pm-tl-item">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="2.8"/><path d="M4.5 6v12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V6M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">~10–20 s</span><span class="pm-tl-badge">Automatic</span></div>
+        <h3>Into your Drive and the graph</h3>
+        <p>The PDF goes to your Google Drive and the paper becomes a node in Neo4j, or fills in a citation stub that was already there. Authors, topics and claims are linked, figure and table images are stored, and an embedding is added if you configured a model.</p>
+      </div>
+    </li>
+    <li class="pm-tl-item">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">After upload</span><span class="pm-tl-badge pm-tl-badge-you">You confirm</span></div>
+        <h3>References, tags, project and people</h3>
+        <p>Review the extracted references: each becomes a linked paper in the citation graph and is merged with the full paper if you add it later. Then accept tag suggestions, pick a project, and note who shared the paper with you.</p>
+      </div>
+    </li>
+    <li class="pm-tl-item">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.4"/><circle cx="5" cy="6.5" r="1.9"/><circle cx="19" cy="6.5" r="1.9"/><circle cx="12" cy="20" r="1.9"/><path d="M10 10.8 6.6 7.7M14 10.8l3.4-3.1M12 14.4v3.7"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">Every 10 min</span><span class="pm-tl-badge">Automatic</span></div>
+        <h3>Onto the project's concept map</h3>
+        <p>A background sweep maps every new project paper once it has a summary: 6 to 15 key concepts and how they relate, shared with the other papers in the project.</p>
+      </div>
+    </li>
+    <li class="pm-tl-item pm-tl-demand">
+      <span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.8 8.6 19 10.2 13.8 12 12 17l-1.8-5L5 10.2l5.2-1.6z"/><path d="m18.5 15.5.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span>
+      <div class="pm-tl-card">
+        <div class="pm-tl-top"><span class="pm-tl-when">On demand</span><span class="pm-tl-badge pm-tl-badge-demand">On demand</span></div>
+        <h3>Concepts and a quick tour</h3>
+        <p>While reading, click Find concepts to mark the ideas on each page that a picture explains best and generate their visualisations, or ask for a quick tour: 6 to 12 guided stops through the PDF, ready in about a minute.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
 <!-- ============================================================ how it works -->
-<section class="pm-section">
+<section class="pm-section" id="how">
   <div class="pm-section-head">
     <p class="pm-kicker">How it works</p>
     <h2>One graph in the middle</h2>
@@ -365,3 +611,5 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
 </section>
 
 </div>
+
+<script defer src="{{ '/assets/js/papermanager-hero.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
