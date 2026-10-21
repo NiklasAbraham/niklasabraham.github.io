@@ -323,40 +323,14 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
         model through LiteLLM.
       </p>
     </div></div>
-    <figure class="pm-shot"><a href="{{ img }}chat-preview.webp"><img src="{{ img }}chat-preview.webp" width="1600" height="1000" loading="lazy"
-      alt="Knowledge chat comparing AlphaFold 2 and AlphaFold 3, with the cited AlphaFold 3 paper open in a pane beside the answer"></a></figure>
-    <p class="pm-caption">A citation opened beside the answer: the AlphaFold 3 paper's summary, with links to the PDF and the library.</p>
-
-    <div class="pm-pair pm-chat-pair">
-      <figure class="pm-shot"><a href="{{ img }}chat-concepts.webp"><img src="{{ img }}chat-concepts.webp" width="1600" height="1000" loading="lazy"
-        alt="Chat answer on denoising score matching with a concept card plotting log-SNR for three noise schedules"></a>
-        <figcaption>A concept card inside an answer: log-SNR of three noise schedules.</figcaption></figure>
-      <figure class="pm-shot"><a href="{{ img }}chat-structure.webp"><img src="{{ img }}chat-structure.webp" width="1600" height="1000" loading="lazy"
-        alt="Structure card showing the SARS-CoV-2 spike glycoprotein, PDB 6VXX, with the three receptor-binding domains and the glycans highlighted"></a>
-        <figcaption>A structure card: the SARS-CoV-2 spike (PDB 6VXX), receptor-binding domains highlighted.</figcaption></figure>
-    </div>
-
-    <div class="pm-asks">
-      <p class="pm-kicker">Questions to try</p>
-      <ul>
-        <li>Explain the denoising score-matching objective behind diffusion models, with the derivation, and how the noise schedule enters it.</li>
-        <li>How does AlphaFold 3 model protein structures differently from AlphaFold 2? Show the SARS-CoV-2 spike glycoprotein (PDB 6VXX) in 3D with the receptor-binding domain highlighted, and cite the papers in my library.</li>
-        <li><code>@project:</code><em>your-project</em> Which papers disagree about how to evaluate this, and what does each one measure?</li>
-        <li><code>@topic:</code><em>Flow Matching</em> What do the most recent papers in my library add, and how do they build on each other?</li>
-      </ul>
-    </div>
-
-    <div class="pm-cardtypes">
-      <figure><img src="{{ img }}card-formula.webp" width="1100" height="1150" loading="lazy" alt="Formula card deriving the denoising score-matching loss step by step">
-        <figcaption><strong>Formula</strong> walked through step by step</figcaption></figure>
-      <figure><img src="{{ img }}card-graph.webp" width="1100" height="713" loading="lazy" alt="Graph card plotting log-SNR against diffusion time for VP, VE and linear-interpolant schedules">
-        <figcaption><strong>Plot</strong> drawn from data, not code</figcaption></figure>
-      <figure><img src="{{ img }}card-text.webp" width="1100" height="865" loading="lazy" alt="Short note comparing the Evoformer of AlphaFold 2 with the Pairformer of AlphaFold 3, with two references">
-        <figcaption><strong>Short note</strong> with its sources</figcaption></figure>
-      <figure><img src="{{ img }}card-anim.webp" width="1100" height="830" loading="lazy" alt="Animation card: atoms of a stylised spike trimer denoised from Gaussian noise over 20 steps">
-        <figcaption><strong>Animation</strong> in a sandboxed frame</figcaption></figure>
+    <div class="pm-chat-demo" data-pm-chat-demo="{{ '/assets/pm-chat-demo/data/' | relative_url }}">
+      <div class="pm-chat-demo-wait" aria-hidden="true"><span>Loading the live demo of the knowledge chat …</span></div>
+      <noscript><style>.pm-chat-demo-wait { display: none; }</style><figure class="pm-shot"><img src="{{ img }}chat-preview.webp" width="1600" height="1000"
+        alt="Knowledge chat comparing AlphaFold 2 and AlphaFold 3, with the cited AlphaFold 3 paper open in a pane beside the answer"></figure></noscript>
     </div>
     <p class="pm-caption">
+      Real conversations over a library of public papers, replayed with the app's own components:
+      pick an example, open a citation, step through a formula, pause an animation, turn a molecule.<br>
       Concept visualisations are adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0);
       structures are drawn with <a href="https://3dmol.csb.pitt.edu">3Dmol.js</a> (BSD-3-Clause).
     </p>
@@ -626,3 +600,4 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
 
 <script defer src="{{ '/assets/js/papermanager-hero.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script defer src="{{ '/assets/js/papermanager-hero-c.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script type="module" src="{{ '/assets/pm-chat-demo/pm-chat-demo.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

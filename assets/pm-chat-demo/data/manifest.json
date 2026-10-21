@@ -1,0 +1,46 @@
+{
+ "tabs": [
+  {
+   "slug": "derivation",
+   "title": "Denoising score matching",
+   "hint": "A derivation in maths, with formula and graph cards",
+   "parent": null,
+   "fork_at": null
+  },
+  {
+   "slug": "pf-ode",
+   "title": "Sampling with the PF-ODE",
+   "hint": "A strand off the derivation: same first answer, new question",
+   "parent": "derivation",
+   "fork_at": 1
+  },
+  {
+   "slug": "alphafold",
+   "title": "AlphaFold 3 vs AlphaFold 2",
+   "hint": "The SARS-CoV-2 spike in 3D, an animation and a short note",
+   "parent": null,
+   "fork_at": null
+  },
+  {
+   "slug": "plddt",
+   "title": "Reading pLDDT",
+   "hint": "An AlphaFold DB model coloured by confidence, and design filters",
+   "parent": null,
+   "fork_at": null
+  },
+  {
+   "slug": "guidance",
+   "title": "Classifier-free guidance",
+   "hint": "Animated concept cards of guided sampling",
+   "parent": null,
+   "fork_at": null
+  },
+  {
+   "slug": "memorisation",
+   "title": "@topic: memorisation",
+   "hint": "Scoped to one topic of the library, compared in a table",
+   "parent": null,
+   "fork_at": null
+  }
+ ]
+}
