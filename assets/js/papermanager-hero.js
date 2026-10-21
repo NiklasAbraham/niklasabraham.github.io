@@ -527,7 +527,19 @@
       S.refs = { x: x2, y: y2 + 18 + tw0 * 0.62 + 30, w: w2 };
       S.tour = { x: x2, y: S.refs.y + (st.small ? 58 : 64), w: w2 };
       S.leg = { x: x, y: S.sum.y + 190, w: colW };
-      S.con = { x: x2, y: S.tour.y + (st.small ? 75 : 58), w: w2 };
+      // as many chip rows as the longest tour needs, so the concepts never overlap it
+      ctx.font = '500 ' + (st.small ? 10 : 11) + 'px Inter, system-ui, sans-serif';
+      var rowH = st.small ? 25 : 28, tourRows = 1;
+      PAPERS.forEach(function (pp) {
+        var cx0 = 0, rows = 1;
+        pp.tour.forEach(function (name, i) {
+          var need = ctx.measureText((i + 1) + '  ' + name).width + 16;
+          if (cx0 + need > w2) { cx0 = 0; rows++; }
+          cx0 += need + 6;
+        });
+        tourRows = Math.max(tourRows, rows);
+      });
+      S.con = { x: x2, y: S.tour.y + 18 + tourRows * rowH + 10, w: w2 };
       return S;
     }
     function thumbRect(S, i) {

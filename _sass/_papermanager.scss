@@ -352,16 +352,8 @@ $pm-themes: (
 }
 
 // ---------------------------------------------------------------- B: banner
-// A port of the 21st.dev ResponsiveHeroBanner: full-bleed image, dark overlay,
+// A port of the 21st.dev ResponsiveHeroBanner: full-bleed image, thin dark ring,
 // centred serif title, two pill buttons, a row of marks, staggered fade-ins.
-
-@font-face {
-  font-family: 'Instrument Serif';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/assets/vendor/fonts/instrument-serif/instrument-serif-regular.woff2') format('woff2');
-}
 
 .pm-hv-b {
   margin-top: -3rem; // up under the site's glass navbar
@@ -402,7 +394,10 @@ $pm-themes: (
 .pm-b-copy { max-width: 48rem; margin: 0 auto; text-align: center; }
 
 .pm-b-title {
-  font-family: 'Instrument Serif', 'Newsreader', Georgia, serif;
+  // the reference demo renders this title in a classic Times-like serif
+  // (its Instrument Serif never loads); Newsreader at large optical size matches it
+  font-family: 'Newsreader', 'Times New Roman', Georgia, serif;
+  font-optical-sizing: auto;
   font-weight: 400;
   letter-spacing: -0.025em;
   line-height: 1.25;
@@ -1051,7 +1046,7 @@ $pm-themes: (
   .pm-mark { font-size: 0.92rem; }
   .pm-c-stage { height: 250px; }
   .pm-d-hint .pm-d-move { display: none; }
-  .pm-f-stage canvas { height: 800px; }
+  .pm-f-stage canvas { height: 880px; }
   .pm-e-lede { font-size: 1.1rem; }
 
   .pm-switch {
