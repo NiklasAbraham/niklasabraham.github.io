@@ -11,7 +11,7 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
 {%- assign repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
 {%- assign docs = 'https://niklasabraham.github.io/PaperManager/' -%}
 <div class="pm" id="pm" data-hero="a">
-<script>(function(){var r=document.getElementById('pm'),H=/^([abdef]|c[1-3]?)$/,T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(!H.test(h))h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(H.test(h)){r.setAttribute('data-hero',h[0]);if(h[0]==='c')r.setAttribute('data-hero-c',h[1]||'1');}if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);})();</script>
+<script>(function(){var r=document.getElementById('pm'),H=/^([abdef]|c[1-7]?)$/,T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(!H.test(h))h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(H.test(h)){r.setAttribute('data-hero',h[0]);if(h[0]==='c')r.setAttribute('data-hero-c',h[1]||'1');}if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);var M=/^(silver|champagne|ink|iridescent|glow|aurora|ice|night)$/,m=(q.get('mat')||'').toLowerCase();try{if(!M.test(m))m=localStorage.getItem('pm-cx-mat')||'';}catch(e){}if(M.test(m))r.setAttribute('data-cx-mat',m);})();</script>
 
 <!-- Design preview: pick a hero and a colour theme for this page (owner tool, not part of the content) -->
 <div class="pm-switch" id="pm-switch" role="group" aria-label="Design preview">
@@ -28,6 +28,21 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
         <button type="button" data-set-hero="c1" title="C1 · Knot">C1</button>
         <button type="button" data-set-hero="c2" title="C2 · Double helix">C2</button>
         <button type="button" data-set-hero="c3" title="C3 · Knowledge sphere">C3</button>
+        <button type="button" data-set-hero="c4" title="C4 · Möbius">C4</button>
+        <button type="button" data-set-hero="c5" title="C5 · Nautilus">C5</button>
+        <button type="button" data-set-hero="c6" title="C6 · Citation tree">C6</button>
+        <button type="button" data-set-hero="c7" title="C7 · Sphere (side)">C7</button>
+      </span>
+      <span class="pm-switch-mat" role="group" aria-label="Hero C material">
+        <button type="button" data-set-mat="auto" title="Material: each version's own" style="--sw:conic-gradient(#d9d5ce 0 50%,#0a1020 0)"></button>
+        <button type="button" data-set-mat="silver" title="Silver" style="--sw:linear-gradient(135deg,#f4f1ea,#9a9184)"></button>
+        <button type="button" data-set-mat="champagne" title="Champagne" style="--sw:linear-gradient(135deg,#fff3d6,#b98b45)"></button>
+        <button type="button" data-set-mat="ink" title="Ink" style="--sw:linear-gradient(135deg,#f7f4ec 50%,#111 50%)"></button>
+        <button type="button" data-set-mat="iridescent" title="Iridescent" style="--sw:linear-gradient(135deg,#8f5cff,#2ed1c6,#ffc857)"></button>
+        <button type="button" data-set-mat="glow" title="Glow (page colour)" style="--sw:radial-gradient(circle,var(--pm-accent),#0c0a14 75%)"></button>
+        <button type="button" data-set-mat="aurora" title="Aurora (page colours)" style="--sw:linear-gradient(135deg,var(--pm-accent),var(--pm-accent-2),#ffc85c)"></button>
+        <button type="button" data-set-mat="ice" title="Ice" style="--sw:linear-gradient(135deg,#e7edf3,#8cd6ff,#9a7bff)"></button>
+        <button type="button" data-set-mat="night" title="Night" style="--sw:radial-gradient(circle,#7fe0ff,#6d5cff 45%,#070b18 80%)"></button>
       </span>
       <button type="button" data-set-hero="d" title="D · Knowledge constellation">D</button>
       <button type="button" data-set-hero="e" title="E · Editorial">E</button>

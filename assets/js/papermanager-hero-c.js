@@ -214,7 +214,7 @@
       if (esum === 0 || R() < 0.55) push(cling(1.0 + R() * 0.6, R() < 0.6), [0, 0, 0], R(), rad, 1, 0.3);
       else { q = cloud(); push(q.p, q.dir, R(), rad * (1 - 0.45 * Math.min(1, q.r)), 1, 0.8); }
     }
-    if (S.pearls) S.pearls.forEach(function (p) { push(p, [0, 0, 0], R(), Math.exp(gauss(R) * 0.2) * 0.02 * (S.pearlSize || 1), 1, 0.5); });
+    if (S.pearls) S.pearls.forEach(function (p) { push(p, [0, 0, 0], R(), p[3] || Math.exp(gauss(R) * 0.2) * 0.02 * (S.pearlSize || 1), 1, 0.5); });
     if (S.halo) {
       for (i = 0; i < c.halo; i++) { q = S.halo(R); push(q.p, q.dir, R(), Math.exp(gauss(R) * 0.5) * 0.005 * (q.big ? 3 : 1), q.big ? 1 : 0, 1); }
     }
@@ -372,7 +372,121 @@
     };
   }
 
-  var SHAPES = { trefoil: trefoil, helix: helix, orb: orb };
+  // C4: a Möbius strip: one continuous surface (read, understand, connect, ask);
+  // one stretch of it unravels into dust.
+  function mobius() {
+    var g = guide(function (v) {
+      var t = v * TAU;
+      return [Math.cos(t), 0.86 * Math.sin(t), 0.08 * Math.sin(2 * t)];
+    }, 2400, true, function () { return [0, 0, 1]; }, true);
+    function unravel(u) { return Math.exp(-Math.pow(wrapDist(u, 0.6) / 0.05, 2)); }
+    g.width = function (u) { return 0.36 * (1 - 0.15 * unravel(u)); };
+    g.thick = 0.016;
+    g.twist = function (u) { return Math.PI * u + 0.2; }; // a single half-twist
+    g.fray = function (u) { return 0.8 * unravel(u); };
+    g.out = function (u, p) { return norm([p[0], p[1], 0]); };
+    g.len = function (R) { return [R(), 0.55 + R() * 0.45]; };
+    g.res = 170; g.wavy = 0.5; g.spread = 0.45;
+    var fr = frame(); sampleGuide(g, 0.6, fr);
+    return {
+      guides: [g], cling: 0.4, radius: 1.3,
+      emitters: [{ p: fr.p.slice(), dir: norm([fr.p[0], fr.p[1], 0.3]), jit: 0.3, len: 0.35, sig0: 0.06, sigK: 0.14, w: 1 }],
+      clingU: function (gg, R, tip) { return tip ? 0.6 + gauss(R) * 0.05 : R(); },
+      view: function (t) { return [0.5 + 0.05 * Math.sin(t * 0.07), 0.25 * Math.sin(t * 0.06), -0.9 + t * 0.05]; },
+      counts: { fibres: [3200, 1500], dust: [9000, 3500], spheres: [45, 24], latent: [8000, 3000], halo: [0, 0] },
+      layout: { wide: [-0.5, 0.02, 0.6], tall: [0, 0.5, 0.86] }
+    };
+  }
+
+  // C5: a nautilus: a golden spiral of silk that keeps growing, its chambers walled
+  // by fine threads, papers strung along it as pearls that grow with it.
+  function nautilus() {
+    var b = Math.log((1 + Math.sqrt(5)) / 2) / (Math.PI / 2), T0 = 0.6, T1 = 3.1 * Math.PI, a = 1.3 / Math.exp(b * T1);
+    function sp(th) { var r = a * Math.exp(b * th); return [r * Math.cos(th), r * Math.sin(th), 0.28 * (1 - (th - T0) / (T1 - T0)) - 0.1]; }
+    var g = guide(function (v) { return sp(T0 + (T1 - T0) * v); }, 2400, false, function () { return [0, 0, 1]; }, true);
+    var rad = []; for (var i = 0; i < g.n; i++) rad.push(Math.hypot(g.P[i * 3], g.P[i * 3 + 1]));
+    function rAt(u) { return rad[Math.max(0, Math.min(g.n - 1, Math.round(u * (g.n - 1))))]; }
+    g.width = function (u) { return 0.012 + 0.19 * rAt(u) / 1.3; };
+    g.thick = 0.03;
+    g.twist = function () { return 0; };
+    g.fray = function (u) { return smooth(0.9, 1, u); };
+    g.len = function (R) { var u0 = Math.pow(R(), 1.6) * 0.5; return [u0, Math.min(1 - u0, 0.4 + R() * 0.6)]; };
+    g.res = 240; g.weight = 6; g.wavy = 0.6;
+    var guides = [g], pearls = [];
+    // chamber walls: gently bowed threads from one whorl to the next
+    for (var th = T1 - 0.25; th > 2 * Math.PI + T0; th -= 0.42) {
+      (function (th) {
+        var p = sp(th), q = sp(th - 2 * Math.PI), m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2, (p[2] + q[2]) / 2];
+        var bow = norm([Math.cos(th + 0.5), Math.sin(th + 0.5), 0]), k = Math.hypot(p[0] - q[0], p[1] - q[1]) * 0.22;
+        var w = guide(function (v) { var s = Math.sin(Math.PI * v) * k; return [p[0] + (q[0] - p[0]) * v + bow[0] * s, p[1] + (q[1] - p[1]) * v + bow[1] * s, p[2] + (q[2] - p[2]) * v]; },
+          40, false, function () { return [0, 0, 1]; }, false);
+        w.width = function () { return 0.04 * Math.hypot(p[0], p[1]); };
+        w.thick = 0.008; w.res = 40; w.weight = 0.22 * Math.hypot(p[0], p[1]); w.stray = 0; w.wavy = 0.3;
+        w.len = function (R) { var s0 = R() * 0.05; return [s0, 1 - s0 - R() * 0.05]; };
+        guides.push(w);
+      })(th);
+    }
+    // pearls along the spiral, growing outward
+    for (var t = T0 + 0.7; t < T1 - 0.1; t += 0.33) { var p = sp(t), r = Math.hypot(p[0], p[1]); pearls.push([p[0], p[1], p[2] + 0.05, 0.008 + 0.03 * r]); }
+    var end = sp(T1), tang = norm([end[0] - sp(T1 - 0.05)[0], end[1] - sp(T1 - 0.05)[1], 0]);
+    return {
+      guides: guides, cling: 0.45, radius: 0.85, pearls: pearls,
+      emitters: [{ p: end, dir: norm([-1, 0.45, 0.2]), jit: 0.25, len: 0.26, sig0: 0.04, sigK: 0.1, w: 1 }],
+      clingU: function (gg, R, tip) { return tip ? 1 - Math.abs(gauss(R)) * 0.08 : Math.pow(R(), 0.6); },
+      view: function (t) { return [0.38 + 0.05 * Math.sin(t * 0.06), 0.3 * Math.sin(t * 0.07), 0.3 - t * 0.035]; },
+      counts: { fibres: [3000, 1400], dust: [9000, 3500], spheres: [40, 22], latent: [7000, 2500], halo: [0, 0] },
+      layout: { wide: [0.06, 0.35, 0.36], tall: [0.2, 0.46, 0.74] }
+    };
+  }
+
+  // C6: a citation tree: one trunk of silk branching into finer and finer strands,
+  // each strand ending in a pearl (papers citing papers), the tips shedding dust.
+  function tree(R0) {
+    var guides = [], pearls = [], emitters = [];
+    function rot(d, ay, az) { // turn a direction up/down (ay) and in/out (az)
+      var c = Math.cos(ay), s = Math.sin(ay), x = d[0] * c - d[1] * s, y = d[0] * s + d[1] * c;
+      c = Math.cos(az); s = Math.sin(az);
+      return norm([x * c - d[2] * s, y, x * s + d[2] * c]);
+    }
+    function branch(p0, d0, len, w, level) {
+      var d1 = rot(d0, gauss(R0) * 0.22, gauss(R0) * 0.18), bend = gauss(R0) * 0.18 * len;
+      var c1 = [p0[0] + d0[0] * len * 0.5 - d0[1] * bend, p0[1] + d0[1] * len * 0.5 + d0[0] * bend, p0[2] + d0[2] * len * 0.5];
+      var p1 = [p0[0] + d1[0] * len, p0[1] + d1[1] * len, p0[2] + d1[2] * len];
+      var g = guide(function (v) {
+        var a = (1 - v) * (1 - v), b = 2 * v * (1 - v), c = v * v;
+        return [a * p0[0] + b * c1[0] + c * p1[0], a * p0[1] + b * c1[1] + c * p1[1], a * p0[2] + b * c1[2] + c * p1[2]];
+      }, 160, false, function () { return [0, 0.2, 1]; }, true);
+      var w0 = w, w1 = w * 0.72, leaf = level >= 4;
+      g.width = function (u) { return w0 + (w1 - w0) * u; };
+      g.thick = Math.max(0.006, w * 0.16);
+      g.twist = function (u) { return 0.6 * u * (level % 2 ? 1 : -1); };
+      g.fray = leaf ? function (u) { return smooth(0.75, 1, u) * 0.6; } : function () { return 0; };
+      g.len = function (R) { var s0 = R() * 0.04; return [s0, 1 - s0 - R() * (leaf ? 0.25 : 0.02)]; };
+      g.res = 60 + 80 * len; g.weight = Math.pow(w, 1.25) * len * 6; g.stray = 0.01; g.wavy = 0.5; g.leaf = leaf;
+      guides.push(g);
+      if (leaf) {
+        pearls.push([p1[0], p1[1], p1[2], 0.024 + R0() * 0.016]);
+        if (R0() < 0.4) emitters.push({ p: p1, dir: d1, jit: 0.4, len: 0.14, sig0: 0.02, sigK: 0.12, w: 0.2 });
+        return;
+      }
+      var n = level === 0 ? 3 : (R0() < 0.4 ? 3 : 2), fan = 0.42 + 0.08 * level;
+      for (var i = 0; i < n; i++) {
+        var f = n === 1 ? 0 : i / (n - 1) - 0.5;
+        var start = [p1[0] - d1[0] * len * 0.06, p1[1] - d1[1] * len * 0.06, p1[2] - d1[2] * len * 0.06];
+        branch(start, rot(d1, f * fan * 2 + gauss(R0) * 0.1, gauss(R0) * 0.4), len * (0.78 + R0() * 0.12), w * 0.62, level + 1);
+      }
+    }
+    branch([-3.4, -1.0, 0], norm([1, 0.2, 0]), 2.3, 0.13, 0);
+    return {
+      guides: guides, emitters: emitters, cling: 0.5, radius: 1.75, pearls: pearls,
+      clingU: function (g, R, tip) { return tip && g.leaf ? 0.8 + R() * 0.2 : R(); },
+      view: function (t) { return [0.1 + 0.04 * Math.sin(t * 0.07), -0.12 + 0.12 * Math.sin(t * 0.06), 0.02 * Math.sin(t * 0.05)]; },
+      counts: { fibres: [3400, 1500], dust: [7000, 2800], spheres: [30, 16], latent: [7000, 2500], halo: [0, 0] },
+      layout: { wide: [0.3, -0.18, 0.62], tall: [0.25, 0.5, 0.95] }
+    };
+  }
+
+  var SHAPES = { trefoil: trefoil, helix: helix, orb: orb, mobius: mobius, nautilus: nautilus, tree: tree };
   function makeShape(name) {
     var S = (SHAPES[name] || trefoil)(rng(77));
     S.wsum = 0;
@@ -442,7 +556,7 @@
     'layout(location=2) in vec3 aNormal;',
     'layout(location=3) in vec3 aTangent;',
     'layout(location=4) in vec4 aData;', // seed, s along fibre, fray, ao (negative = stray)
-    'out vec3 vN; out vec3 vT; out vec3 vV; out float vAlpha; out float vAo; out float vE; out float vFray; out float vTone;',
+    'out vec3 vN; out vec3 vT; out vec3 vV; out float vAlpha; out float vAo; out float vE; out float vFray; out float vTone; out float vS; out float vG;',
     'void main(){',
     '  float seed = aData.x, s = aData.y, fz = aData.z, ao = abs(aData.w);',
     '  float breath = 1.0 + 0.07 * sin(uTime * 0.55 + aCenter.x * 2.2 + seed * 2.0) + 0.05 * sin(uTime * 0.9 + s * 9.0 + seed * 30.0) * fz;',
@@ -457,12 +571,17 @@
     '  vV = -vp;',
     '  float taper = smoothstep(0.0, 0.14, s) * smoothstep(1.0, 0.86, s);',
     '  vAlpha = taper * (1.0 - 0.72 * fz) * (aData.w < 0.0 ? 0.45 : 1.0) * (1.0 - smoothstep(0.3, 0.85, e));',
-    '  vAo = ao; vE = e; vFray = fz; vTone = 0.72 + 0.4 * h11(seed * 53.0);',
+    '  vAo = ao; vE = e; vFray = fz; vTone = 0.72 + 0.4 * h11(seed * 53.0); vS = s; vG = dot(wp, vec3(0.32, 0.22, 0.12)) + 0.5;',
     '}'
   ].join('\n');
 
   var SHADE = [
-    'uniform vec3 uLo, uMid, uHi, uAcc; uniform float uDark, uAlpha;',
+    'uniform vec3 uLo, uMid, uHi, uAcc, uAcc2, uDust; uniform float uDark, uAlpha, uMode, uSpec;',
+    // violet -> teal -> gold, cycling (iridescent and aurora materials)
+    'uniform vec3 uPa, uPb, uPc;',
+    'vec3 pal3(float k){ k = fract(k) * 3.0;',
+    '  return k < 1.0 ? mix(uPa, uPb, k) : k < 2.0 ? mix(uPb, uPc, k - 1.0) : mix(uPc, uPa, k - 2.0); }',
+    'bool glowy(){ return (uMode > 1.5 && uMode < 2.5) || uMode > 3.5; }',
     'const vec3 L1 = vec3(-0.45, 0.72, 0.53);',
     'const vec3 L2 = vec3(0.7, -0.15, 0.7);'
   ].join('\n');
@@ -471,7 +590,7 @@
     '#version 300 es',
     'precision highp float;',
     SHADE,
-    'in vec3 vN; in vec3 vT; in vec3 vV; in float vAlpha; in float vAo; in float vE; in float vFray; in float vTone;',
+    'in vec3 vN; in vec3 vT; in vec3 vV; in float vAlpha; in float vAo; in float vE; in float vFray; in float vTone; in float vS; in float vG;',
     'out vec4 o;',
     'void main(){',
     '  vec3 N = normalize(vN), T = normalize(vT), V = normalize(vV);',
@@ -485,13 +604,20 @@
     '  float d = pow(wrap, 1.5) * vAo * vTone + fill;',
     '  vec3 c = mix(uLo, uMid, smoothstep(0.0, 0.85, d));',
     '  c = mix(c, uHi, smoothstep(0.55, 1.1, d) * 0.7);',
-    '  c += uHi * spec * (0.55 + 0.45 * wrap) * vAo;',
+    '  c += uHi * spec * uSpec * (0.55 + 0.45 * wrap) * vAo;',
+    // materials: 1 iridescent sheen, 2 glow from within, 3 aurora gradient along the fibres
+    '  if (uMode > 0.5 && uMode < 1.5) { vec3 ir = pal3(dot(N, V) * 0.9 + vG * 0.8 + vS * 0.35); c = mix(c, c * (0.45 + 0.9 * ir) + ir * 0.12, 0.85) + ir * spec * 0.35; }',
+    '  if (uMode > 1.5 && uMode < 2.5) { c = uMid * (0.2 + 0.7 * d) + uHi * spec * 1.1 + uAcc * 0.08; }',
+    '  if (uMode > 3.5) { vec3 ir = pal3(dot(N, V) * 0.7 + vG * 0.9 + vS * 0.3); c = ir * (0.18 + 0.8 * d) + uHi * spec * 1.0; }',
+    '  if (uMode > 2.5 && uMode < 3.5) { float f = clamp(vS * 0.55 + vG * 0.6 - 0.05, 0.0, 1.0); vec3 gr = f < 0.55 ? mix(uAcc, uAcc2, f / 0.55) : mix(uAcc2, vec3(1.0, 0.78, 0.36), (f - 0.55) / 0.45);',
+    '    c = mix(c, gr * (0.3 + 0.85 * d) + uHi * spec * 0.45, 0.82); }',
     '  c = mix(c, mix(uLo, uAcc, 0.5), 0.07 * (1.0 - d));', // accent in the shadows
         // depth: far strands lighter and fainter
     '  c = min(c, uHi * 0.985);',
     '  float far = smoothstep(-0.6, 0.9, length(vV) - uFarRef);',
     '  float a = vAlpha * uAlpha * (0.85 - 0.25 * far);',
-    '  o = vec4(c * a, a);',
+    '  if (glowy()) c *= 0.5;',
+    '  o = vec4(c * a, glowy() ? a * 0.3 : a);',
     '}'
   ].join('\n').replace('uniform vec3 uLo', 'uniform float uFarRef; uniform vec3 uLo');
 
@@ -539,13 +665,17 @@
     // palette: pearl, sand, taupe, graphite
     '  float k = fract(vSeed * 7.13);',
     '  if (vType > 0.5 && vType < 1.5) k *= 0.8;',
-    '  vec3 sand = vec3(0.78, 0.69, 0.55);',
+    '  vec3 sand = uDust;',
     '  vec3 base = k < 0.28 ? mix(uMid, uHi, 0.75) : k < 0.6 ? mix(uMid, sand, 0.7) : k < 0.86 ? mix(uLo, sand, 0.5) : mix(uLo, uMid, 0.15);',
     '  base = mix(base, uAcc, 0.1 * step(0.95, fract(vSeed * 3.7)));',
     '  vec3 c = base * (0.35 + 0.75 * diff) + uHi * spec * (vType > 0.5 && vType < 1.5 ? 0.9 : 0.35) + uHi * rim * 0.12;',
     '  if (vSize < 3.0) c = base * (0.55 + 0.45 * diff);',
+    '  if (uMode > 0.5 && uMode < 1.5) c = mix(c, c * (0.5 + 0.8 * pal3(vSeed * 3.1 + N.x * 0.4)), 0.7);',
+    '  if (uMode > 2.5 && uMode < 3.5) c = mix(c, pal3(vSeed * 0.66) * (0.5 + 0.6 * diff), 0.55);',
+    '  if (uMode > 3.5) c = mix(pal3(vSeed * 0.9), uHi, spec * 0.8 + (vType > 0.5 && vType < 1.5 ? 0.25 : 0.1)) * (0.6 + 0.6 * diff);',
+    '  if (uMode > 1.5 && uMode < 2.5) c = mix(uDust, uHi, spec + (vType > 0.5 && vType < 1.5 ? 0.3 : 0.0)) * (0.55 + 0.6 * diff);',
     '  float a = vAlpha * edge * uAlpha;',
-    '  o = vec4(c * a, a);',
+    '  o = vec4(c * a, glowy() ? a * 0.4 : a);',
     '}'
   ].join('\n');
 
@@ -568,6 +698,36 @@
       u[name] = gl.getUniformLocation(p, info.name);
     }
     return { p: p, u: u };
+  }
+
+  // ------------------------------------------------------------ materials
+  // name: [light, dark] -> { lo, mid, hi (fibre shade ramp), dust, mode, spec }; "acc" in a
+  // ramp means the page accent, so the colour themes still steer glow and aurora.
+  var MATERIALS = {
+    silver: [{ lo: [0.22, 0.19, 0.155], mid: [0.64, 0.585, 0.51], hi: [1.0, 0.98, 0.94], dust: [0.78, 0.69, 0.55] },
+      { lo: [0.16, 0.15, 0.14], mid: [0.55, 0.52, 0.48], hi: [0.97, 0.95, 0.91], dust: [0.7, 0.64, 0.55] }],
+    champagne: [{ lo: [0.3, 0.2, 0.08], mid: [0.8, 0.62, 0.34], hi: [1.0, 0.95, 0.8], dust: [0.86, 0.68, 0.38] },
+      { lo: [0.2, 0.13, 0.05], mid: [0.72, 0.55, 0.28], hi: [1.0, 0.93, 0.74], dust: [0.82, 0.64, 0.34] }],
+    ink: [{ lo: [0.03, 0.03, 0.04], mid: [0.13, 0.13, 0.15], hi: [0.52, 0.52, 0.55], dust: [0.2, 0.2, 0.21], spec: 0.45 }],
+    iridescent: [{ lo: [0.3, 0.3, 0.36], mid: [0.74, 0.74, 0.8], hi: [1.0, 1.0, 1.0], dust: [0.76, 0.76, 0.86], mode: 1 },
+      { lo: [0.14, 0.14, 0.18], mid: [0.6, 0.6, 0.68], hi: [1.0, 1.0, 1.0], dust: [0.7, 0.7, 0.8], mode: 1 }],
+    glow: [{ lo: 'acc', mid: 'acc', hi: [1.0, 0.96, 1.0], dust: 'acc', mode: 2, spec: 1 }],
+    aurora: [{ lo: [0.2, 0.2, 0.26], mid: [0.66, 0.66, 0.72], hi: [1.0, 1.0, 1.0], dust: [0.7, 0.7, 0.8], mode: 3 },
+      { lo: [0.12, 0.12, 0.16], mid: [0.56, 0.56, 0.64], hi: [1.0, 1.0, 1.0], dust: [0.66, 0.66, 0.76], mode: 3 }],
+    // cool iridescence: ice blue -> violet -> teal, on a pale cool ground (ice) or glowing on deep night blue (night)
+    ice: [{ lo: [0.2, 0.25, 0.34], mid: [0.66, 0.74, 0.86], hi: [1.0, 1.0, 1.0], dust: [0.62, 0.72, 0.88], mode: 1, pal: 'cool' },
+      { lo: [0.1, 0.13, 0.2], mid: [0.5, 0.6, 0.76], hi: [1.0, 1.0, 1.0], dust: [0.55, 0.66, 0.85], mode: 1, pal: 'cool' }],
+    night: [{ lo: [0.05, 0.07, 0.14], mid: [0.5, 0.62, 0.9], hi: [0.95, 0.98, 1.0], dust: [0.6, 0.75, 1.0], mode: 4, pal: 'cool', spec: 1 }]
+  };
+  var PALETTES = {
+    warm: [[0.56, 0.36, 1.0], [0.18, 0.82, 0.78], [1.0, 0.78, 0.34]],
+    cool: [[0.55, 0.84, 1.0], [0.6, 0.48, 1.0], [0.26, 0.9, 0.84]]
+  };
+  function material(name, dark, acc, acc2) {
+    var m = MATERIALS[name], v = m[dark && m[1] ? 1 : 0];
+    function c(x, k) { return x === 'acc' ? [acc[0] * k + (1 - k) * 0.9, acc[1] * k + (1 - k) * 0.9, acc[2] * k + (1 - k) * 0.95] : x; }
+    return { lo: c(v.lo, 0.35).map(function (q) { return v.lo === 'acc' ? q * 0.3 : q; }), mid: c(v.mid, 0.85), hi: v.hi, dust: c(v.dust, 0.6),
+      mode: v.mode || 0, spec: v.spec === undefined ? 1 : v.spec, pal: PALETTES[v.pal || 'warm'] };
   }
 
   // ------------------------------------------------------------ init
@@ -605,6 +765,8 @@
     var fib = buildFibres(S, R, S.counts.fibres[Q], small ? 0.7 : 1);
     var pts = buildParticles(S, R, { dust: S.counts.dust[Q], spheres: S.counts.spheres[Q], latent: S.counts.latent[Q], halo: S.counts.halo[Q] });
     var alpha = +(opts.alpha || container.getAttribute('data-alpha') || 1);
+    var layout = S.layout, lo = opts.layout || container.getAttribute('data-layout');
+    if (lo) { lo = lo.split(';').map(function (x) { return x.split(',').map(Number); }); layout = { wide: lo[0], tall: lo[1] || S.layout.tall }; }
 
     // fibre buffers
     var vaoF = gl.createVertexArray();
@@ -646,13 +808,12 @@
 
     function colours() {
       var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-      var src = container.closest('.pm') || container;
-      var acc = parseColor(getComputedStyle(src).getPropertyValue('--pm-accent') || '#7c3aed');
-      if (dark) {
-        col = { lo: [0.16, 0.15, 0.14], mid: [0.55, 0.52, 0.48], hi: [0.97, 0.95, 0.91], acc: acc, dark: 1, far: 0 };
-      } else {
-        col = { lo: [0.22, 0.19, 0.155], mid: [0.64, 0.585, 0.51], hi: [1.0, 0.98, 0.94], acc: acc, dark: 0, far: 0 };
-      }
+      var src = container.closest('.pm') || container, cs = getComputedStyle(src);
+      var acc = parseColor(cs.getPropertyValue('--pm-accent') || '#7c3aed');
+      var acc2 = parseColor(cs.getPropertyValue('--pm-accent-2') || '#2563eb');
+      var name = (src.getAttribute && src.getAttribute('data-cx-mat')) || container.getAttribute('data-mat') || 'silver';
+      col = material(MATERIALS[name] ? name : 'silver', dark, acc, acc2);
+      col.acc = acc; col.acc2 = acc2; col.dark = dark ? 1 : 0;
     }
     colours();
 
@@ -666,7 +827,7 @@
       var fov = 26 * Math.PI / 180, tn = Math.tan(fov / 2);
       // place the object: layout = [x, y, size] in screen units; size is its radius as a
       // share of the half-height (landscape) or the half-width (portrait)
-      var L = aspect >= 1 ? S.layout.wide : S.layout.tall;
+      var L = aspect >= 1 ? layout.wide : layout.tall;
       dist = S.radius / (L[2] * tn * (aspect >= 1 ? 1 : aspect));
       offX = L[0] * tn * dist * aspect; offY = L[1] * tn * dist;
       proj = perspective(fov, aspect, 0.1, 40);
@@ -686,8 +847,9 @@
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.enable(gl.BLEND);
-      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-      gl.enable(gl.DEPTH_TEST);
+      var glow = col.mode === 2 || col.mode === 4; // additive light on a dark ground: no occlusion
+      if (glow) gl.blendFunc(gl.ONE, gl.ONE); else gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      if (glow) gl.disable(gl.DEPTH_TEST); else gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
       var V = view(t);
       var easedIntro = intro > 0 ? intro * intro * (3 - 2 * intro) : 0;
@@ -706,6 +868,11 @@
         gl.uniform3fv(P.u.uMid, col.mid);
         gl.uniform3fv(P.u.uHi, col.hi);
         gl.uniform3fv(P.u.uAcc, col.acc);
+        if (P.u.uAcc2) gl.uniform3fv(P.u.uAcc2, col.acc2);
+        if (P.u.uDust) gl.uniform3fv(P.u.uDust, col.dust);
+        if (P.u.uMode) gl.uniform1f(P.u.uMode, col.mode);
+        if (P.u.uSpec) gl.uniform1f(P.u.uSpec, col.spec);
+        if (P.u.uPa) { gl.uniform3fv(P.u.uPa, col.pal[0]); gl.uniform3fv(P.u.uPb, col.pal[1]); gl.uniform3fv(P.u.uPc, col.pal[2]); }
         if (P.u.uDark) gl.uniform1f(P.u.uDark, col.dark);
         if (P.u.uAlpha) gl.uniform1f(P.u.uAlpha, alpha);
         if (P.u.uFarRef) gl.uniform1f(P.u.uFarRef, dist);
@@ -795,7 +962,7 @@
     var recolour = function () { colours(); if (!raf && visible) draw(); };
     new MutationObserver(recolour).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     var pm = container.closest('.pm');
-    if (pm) new MutationObserver(recolour).observe(pm, { attributes: true, attributeFilter: ['data-pm-theme'] });
+    if (pm) new MutationObserver(recolour).observe(pm, { attributes: true, attributeFilter: ['data-pm-theme', 'data-cx-mat'] });
     canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); alive = false; fallback(); });
 
     resize();
@@ -827,6 +994,34 @@
       io.observe(el);
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
-  else auto();
+  // material swatches in the page's design switcher ([data-set-mat]); "auto" = each
+  // variant's own default. Remembered like the other choices (?mat=ink, localStorage).
+  var MAT_NAMES = ['silver', 'champagne', 'ink', 'iridescent', 'glow', 'aurora', 'ice', 'night'];
+  function mats() {
+    var pm = document.getElementById('pm');
+    if (!pm) return;
+    function mark() {
+      var m = pm.getAttribute('data-cx-mat') || 'auto';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-set-mat]'), function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-set-mat') === m ? 'true' : 'false');
+      });
+    }
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-set-mat]');
+      if (!b) return;
+      var m = b.getAttribute('data-set-mat');
+      if (MAT_NAMES.indexOf(m) >= 0) pm.setAttribute('data-cx-mat', m); else { m = 'auto'; pm.removeAttribute('data-cx-mat'); }
+      try { localStorage.setItem('pm-cx-mat', m); } catch (er) { /* private mode */ }
+      try {
+        var u = new URL(location.href);
+        if (m === 'auto') u.searchParams.delete('mat'); else u.searchParams.set('mat', m);
+        history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+      } catch (er) { /* old browser */ }
+      mark();
+    });
+    mark();
+  }
+  function start() { auto(); mats(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();

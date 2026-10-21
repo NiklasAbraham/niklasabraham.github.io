@@ -1,5 +1,6 @@
 <!-- ============================================================ hero C: silk objects (WebGL, assets/js/papermanager-hero-c.js)
-     Three full-bleed sub-versions; .pm[data-hero-c] picks one (C1 when unset). -->
+     Seven full-bleed sub-versions; .pm[data-hero-c] picks one (C1 when unset),
+     .pm[data-cx-mat] overrides the material (else each variant's data-mat, else silver). -->
 {%- assign cx_repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
 {%- assign cx_docs = 'https://niklasabraham.github.io/PaperManager/' -%}
 {%- assign cx_img = '/assets/papermanager/' | relative_url -%}
@@ -48,6 +49,46 @@
     <canvas class="pm-cx-canvas" role="img"
       aria-label="A sphere of silk ribbons orbiting an inner graph of pearls joined by fine threads, in a halo of dust. Move the pointer over it and it bursts apart, then settles back."></canvas>
     <img class="pm-cx-still" data-src="{{ cx_img }}hero-c3-still.webp" alt="" width="1440" height="900" decoding="async">
+    <div class="pm-cx-copy">
+      <div class="pm-cx-head">{{ cx_head }}</div>
+      <div class="pm-cx-side">{{ cx_text }}</div>
+    </div>
+  </div>
+
+  <div class="pm-cx pm-cx-4" data-name="Möbius" data-pm-hero-c data-shape="mobius">
+    <canvas class="pm-cx-canvas" role="img"
+      aria-label="A Möbius strip of fine silky fibres, one continuous surface, one stretch of it unravelling into dust. Move the pointer over it and it bursts apart, then settles back."></canvas>
+    <img class="pm-cx-still" data-src="{{ cx_img }}hero-c4-still.webp" alt="" width="1440" height="900" decoding="async">
+    <div class="pm-cx-copy">
+      <div class="pm-cx-head">{{ cx_head }}</div>
+      <div class="pm-cx-side">{{ cx_text }}</div>
+    </div>
+  </div>
+
+  <div class="pm-cx pm-cx-5" data-name="Nautilus" data-pm-hero-c data-shape="nautilus">
+    <canvas class="pm-cx-canvas" role="img"
+      aria-label="A nautilus spiral of silk growing outward, its chambers walled by fine threads, pearls along it growing with it. Move the pointer over it and it bursts apart, then settles back."></canvas>
+    <img class="pm-cx-still" data-src="{{ cx_img }}hero-c5-still.webp" alt="" width="1440" height="900" decoding="async">
+    <div class="pm-cx-copy">
+      <div class="pm-cx-head">{{ cx_head }}</div>
+      <div class="pm-cx-side">{{ cx_text }}</div>
+    </div>
+  </div>
+
+  <div class="pm-cx pm-cx-6" data-name="Citation tree" data-pm-hero-c data-shape="tree">
+    <canvas class="pm-cx-canvas" role="img"
+      aria-label="A trunk of silk branching into finer and finer strands, each ending in a pearl, like papers citing papers. Move the pointer over it and it bursts apart, then settles back."></canvas>
+    <img class="pm-cx-still" data-src="{{ cx_img }}hero-c6-still.webp" alt="" width="1440" height="900" decoding="async">
+    <div class="pm-cx-copy">
+      <div class="pm-cx-head">{{ cx_head }}</div>
+      <div class="pm-cx-side">{{ cx_text }}</div>
+    </div>
+  </div>
+
+  <div class="pm-cx pm-cx-7" data-name="Sphere (side)" data-pm-hero-c data-shape="orb" data-layout="0.56,0.0,0.88;0,0.5,0.78" data-mat="night">
+    <canvas class="pm-cx-canvas" role="img"
+      aria-label="A sphere of silk ribbons in a cool iridescent glow, orbiting an inner graph of pearls joined by fine threads. Move the pointer over it and it bursts apart, then settles back."></canvas>
+    <img class="pm-cx-still" data-src="{{ cx_img }}hero-c7-still.webp" alt="" width="1440" height="900" decoding="async">
     <div class="pm-cx-copy">
       <div class="pm-cx-head">{{ cx_head }}</div>
       <div class="pm-cx-side">{{ cx_text }}</div>

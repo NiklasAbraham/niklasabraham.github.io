@@ -1,38 +1,71 @@
 /*******************************************************************************
  * PaperManager hero C: silk objects (markup in _includes/papermanager-hero-c.html,
- * WebGL in assets/js/papermanager-hero-c.js). Three full-bleed sub-versions on a
- * warm-grey band that runs up under the glass navbar:
- *   C1 knot   object huge and centred, a faint word behind, text along the bottom
- *   C2 book   object bleeding off the right edge, text in a left column
- *   C3 brain  object behind a big centred headline
+ * WebGL in assets/js/papermanager-hero-c.js). Seven full-bleed sub-versions that
+ * run up under the glass navbar:
+ *   C1 knot       object huge and centred, a faint word behind, text along the bottom
+ *   C2 helix      object bleeding off the right edge, text in a left column
+ *   C3 sphere     object behind a big centred headline
+ *   C4 Möbius     object on the left, text in a right column
+ *   C5 nautilus   object above, text centred along the bottom
+ *   C6 tree       object across the lower half, text top left
+ *   C7 sphere     C3's sphere on the right in a cool glow, text in a left column
+ * Each has a material (fibres, dust and ground): the variant's data-mat, or the
+ * visitor's pick on .pm[data-cx-mat].
  ******************************************************************************/
 
-.pm-cx-hero {
-  --cx-bg: #e9e7e3;
-  --cx-ink: #141414;
-  --cx-ink-2: #45433f;
-  --cx-word: rgba(70, 60, 50, 0.055);
-  --cx-btn-bg: #141414;
-  --cx-btn-ink: #ffffff;
-  --cx-rule: rgba(20, 20, 20, 0.35);
-  html[data-theme='dark'] & {
-    --cx-bg: #1b1a18;
-    --cx-ink: #f2efea;
-    --cx-ink-2: #c4bfb7;
-    --cx-word: rgba(255, 250, 240, 0.045);
-    --cx-btn-bg: #f2efea;
-    --cx-btn-ink: #141414;
-    --cx-rule: rgba(242, 239, 234, 0.35);
+// ground and text colours per material: bg, ink, ink-2, word, button bg, button ink, rule
+$cx-light: (
+  'silver': (#e9e7e3, #141414, #45433f, rgba(70, 60, 50, 0.055), #141414, #fff, rgba(20, 20, 20, 0.35)),
+  'champagne': (#f2ebdf, #1d160c, #5a4c38, rgba(120, 90, 40, 0.07), #1d160c, #fff, rgba(29, 22, 12, 0.35)),
+  'ink': (#f7f4ec, #0e0e10, #3d3c3a, rgba(0, 0, 0, 0.05), #0e0e10, #fff, rgba(14, 14, 16, 0.4)),
+  'iridescent': (#ecebf1, #121218, #4a4a58, rgba(60, 60, 90, 0.06), #121218, #fff, rgba(18, 18, 24, 0.35)),
+  'glow': (#0c0a14, #f3f0ff, #c3bdd8, rgba(200, 180, 255, 0.05), #f3f0ff, #0c0a14, rgba(243, 240, 255, 0.35)),
+  'aurora': (#eeeef3, #121218, #4a4a58, rgba(60, 60, 90, 0.06), #121218, #fff, rgba(18, 18, 24, 0.35)),
+  'ice': (#e7edf3, #0f1722, #44516a, rgba(40, 70, 110, 0.06), #0f1722, #fff, rgba(15, 23, 34, 0.35)),
+  'night': (#070b18, #eef3ff, #b6c2dc, rgba(150, 190, 255, 0.05), #eef3ff, #070b18, rgba(238, 243, 255, 0.35)),
+);
+// dark site theme: materials that have a dark ground of their own
+$cx-dark: (
+  'silver': (#1b1a18, #f2efea, #c4bfb7, rgba(255, 250, 240, 0.045), #f2efea, #141414, rgba(242, 239, 234, 0.35)),
+  'champagne': (#1c1710, #f5ecdc, #cbbb9f, rgba(255, 230, 180, 0.05), #f5ecdc, #1c1710, rgba(245, 236, 220, 0.35)),
+  'iridescent': (#111218, #f0f0f6, #b8b8c8, rgba(220, 220, 255, 0.045), #f0f0f6, #111218, rgba(240, 240, 246, 0.35)),
+  'aurora': (#101016, #f0f0f6, #b8b8c8, rgba(220, 220, 255, 0.045), #f0f0f6, #101016, rgba(240, 240, 246, 0.35)),
+  'ice': (#0e141d, #eef3fa, #b2bfd2, rgba(180, 210, 255, 0.045), #eef3fa, #0e141d, rgba(238, 243, 250, 0.35)),
+);
+@mixin cx-vars($c) {
+  --cx-bg: #{nth($c, 1)};
+  --cx-ink: #{nth($c, 2)};
+  --cx-ink-2: #{nth($c, 3)};
+  --cx-word: #{nth($c, 4)};
+  --cx-btn-bg: #{nth($c, 5)};
+  --cx-btn-ink: #{nth($c, 6)};
+  --cx-rule: #{nth($c, 7)};
+}
+.pm-cx { @include cx-vars(map-get($cx-light, 'silver')); }
+html[data-theme='dark'] .pm-cx { @include cx-vars(map-get($cx-dark, 'silver')); }
+@each $name, $c in $cx-light {
+  // the variant's own default, then the visitor's pick (higher specificity)
+  .pm-cx[data-mat='#{$name}'], .pm[data-cx-mat='#{$name}'] .pm-cx.pm-cx { @include cx-vars($c); }
+  @if map-has-key($cx-dark, $name) {
+    html[data-theme='dark'] .pm-cx[data-mat='#{$name}'], html[data-theme='dark'] .pm[data-cx-mat='#{$name}'] .pm-cx.pm-cx { @include cx-vars(map-get($cx-dark, $name)); }
+  } @else {
+    html[data-theme='dark'] .pm-cx[data-mat='#{$name}'], html[data-theme='dark'] .pm[data-cx-mat='#{$name}'] .pm-cx.pm-cx { @include cx-vars($c); }
   }
 }
+// the night grounds carry a faint glow of the page accent
+.pm-cx[data-mat='glow'], .pm[data-cx-mat='glow'] .pm-cx.pm-cx {
+  background-image: radial-gradient(ellipse at 62% 42%, color-mix(in srgb, var(--pm-accent) 22%, transparent), transparent 62%);
+}
+.pm-cx[data-mat='night'], .pm[data-cx-mat='night'] .pm-cx.pm-cx {
+  background-image: radial-gradient(ellipse at 68% 45%, rgba(70, 120, 255, 0.16), transparent 60%);
+}
+.pm[data-cx-mat]:not([data-cx-mat='glow']):not([data-cx-mat='night']) .pm-cx.pm-cx { background-image: none; }
 
 // .pm-hv.pm-cx-hero outranks the generic .pm-hv-c rules
 .pm-hv.pm-cx-hero {
   margin-top: -3rem; // up under the site's glass navbar, like hero B
   margin-bottom: 1.5rem;
   padding: 0;
-  background: var(--cx-bg);
-  color: var(--cx-ink-2);
 }
 
 .pm-cx {
@@ -42,6 +75,8 @@
   min-height: 100svh;
   overflow: hidden;
   isolation: isolate;
+  background-color: var(--cx-bg);
+  color: var(--cx-ink-2);
   touch-action: pan-y; // vertical scrolling stays with the page, taps and sideways drags burst
   // soft fade into the page below
   &::after {
@@ -57,7 +92,7 @@
   }
 }
 .pm-cx-1 { display: block; }
-@each $n in 2, 3 {
+@each $n in 2, 3, 4, 5, 6, 7 {
   .pm[data-hero-c='#{$n}'] .pm-cx-1 { display: none; }
   .pm[data-hero-c='#{$n}'] .pm-cx-#{$n} { display: block; }
 }
@@ -127,6 +162,7 @@
   letter-spacing: -0.045em;
 }
 .pm-cx-l1, .pm-cx-l2 { display: block; }
+.pm .pm-cx-hero .pm-cx-title span { color: inherit; } // the site styles bare spans
 .pm-cx-l2 {
   font-family: 'Newsreader', 'Times New Roman', Georgia, serif;
   font-style: italic;
@@ -199,10 +235,21 @@
   align-items: end;
 }
 
-// ---------------------------------------------------------------- C2: left column
+// ---------------------------------------------------------------- C2, C7: left column / C4: right column
 
-.pm-cx-2.pm-cx {
-  // flex, but only while shown (the display rules above pick block/none)
+// a soft wash of the background behind a side column, in case dust drifts in
+@mixin cx-side-wash($side) {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  #{$side}: 0;
+  width: max(46%, calc((100% - 1180px) / 2 + 40rem));
+  background: linear-gradient(to if($side == left, right, left), color-mix(in srgb, var(--cx-bg) 92%, transparent) 70%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+.pm-cx-2.pm-cx, .pm-cx-7.pm-cx, .pm-cx-4.pm-cx {
   .pm-cx-copy {
     position: absolute;
     left: 0;
@@ -211,18 +258,56 @@
     transform: translateY(-46%);
   }
   .pm-cx-head, .pm-cx-side { max-width: 34rem; }
-  &::before {
-    // a soft wash of the background behind the text column, in case dust drifts in
+  .pm-cx-head { margin-bottom: 1.6rem; }
+  .pm-cx-title { font-size: clamp(2.8rem, 5.4vw, 5.4rem); }
+}
+.pm-cx-2.pm-cx::before, .pm-cx-7.pm-cx::before { @include cx-side-wash(left); }
+.pm-cx-4.pm-cx {
+  &::before { @include cx-side-wash(right); }
+  .pm-cx-copy { display: flex; flex-direction: column; align-items: flex-end; }
+  .pm-cx-head, .pm-cx-side { width: 34rem; }
+}
+
+// ---------------------------------------------------------------- C5: centred along the bottom
+
+.pm-cx-5 {
+  .pm-cx-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: clamp(3rem, 7vh, 5.5rem);
+    text-align: center;
+  }
+  .pm-cx-eyebrow { justify-content: center; }
+  .pm-cx-head { margin-bottom: 1.1rem; }
+  .pm-cx-title { font-size: clamp(2.4rem, 4.2vw, 4rem); }
+  .pm-cx-lede { margin-left: auto !important; margin-right: auto !important; max-width: 54rem !important; font-size: 0.97rem !important; }
+  .pm-cx-ctas { justify-content: center; }
+}
+
+// ---------------------------------------------------------------- C6: top left, beside the crown
+
+.pm-cx-6 {
+  .pm-cx-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: clamp(5.5rem, 12vh, 8.5rem);
+  }
+  .pm-cx-head, .pm-cx-side { max-width: 34rem; }
+  .pm-cx-head { margin-bottom: 1.4rem; }
+  &.pm-cx::before {
+    // wash behind the column, fading out towards the crown on the right
     content: '';
     position: absolute;
-    inset: 0 auto 0 0;
+    left: 0;
+    top: 0;
     width: max(46%, calc((100% - 1180px) / 2 + 40rem));
-    background: linear-gradient(to right, color-mix(in srgb, var(--cx-bg) 92%, transparent) 70%, transparent);
+    height: 72%;
+    background: radial-gradient(ellipse at 0% 20%, color-mix(in srgb, var(--cx-bg) 92%, transparent) 55%, transparent 75%);
     pointer-events: none;
     z-index: 2;
   }
-  .pm-cx-head { margin-bottom: 1.6rem; }
-  .pm-cx-title { font-size: clamp(2.8rem, 5.4vw, 5.4rem); }
 }
 
 // ---------------------------------------------------------------- C3: centred over the object
@@ -264,8 +349,8 @@
 
 @media (max-width: 700px) {
   .pm-cx { min-height: max(100svh, 760px); }
-  .pm-cx-2.pm-cx::before { display: none; }
-  .pm-cx-1 .pm-cx-copy, .pm-cx-2.pm-cx .pm-cx-copy, .pm-cx-3 .pm-cx-copy {
+  .pm-cx.pm-cx::before { display: none; }
+  .pm-cx.pm-cx .pm-cx-copy {
     top: auto;
     bottom: 3.2rem;
     transform: none;
@@ -273,7 +358,9 @@
   }
   .pm-cx-head { margin-bottom: 1.2rem !important; }
   .pm-cx-word { font-size: 8rem; top: 30%; }
-  .pm .pm-cx-hero .pm-cx-title, .pm-cx-2.pm-cx .pm-cx-title { font-size: 2.55rem; }
+  .pm .pm-cx-hero .pm-cx-title, .pm-cx.pm-cx .pm-cx-title { font-size: 2.55rem; }
+  .pm-cx-4.pm-cx .pm-cx-copy { align-items: stretch; }
+  .pm-cx-4.pm-cx .pm-cx-head, .pm-cx-4.pm-cx .pm-cx-side { width: auto; }
   .pm-cx-3 .pm-cx-title { font-size: 2.8rem !important; }
   .pm-cx-3 .pm-cx-copy::before { top: 20%; height: 50%; }
   .pm .pm-cx-hero p.pm-cx-eyebrow { font-size: 0.7rem; letter-spacing: 0.1em; gap: 0.7rem; margin-bottom: 0.8rem; }
@@ -283,7 +370,7 @@
   .pm .pm-cx-hero a.pm-cx-btn { width: 100%; justify-content: center; }
 }
 
-// ---------------------------------------------------------------- design switcher: C1-C3 chips
+// ---------------------------------------------------------------- design switcher: C1-C7 chips, material swatches
 // (the switcher lives in _papermanager.scss; these chips only show while C is picked)
 
 .pm-switch-sub {
@@ -295,4 +382,35 @@
   border-right: 1px solid var(--pm-border);
   .pm[data-hero='c'] & { display: flex; }
   .pm-switch & [data-set-hero] { width: auto; min-width: 28px; padding: 0 6px; border-radius: 13px; font-size: 0.7rem; }
+}
+
+.pm-switch-mat {
+  display: none;
+  align-items: center;
+  gap: 3px;
+  margin-right: 3px;
+  padding-right: 6px;
+  border-right: 1px solid var(--pm-border);
+  .pm[data-hero='c'] & { display: flex; }
+  [data-set-mat] {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background: var(--sw);
+    cursor: pointer;
+    &[aria-pressed='true'] { outline: 2px solid var(--pm-ink); outline-offset: 1px; }
+  }
+}
+
+// with C picked the switcher carries 7 chips and 9 swatches: let it wrap on narrow screens
+@media (max-width: 1100px) {
+  .pm[data-hero='c'] .pm-switch {
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    border-radius: 18px;
+    .pm-switch-body { flex-wrap: wrap; justify-content: center; row-gap: 6px; }
+    .pm-switch-set { flex-wrap: wrap; justify-content: center; }
+  }
 }

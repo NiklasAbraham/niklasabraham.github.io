@@ -809,9 +809,9 @@
   var nameEl = sw && sw.querySelector('.pm-switch-name');
 
   function setHero(h, save) {
-    // hero C has sub-versions C1-C3 (.pm[data-hero-c]); plain "c" keeps the current one
+    // hero C has sub-versions C1-C7 (.pm[data-hero-c]); plain "c" keeps the current one
     var sub = '';
-    if (/^c[1-3]$/.test(h)) { sub = h[1]; h = 'c'; }
+    if (/^c[1-7]$/.test(h)) { sub = h[1]; h = 'c'; }
     else if (h === 'c') sub = root.getAttribute('data-hero-c') || '1';
     if (HEROES.indexOf(h) < 0) h = 'a';
     root.setAttribute('data-hero', h);
