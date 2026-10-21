@@ -211,6 +211,16 @@
     transform: translateY(-46%);
   }
   .pm-cx-head, .pm-cx-side { max-width: 34rem; }
+  &::before {
+    // a soft wash of the background behind the text column, in case dust drifts in
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: max(46%, calc((100% - 1180px) / 2 + 40rem));
+    background: linear-gradient(to right, color-mix(in srgb, var(--cx-bg) 92%, transparent) 70%, transparent);
+    pointer-events: none;
+    z-index: 2;
+  }
   .pm-cx-head { margin-bottom: 1.6rem; }
   .pm-cx-title { font-size: clamp(2.8rem, 5.4vw, 5.4rem); }
 }
@@ -254,6 +264,7 @@
 
 @media (max-width: 700px) {
   .pm-cx { min-height: max(100svh, 760px); }
+  .pm-cx-2.pm-cx::before { display: none; }
   .pm-cx-1 .pm-cx-copy, .pm-cx-2.pm-cx .pm-cx-copy, .pm-cx-3 .pm-cx-copy {
     top: auto;
     bottom: 3.2rem;

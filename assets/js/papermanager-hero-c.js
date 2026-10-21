@@ -256,18 +256,18 @@
       clingU: function (gg, R, tip) { return tip ? tips[Math.floor(R() * 3)] + gauss(R) * 0.045 : R(); },
       view: function (t) { return [0.16 + 0.08 * Math.sin(t * 0.07), 0.32 * Math.sin(t * 0.09 + 0.6), 0.25 + t * 0.045]; },
       counts: { fibres: [2600, 1200], dust: [15000, 6000], spheres: [80, 40], latent: [9000, 3000], halo: [0, 0] },
-      layout: { wide: [0.0, 0.15, 0.55], tall: [0, 0.45, 0.8] }
+      layout: { wide: [0.0, 0.27, 0.43], tall: [0, 0.52, 0.74] }
     };
   }
 
   // C2: a double helix: two silk ribbons wound round each other, base pairs strung
   // between them as thin threads with pearls; both ends fray into dust.
   function helix() {
-    var guides = [], emitters = [], L = 2.5, r = 0.4, w = TAU / 1.7;
+    var guides = [], emitters = [], L1 = 1.0, L2 = 3.2, r = 0.4, w = TAU / 1.7; // short to the left (the text), long off the right edge
     function frayEnds(u) { return Math.max(smooth(0.1, 0, u), smooth(0.9, 1, u)); }
     [0, Math.PI].forEach(function (ph) {
       var g = guide(function (v) {
-        var x = -L + 2 * L * v;
+        var x = -L1 + (L1 + L2) * v;
         return [x, r * Math.cos(w * x + ph), r * Math.sin(w * x + ph)];
       }, 1600, false, function (p) { return norm([0, p[1], p[2]]); }, true);
       g.width = function (u) { return 0.11 * (1 - 0.3 * frayEnds(u)); };
@@ -281,7 +281,7 @@
     });
     // base pairs: short straight bundles across the axis
     var rungs = [];
-    for (var x = -L + 0.32; x < L - 0.3; x += 0.17) {
+    for (var x = -L1 + 0.32; x < L2 - 0.3; x += 0.17) {
       (function (x) {
         var a = [x, r * Math.cos(w * x), r * Math.sin(w * x)], b = [x, -a[1], -a[2]];
         var g = guide(function (v) { return [a[0], a[1] + (b[1] - a[1]) * v, a[2] + (b[2] - a[2]) * v]; }, 24, false,
@@ -295,7 +295,9 @@
       })(x);
     }
     [-1, 1].forEach(function (sd) {
-      emitters.push({ p: [sd * L * 0.97, 0, 0], dir: [sd, 0, 0], jit: 0.18, len: 0.45, sig0: 0.08, sigK: 0.14, w: 1, box: [0, r * 0.6, r * 0.6] });
+      // the left end only sheds a little dust, downwards, away from the text column
+      emitters.push(sd > 0 ? { p: [L2 * 0.97, 0, 0], dir: [1, 0, 0], jit: 0.18, len: 0.45, sig0: 0.08, sigK: 0.14, w: 1, box: [0, r * 0.6, r * 0.6] }
+        : { p: [-L1 * 0.97, 0, 0], dir: [-0.3, -1, 0.2], jit: 0.25, len: 0.18, sig0: 0.06, sigK: 0.1, w: 0.3, box: [0, r * 0.5, r * 0.5] });
     });
     return {
       guides: guides, emitters: emitters, cling: 0.34, radius: 1.6,
@@ -303,7 +305,7 @@
       pearls: rungs, // a pearl at each end of every base pair
       view: function (t) { return [0.25 + 0.04 * Math.sin(t * 0.07), -0.35 + 0.12 * Math.sin(t * 0.06), 0.42, t * 0.22]; },
       counts: { fibres: [3000, 1400], dust: [12000, 5000], spheres: [50, 26], latent: [8000, 3000], halo: [0, 0] },
-      layout: { wide: [0.52, 0.02, 0.9], tall: [0.1, 0.42, 1.05] }
+      layout: { wide: [0.5, 0.0, 0.9], tall: [0.12, 0.5, 1.3] }
     };
   }
 
