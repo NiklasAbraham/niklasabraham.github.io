@@ -11,7 +11,7 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
 {%- assign repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
 {%- assign docs = 'https://niklasabraham.github.io/PaperManager/' -%}
 <div class="pm" id="pm" data-hero="a">
-<script>(function(){var r=document.getElementById('pm'),H='abcdef',T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(H.indexOf(h)<0||h.length!==1)h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(h.length===1&&H.indexOf(h)>=0)r.setAttribute('data-hero',h);if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);})();</script>
+<script>(function(){var r=document.getElementById('pm'),H=/^([abdef]|c[1-3]?)$/,T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(!H.test(h))h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(H.test(h)){r.setAttribute('data-hero',h[0]);if(h[0]==='c')r.setAttribute('data-hero-c',h[1]||'1');}if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);})();</script>
 
 <!-- Design preview: pick a hero and a colour theme for this page (owner tool, not part of the content) -->
 <div class="pm-switch" id="pm-switch" role="group" aria-label="Design preview">
@@ -23,7 +23,12 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
     <div class="pm-switch-set">
       <button type="button" data-set-hero="a" title="A · Classic">A</button>
       <button type="button" data-set-hero="b" title="B · Banner">B</button>
-      <button type="button" data-set-hero="c" title="C · Silk infinity">C</button>
+      <button type="button" data-set-hero="c" title="C · Silk">C</button>
+      <span class="pm-switch-sub" role="group" aria-label="Hero C versions">
+        <button type="button" data-set-hero="c1" title="C1 · Knot">C1</button>
+        <button type="button" data-set-hero="c2" title="C2 · Double helix">C2</button>
+        <button type="button" data-set-hero="c3" title="C3 · Knowledge sphere">C3</button>
+      </span>
       <button type="button" data-set-hero="d" title="D · Knowledge constellation">D</button>
       <button type="button" data-set-hero="e" title="E · Editorial">E</button>
       <button type="button" data-set-hero="f" title="F · Annotated page">F</button>

@@ -1,34 +1,57 @@
-<!-- ============================================================ hero C: silk infinity (WebGL, assets/js/papermanager-hero-c.js) -->
-{%- assign c2_repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
-{%- assign c2_docs = 'https://niklasabraham.github.io/PaperManager/' -%}
-{%- assign c2_still = '/assets/papermanager/hero-c-still.webp' | relative_url -%}
-<section class="pm-hv pm-hv-c pm-hero-c2" data-hero="c" data-name="Silk infinity" data-pm-hero-c>
-  <div class="pm-c2-stage">
-    <span class="pm-c2-word" aria-hidden="true">papers</span>
-    <canvas class="pm-c2-canvas" role="img"
-      aria-label="A twisted infinity knot spun from thousands of fine silky fibres, with dust and small pearls fraying off both ends. Move the pointer over it and it bursts apart, then settles back."></canvas>
-    <img class="pm-c2-still" data-src="{{ c2_still }}" alt="" width="1400" height="641" decoding="async">
-    <noscript><img class="pm-c2-still pm-c2-still-on" src="{{ c2_still }}" alt="" width="1400" height="641"></noscript>
-  </div>
-  <div class="pm-c2-copy">
-    <div class="pm-c2-head">
-      <p class="pm-c2-eyebrow"><span class="pm-c2-rule" aria-hidden="true"></span>Open source research tool</p>
-      <h1 class="pm-c2-title"><span class="pm-c2-l1">A second brain</span> <span class="pm-c2-l2">for research papers.</span></h1>
-    </div>
-    <div class="pm-c2-side">
-      <p class="pm-c2-lede">
+<!-- ============================================================ hero C: silk objects (WebGL, assets/js/papermanager-hero-c.js)
+     Three full-bleed sub-versions; .pm[data-hero-c] picks one (C1 when unset). -->
+{%- assign cx_repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
+{%- assign cx_docs = 'https://niklasabraham.github.io/PaperManager/' -%}
+{%- assign cx_img = '/assets/papermanager/' | relative_url -%}
+{%- capture cx_arrow -%}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10.5M9 4l4 4-4 4"/></svg>{%- endcapture -%}
+{%- capture cx_text -%}
+      <p class="pm-cx-lede">
         PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
         Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
         draws the ideas on each page as interactive visualisations, and maps how every paper in a
         project connects to the others.
       </p>
-      <div class="pm-c2-ctas">
-        <a class="pm-c2-btn" href="{{ c2_repo }}">Code on GitHub
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10.5M9 4l4 4-4 4"/></svg></a>
-        <a class="pm-c2-link" href="#setup">Set it up
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10.5M9 4l4 4-4 4"/></svg></a>
-        <a class="pm-c2-link" href="{{ c2_docs }}">Documentation</a>
+      <div class="pm-cx-ctas">
+        <a class="pm-cx-btn" href="{{ cx_repo }}">Code on GitHub {{ cx_arrow }}</a>
+        <a class="pm-cx-link" href="#setup">Set it up {{ cx_arrow }}</a>
+        <a class="pm-cx-link" href="{{ cx_docs }}">Documentation</a>
       </div>
+{%- endcapture -%}
+{%- capture cx_head -%}
+      <p class="pm-cx-eyebrow"><span class="pm-cx-rule" aria-hidden="true"></span>Open source research tool</p>
+      <h1 class="pm-cx-title"><span class="pm-cx-l1">A second brain</span> <span class="pm-cx-l2">for research papers.</span></h1>
+{%- endcapture -%}
+<section class="pm-hv pm-hv-c pm-cx-hero pm-bleed" data-hero="c" data-name="Silk">
+
+  <div class="pm-cx pm-cx-1" data-name="Knot" data-pm-hero-c data-shape="trefoil">
+    <span class="pm-cx-word" aria-hidden="true">papers</span>
+    <canvas class="pm-cx-canvas" role="img"
+      aria-label="A trefoil knot spun from thousands of fine silky fibres, its three loops fraying into dust and small pearls. Move the pointer over it and it bursts apart, then settles back."></canvas>
+    <img class="pm-cx-still" data-src="{{ cx_img }}hero-c1-still.webp" alt="" width="1440" height="900" decoding="async">
+    <div class="pm-cx-copy">
+      <div class="pm-cx-head">{{ cx_head }}</div>
+      <div class="pm-cx-side">{{ cx_text }}</div>
     </div>
   </div>
+
+  <div class="pm-cx pm-cx-2" data-name="Double helix" data-pm-hero-c data-shape="helix">
+    <canvas class="pm-cx-canvas" role="img"
+      aria-label="A double helix of two silk ribbons wound round each other, base pairs strung between them as fine threads with pearls, both ends fraying into dust. Move the pointer over it and it bursts apart, then settles back."></canvas>
+    <img class="pm-cx-still" data-src="{{ cx_img }}hero-c2-still.webp" alt="" width="1440" height="900" decoding="async">
+    <div class="pm-cx-copy">
+      <div class="pm-cx-head">{{ cx_head }}</div>
+      <div class="pm-cx-side">{{ cx_text }}</div>
+    </div>
+  </div>
+
+  <div class="pm-cx pm-cx-3" data-name="Knowledge sphere" data-pm-hero-c data-shape="orb" data-alpha="0.92">
+    <canvas class="pm-cx-canvas" role="img"
+      aria-label="A sphere of silk ribbons orbiting an inner graph of pearls joined by fine threads, in a halo of dust. Move the pointer over it and it bursts apart, then settles back."></canvas>
+    <img class="pm-cx-still" data-src="{{ cx_img }}hero-c3-still.webp" alt="" width="1440" height="900" decoding="async">
+    <div class="pm-cx-copy">
+      <div class="pm-cx-head">{{ cx_head }}</div>
+      <div class="pm-cx-side">{{ cx_text }}</div>
+    </div>
+  </div>
+
 </section>

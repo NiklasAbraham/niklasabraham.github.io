@@ -1,66 +1,68 @@
 /*******************************************************************************
- * PaperManager hero C: silk infinity (markup in _includes/papermanager-hero-c.html,
- * WebGL in assets/js/papermanager-hero-c.js). A warm-grey card: a fibre knot
- * over a huge faint word, then an editorial headline with the lede beside it.
+ * PaperManager hero C: silk objects (markup in _includes/papermanager-hero-c.html,
+ * WebGL in assets/js/papermanager-hero-c.js). Three full-bleed sub-versions on a
+ * warm-grey band that runs up under the glass navbar:
+ *   C1 knot   object huge and centred, a faint word behind, text along the bottom
+ *   C2 book   object bleeding off the right edge, text in a left column
+ *   C3 brain  object behind a big centred headline
  ******************************************************************************/
 
-.pm-hero-c2 {
-  --c2-bg: #e9e7e3;
-  --c2-ink: #141414;
-  --c2-ink-2: #45433f;
-  --c2-muted: #6d6a64;
-  --c2-word: rgba(70, 60, 50, 0.055);
-  --c2-btn-bg: #141414;
-  --c2-btn-ink: #ffffff;
-  --c2-rule: rgba(20, 20, 20, 0.35);
+.pm-cx-hero {
+  --cx-bg: #e9e7e3;
+  --cx-ink: #141414;
+  --cx-ink-2: #45433f;
+  --cx-word: rgba(70, 60, 50, 0.055);
+  --cx-btn-bg: #141414;
+  --cx-btn-ink: #ffffff;
+  --cx-rule: rgba(20, 20, 20, 0.35);
   html[data-theme='dark'] & {
-    --c2-bg: #1b1a18;
-    --c2-ink: #f2efea;
-    --c2-ink-2: #c4bfb7;
-    --c2-muted: #9a958d;
-    --c2-word: rgba(255, 250, 240, 0.045);
-    --c2-btn-bg: #f2efea;
-    --c2-btn-ink: #141414;
-    --c2-rule: rgba(242, 239, 234, 0.35);
+    --cx-bg: #1b1a18;
+    --cx-ink: #f2efea;
+    --cx-ink-2: #c4bfb7;
+    --cx-word: rgba(255, 250, 240, 0.045);
+    --cx-btn-bg: #f2efea;
+    --cx-btn-ink: #141414;
+    --cx-rule: rgba(242, 239, 234, 0.35);
   }
 }
 
-// .pm-hv.pm-hero-c2 outranks the generic .pm-hv-c rules
-.pm-hv.pm-hero-c2 {
-  margin: 0.6rem 0 0.5rem;
+// .pm-hv.pm-cx-hero outranks the generic .pm-hv-c rules
+.pm-hv.pm-cx-hero {
+  margin-top: -3rem; // up under the site's glass navbar, like hero B
+  margin-bottom: 1.5rem;
   padding: 0;
-  border-radius: 22px;
-  background: var(--c2-bg);
-  color: var(--c2-ink-2);
+  background: var(--cx-bg);
+  color: var(--cx-ink-2);
+}
+
+.pm-cx {
+  display: none;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
   overflow: hidden;
   isolation: isolate;
-}
-
-.pm-c2-stage {
-  position: relative;
-  height: clamp(330px, 44vw, 540px);
   touch-action: pan-y; // vertical scrolling stays with the page, taps and sideways drags burst
-  user-select: none;
-  -webkit-user-select: none;
+  // soft fade into the page below
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 72px;
+    background: linear-gradient(to bottom, transparent, var(--global-bg-color));
+    pointer-events: none;
+    z-index: 2;
+  }
+}
+.pm-cx-1 { display: block; }
+@each $n in 2, 3 {
+  .pm[data-hero-c='#{$n}'] .pm-cx-1 { display: none; }
+  .pm[data-hero-c='#{$n}'] .pm-cx-#{$n} { display: block; }
 }
 
-.pm-c2-word {
-  position: absolute;
-  left: 50%;
-  top: 52%;
-  transform: translate(-50%, -50%);
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 500;
-  font-size: clamp(6.5rem, 23vw, 19rem);
-  line-height: 1;
-  letter-spacing: -0.065em;
-  color: var(--c2-word);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.pm-c2-canvas, .pm-c2-still {
+.pm-cx-canvas, .pm-cx-still {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -68,25 +70,41 @@
   display: block;
   z-index: 1;
 }
-.pm-c2-canvas { cursor: crosshair; }
+.pm-cx-canvas { cursor: crosshair; }
+// the still image only shows when WebGL is missing (the script sets is-still and its src)
+.pm-cx-still { display: none; object-fit: cover; }
+.pm-cx.is-still .pm-cx-still { display: block; }
+.pm-cx.is-still .pm-cx-canvas { display: none; }
 
-// the still image only shows when WebGL is missing (the script sets is-still and its src) or without JS
-.pm-c2-still { display: none; object-fit: cover; }
-.pm-hero-c2.is-still .pm-c2-still, .pm-c2-still-on { display: block; }
-.pm-hero-c2.is-still .pm-c2-canvas { display: none; }
-
-.pm-c2-copy {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 2.5rem;
-  align-items: end;
-  padding: 0 clamp(1.25rem, 3.4vw, 2.6rem) clamp(1.5rem, 3vw, 2.4rem);
-  margin-top: -1.2rem;
+.pm-cx-word {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: clamp(7rem, 26vw, 26rem);
+  line-height: 1;
+  letter-spacing: -0.065em;
+  color: var(--cx-word);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
 }
 
-.pm .pm-hero-c2 p.pm-c2-eyebrow {
+// ---------------------------------------------------------------- copy
+
+.pm-cx-copy {
+  position: relative;
+  z-index: 3;
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  pointer-events: none; // the scene under the text still reacts; links opt back in
+  a { pointer-events: auto; }
+}
+
+.pm .pm-cx-hero p.pm-cx-eyebrow {
   display: flex;
   align-items: center;
   gap: 0.9rem;
@@ -96,20 +114,20 @@
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--c2-ink-2);
+  color: var(--cx-ink-2);
 }
-.pm-c2-rule { flex: none; width: 2.2rem; height: 1px; background: var(--c2-rule); }
+.pm-cx-rule { flex: none; width: 2.2rem; height: 1px; background: var(--cx-rule); }
 
-.pm .pm-hero-c2 .pm-c2-title {
+.pm .pm-cx-hero .pm-cx-title {
   margin: 0;
-  color: var(--c2-ink);
-  font-size: clamp(2.5rem, 5.5vw, 4.6rem);
+  color: var(--cx-ink);
+  font-size: clamp(2.6rem, 5.6vw, 5.2rem);
   line-height: 1;
   font-weight: 500;
   letter-spacing: -0.045em;
 }
-.pm-c2-l1, .pm-c2-l2 { display: block; }
-.pm-c2-l2 {
+.pm-cx-l1, .pm-cx-l2 { display: block; }
+.pm-cx-l2 {
   font-family: 'Newsreader', 'Times New Roman', Georgia, serif;
   font-style: italic;
   font-weight: 380;
@@ -119,15 +137,15 @@
   margin-top: 0.06em;
 }
 
-.pm .pm-hero-c2 .pm-c2-lede {
+.pm .pm-cx-hero .pm-cx-lede {
   margin: 0 0 1.5rem;
   max-width: 34rem;
-  font-size: 1rem;
+  font-size: 1.02rem;
   line-height: 1.6;
-  color: var(--c2-ink-2);
+  color: var(--cx-ink-2);
 }
 
-.pm-c2-ctas {
+.pm-cx-ctas {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -135,14 +153,14 @@
   svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; transition: transform 0.2s ease; }
 }
 
-.pm .pm-hero-c2 a.pm-c2-btn {
+.pm .pm-cx-hero a.pm-cx-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.8rem 1.35rem;
+  padding: 0.85rem 1.4rem;
   border-radius: 999px;
-  background: var(--c2-btn-bg);
-  color: var(--c2-btn-ink);
+  background: var(--cx-btn-bg);
+  color: var(--cx-btn-ink);
   font-size: 0.98rem;
   font-weight: 500;
   text-decoration: none;
@@ -152,34 +170,118 @@
   &:focus-visible { outline: 2px solid var(--pm-accent); outline-offset: 3px; }
 }
 
-.pm .pm-hero-c2 a.pm-c2-link {
+.pm .pm-cx-hero a.pm-cx-link {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   padding: 0.3rem 0 0.35rem;
-  color: var(--c2-ink);
+  color: var(--cx-ink);
   font-size: 0.98rem;
   font-weight: 500;
   text-decoration: none;
-  border-bottom: 1px solid var(--c2-rule);
-  transition: border-color 0.2s ease, color 0.2s ease;
+  border-bottom: 1px solid var(--cx-rule);
+  transition: border-color 0.2s ease;
   &:hover { border-bottom-color: var(--pm-accent); }
   &:hover svg { transform: translateX(3px); }
   &:focus-visible { outline: 2px solid var(--pm-accent); outline-offset: 3px; }
 }
 
-@media (max-width: 900px) {
-  .pm-c2-copy { grid-template-columns: 1fr; gap: 1.4rem; margin-top: -0.6rem; }
+// ---------------------------------------------------------------- C1: text along the bottom
+
+.pm-cx-1 .pm-cx-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(3.5rem, 8vh, 6rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: end;
 }
 
-@media (max-width: 560px) {
-  .pm-hv.pm-hero-c2 { border-radius: 18px; }
-  .pm-c2-stage { height: 270px; }
-  .pm-c2-word { font-size: 7rem; top: 50%; }
-  .pm .pm-hero-c2 .pm-c2-title { font-size: 2.45rem; }
-  .pm .pm-hero-c2 p.pm-c2-eyebrow { font-size: 0.7rem; letter-spacing: 0.1em; gap: 0.7rem; margin-bottom: 0.8rem; }
-  .pm-c2-rule { width: 1.6rem; }
-  .pm .pm-hero-c2 .pm-c2-lede { font-size: 0.97rem; }
-  .pm-c2-ctas { gap: 0.6rem 1.3rem; }
-  .pm .pm-hero-c2 a.pm-c2-btn { width: 100%; justify-content: center; }
+// ---------------------------------------------------------------- C2: left column
+
+.pm-cx-2.pm-cx {
+  // flex, but only while shown (the display rules above pick block/none)
+  .pm-cx-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-46%);
+  }
+  .pm-cx-head, .pm-cx-side { max-width: 34rem; }
+  .pm-cx-head { margin-bottom: 1.6rem; }
+  .pm-cx-title { font-size: clamp(2.8rem, 5.4vw, 5.4rem); }
+}
+
+// ---------------------------------------------------------------- C3: centred over the object
+
+.pm-cx-3 {
+  .pm-cx-copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-42%);
+    text-align: center;
+    &::before {
+      // a soft wash of the background behind the words so they read over the fibres
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(1100px, 110%);
+      height: 120%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(closest-side, color-mix(in srgb, var(--cx-bg) 90%, transparent) 55%, transparent);
+      z-index: -1;
+    }
+  }
+  .pm-cx-eyebrow { justify-content: center; }
+  .pm-cx-title { font-size: clamp(3rem, 7.4vw, 7rem); }
+  .pm-cx-head { margin-bottom: 2rem; }
+  .pm-cx-lede { margin-left: auto !important; margin-right: auto !important; max-width: 40rem !important; }
+  .pm-cx-ctas { justify-content: center; }
+}
+
+// ---------------------------------------------------------------- phones and small tablets:
+// the object sits in the upper part (see layout.tall in the script), text at the bottom
+
+@media (max-width: 900px) {
+  .pm-cx-1 .pm-cx-copy { grid-template-columns: 1fr; gap: 1.4rem; }
+}
+
+@media (max-width: 700px) {
+  .pm-cx { min-height: max(100svh, 760px); }
+  .pm-cx-1 .pm-cx-copy, .pm-cx-2.pm-cx .pm-cx-copy, .pm-cx-3 .pm-cx-copy {
+    top: auto;
+    bottom: 3.2rem;
+    transform: none;
+    display: block;
+  }
+  .pm-cx-head { margin-bottom: 1.2rem !important; }
+  .pm-cx-word { font-size: 8rem; top: 30%; }
+  .pm .pm-cx-hero .pm-cx-title, .pm-cx-2.pm-cx .pm-cx-title { font-size: 2.55rem; }
+  .pm-cx-3 .pm-cx-title { font-size: 2.8rem !important; }
+  .pm-cx-3 .pm-cx-copy::before { top: 20%; height: 50%; }
+  .pm .pm-cx-hero p.pm-cx-eyebrow { font-size: 0.7rem; letter-spacing: 0.1em; gap: 0.7rem; margin-bottom: 0.8rem; }
+  .pm-cx-rule { width: 1.6rem; }
+  .pm .pm-cx-hero .pm-cx-lede { font-size: 0.97rem; margin-bottom: 1.2rem; }
+  .pm-cx-ctas { gap: 0.6rem 1.3rem; }
+  .pm .pm-cx-hero a.pm-cx-btn { width: 100%; justify-content: center; }
+}
+
+// ---------------------------------------------------------------- design switcher: C1-C3 chips
+// (the switcher lives in _papermanager.scss; these chips only show while C is picked)
+
+.pm-switch-sub {
+  display: none;
+  gap: 2px;
+  margin: 0 3px;
+  padding: 0 3px;
+  border-left: 1px solid var(--pm-border);
+  border-right: 1px solid var(--pm-border);
+  .pm[data-hero='c'] & { display: flex; }
+  .pm-switch & [data-set-hero] { width: auto; min-width: 28px; padding: 0 6px; border-radius: 13px; font-size: 0.7rem; }
 }

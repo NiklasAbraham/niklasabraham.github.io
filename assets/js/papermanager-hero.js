@@ -809,17 +809,23 @@
   var nameEl = sw && sw.querySelector('.pm-switch-name');
 
   function setHero(h, save) {
+    // hero C has sub-versions C1-C3 (.pm[data-hero-c]); plain "c" keeps the current one
+    var sub = '';
+    if (/^c[1-3]$/.test(h)) { sub = h[1]; h = 'c'; }
+    else if (h === 'c') sub = root.getAttribute('data-hero-c') || '1';
     if (HEROES.indexOf(h) < 0) h = 'a';
     root.setAttribute('data-hero', h);
+    if (sub) root.setAttribute('data-hero-c', sub);
     if (sw) {
       Array.prototype.forEach.call(sw.querySelectorAll('[data-set-hero]'), function (b) {
-        b.setAttribute('aria-pressed', b.getAttribute('data-set-hero') === h ? 'true' : 'false');
+        var v = b.getAttribute('data-set-hero');
+        b.setAttribute('aria-pressed', v === h || (sub && v === 'c' + sub) ? 'true' : 'false');
       });
-      var sec = root.querySelector('.pm-hv-' + h);
-      if (nameEl && sec) nameEl.textContent = h.toUpperCase() + ' · ' + sec.getAttribute('data-name');
+      var sec = root.querySelector(sub ? '.pm-cx-' + sub : '.pm-hv-' + h);
+      if (nameEl && sec) nameEl.textContent = (h + sub).toUpperCase() + ' · ' + sec.getAttribute('data-name');
     }
     scenes.forEach(function (s) { s.setActive(s.hero === h); });
-    if (save) { store('pm-hero', h); setParam('hero', h); }
+    if (save) { store('pm-hero', h + sub); setParam('hero', h + sub); }
   }
   function setTheme(t, save) {
     if (THEMES.indexOf(t) < 0) t = 'violet';

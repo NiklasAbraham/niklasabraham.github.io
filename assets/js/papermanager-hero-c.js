@@ -1,5 +1,8 @@
-/* PaperManager hero C: a silky infinity knot of fine fibres and dust, drawn
- * with plain WebGL2 (no library, nothing loaded from elsewhere).
+/* PaperManager hero C: silky objects of fine fibres and dust, drawn with plain
+ * WebGL2 (no library, nothing loaded from elsewhere). Three shapes, picked by
+ * data-shape on the container: "trefoil" (C1, a knot), "helix" (C2, a double
+ * helix with base pairs) and "orb" (C3, silk orbits round an inner graph of
+ * pearls and threads).
  *
  * Near the pointer the fibres and the dust burst outward and spring back
  * (a damped impulse response per burst, evaluated in the vertex shader, so the
@@ -12,7 +15,8 @@
  * load; or call PMHeroC.init(container, opts) yourself.
  *   opts.preserve  keep the drawing buffer (for capturing a still image)
  *   opts.time      start at this scene time (seconds)
- *   opts.noIntro   skip the "dust condenses into the knot" intro
+ *   opts.noIntro   skip the "dust condenses into the shape" intro
+ *   opts.shape     overrides data-shape; opts.alpha (or data-alpha) fades the object
  */
 (function () {
   'use strict';
@@ -59,162 +63,319 @@
   function rotZ(a) { var c = Math.cos(a), s = Math.sin(a); return new Float32Array([c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]); }
   function translate(x, y, z) { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1]); }
 
-  // ------------------------------------------------------------ the knot
-  // A lemniscate of Bernoulli lifted into 3D (the two strands pass over and
-  // under at the crossing), reparametrised by arc length; u in [0, 1) runs
-  // once round. u = 0 is the right tip, u = 0.5 the left tip, the crossings
-  // sit at u = 0.25 and 0.75.
-  var CURVE_N = 2048;
-  function buildCurve() {
-    var A = 1.18, raw = [], len = [0], i;
-    for (i = 0; i <= CURVE_N * 4; i++) {
-      var t = i / (CURVE_N * 4) * TAU, s = Math.sin(t), c = Math.cos(t), den = 1 + s * s;
-      raw.push([A * c / den, 1.08 * A * s * c / den + 0.05 * Math.sin(2 * t + 0.6), 0.3 * s + 0.06 * Math.sin(3 * t)]);
-      if (i) {
-        var p = raw[i - 1], q = raw[i];
-        len.push(len[i - 1] + Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]));
+  // ------------------------------------------------------------ guides
+  // Every shape is a set of guides: curves with a moving frame, along which a
+  // bundle of fibres runs as a ribbon (wide axis / thin axis, optional twist),
+  // plus emitters that stream dust off the shape and an optional dust halo.
+  function v3(x, y, z) { return [x, y, z]; }
+  function norm(a) { var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+  function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+
+  // f(v) -> [x,y,z] for v in [0,1]; hint(p, v) -> a vector roughly along the thin axis
+  function guide(f, n, closed, hint, reparam) {
+    var raw = [], len = [0], i, m = reparam ? n * 4 : n;
+    for (i = 0; i <= m; i++) {
+      raw.push(f(closed ? i / m : i / m));
+      if (i) len.push(len[i - 1] + Math.hypot(raw[i][0] - raw[i - 1][0], raw[i][1] - raw[i - 1][1], raw[i][2] - raw[i - 1][2]));
+    }
+    var total = len[m], P = new Float32Array(n * 3), j = 0, cnt = closed ? n : n;
+    for (i = 0; i < cnt; i++) {
+      var k, a, b;
+      if (reparam) {
+        var target = (closed ? i / n : i / (n - 1)) * total;
+        while (j < m - 1 && len[j + 1] < target) j++;
+        k = (target - len[j]) / (len[j + 1] - len[j] || 1);
+        a = raw[j]; b = raw[j + 1];
+      } else {
+        var fv = closed ? i / n * m : i / (n - 1) * m, j0 = Math.min(m - 1, Math.floor(fv));
+        k = fv - j0; a = raw[j0]; b = raw[j0 + 1];
       }
+      for (var d = 0; d < 3; d++) P[i * 3 + d] = a[d] + (b[d] - a[d]) * k;
     }
-    var total = len[len.length - 1], P = new Float32Array(CURVE_N * 3), j = 0;
-    for (i = 0; i < CURVE_N; i++) {
-      var target = i / CURVE_N * total;
-      while (len[j + 1] < target) j++;
-      var k = (target - len[j]) / (len[j + 1] - len[j] || 1);
-      for (var d = 0; d < 3; d++) P[i * 3 + d] = raw[j][d] + (raw[j + 1][d] - raw[j][d]) * k;
+    var T = new Float32Array(n * 3), N = new Float32Array(n * 3), B = new Float32Array(n * 3);
+    for (i = 0; i < n; i++) {
+      var ia = closed ? (i + 1) % n : Math.min(n - 1, i + 1), ib = closed ? (i - 1 + n) % n : Math.max(0, i - 1);
+      var tt = norm([P[ia * 3] - P[ib * 3], P[ia * 3 + 1] - P[ib * 3 + 1], P[ia * 3 + 2] - P[ib * 3 + 2]]);
+      var p = [P[i * 3], P[i * 3 + 1], P[i * 3 + 2]];
+      var nn = norm(cross(hint(p, i / (closed ? n : n - 1)), tt));
+      var bb = cross(tt, nn);
+      T.set(tt, i * 3); N.set(nn, i * 3); B.set(bb, i * 3);
     }
-    // frames: T along the curve, N in the "page" plane, B roughly towards the viewer
-    var T = new Float32Array(CURVE_N * 3), N = new Float32Array(CURVE_N * 3), B = new Float32Array(CURVE_N * 3);
-    for (i = 0; i < CURVE_N; i++) {
-      var a = ((i + 1) % CURVE_N) * 3, b = ((i - 1 + CURVE_N) % CURVE_N) * 3;
-      var tx = P[a] - P[b], ty = P[a + 1] - P[b + 1], tz = P[a + 2] - P[b + 2], tl = Math.hypot(tx, ty, tz);
-      tx /= tl; ty /= tl; tz /= tl;
-      var nx = -ty, ny = tx, nz = 0, nl = Math.hypot(nx, ny) || 1; // cross(z, T)
-      nx /= nl; ny /= nl;
-      var bx = ty * nz - tz * ny, by = tz * nx - tx * nz, bz = tx * ny - ty * nx;
-      T.set([tx, ty, tz], i * 3); N.set([nx, ny, nz], i * 3); B.set([bx, by, bz], i * 3);
-    }
-    return { P: P, T: T, N: N, B: B };
+    return {
+      P: P, T: T, N: N, B: B, n: n, closed: closed, length: total,
+      width: function () { return 0.1; }, thick: 0.03,
+      twist: function () { return 0; }, fray: function () { return 0; }, out: null,
+      len: function (R) { return [R(), 0.5 + R() * 0.5]; }, weight: 1, stray: 0.02, res: 160, spread: 0.35
+    };
   }
-  function sampleCurve(C, u, out) {
-    var f = (u - Math.floor(u)) * CURVE_N, i0 = Math.floor(f) % CURVE_N, i1 = (i0 + 1) % CURVE_N, k = f - Math.floor(f);
+  function sampleGuide(g, u, out) {
+    var f, i0, i1, k;
+    if (g.closed) { f = (u - Math.floor(u)) * g.n; i0 = Math.floor(f) % g.n; i1 = (i0 + 1) % g.n; k = f - Math.floor(f); }
+    else { f = Math.max(0, Math.min(1, u)) * (g.n - 1); i0 = Math.min(g.n - 2, Math.floor(f)); i1 = i0 + 1; k = f - i0; }
     for (var d = 0; d < 3; d++) {
-      out.p[d] = C.P[i0 * 3 + d] + (C.P[i1 * 3 + d] - C.P[i0 * 3 + d]) * k;
-      out.t[d] = C.T[i0 * 3 + d] + (C.T[i1 * 3 + d] - C.T[i0 * 3 + d]) * k;
-      out.n[d] = C.N[i0 * 3 + d] + (C.N[i1 * 3 + d] - C.N[i0 * 3 + d]) * k;
-      out.b[d] = C.B[i0 * 3 + d] + (C.B[i1 * 3 + d] - C.B[i0 * 3 + d]) * k;
+      out.p[d] = g.P[i0 * 3 + d] + (g.P[i1 * 3 + d] - g.P[i0 * 3 + d]) * k;
+      out.t[d] = g.T[i0 * 3 + d] + (g.T[i1 * 3 + d] - g.T[i0 * 3 + d]) * k;
+      out.n[d] = g.N[i0 * 3 + d] + (g.N[i1 * 3 + d] - g.N[i0 * 3 + d]) * k;
+      out.b[d] = g.B[i0 * 3 + d] + (g.B[i1 * 3 + d] - g.B[i0 * 3 + d]) * k;
     }
   }
   function wrapDist(u, c) { var d = Math.abs(u - c) % 1; return Math.min(d, 1 - d); }
-  // ribbon twist: none at the tips (broad face to the viewer), fast through the crossings
-  function twist(u) { return TAU * u - 0.5 * Math.sin(2 * TAU * u) + 0.75; }
-  function fray(u) { return Math.max(Math.exp(-Math.pow(wrapDist(u, 0) / 0.075, 2)), Math.exp(-Math.pow(wrapDist(u, 0.5) / 0.075, 2))); }
-  function crossing(u) { return Math.max(Math.exp(-Math.pow(wrapDist(u, 0.25) / 0.09, 2)), Math.exp(-Math.pow(wrapDist(u, 0.75) / 0.09, 2))); }
-  function ribbonW(u) { return 0.22 * (1 - 0.35 * crossing(u)) + 0.05 * Math.sin(TAU * 2 * u + 1.1) * Math.sin(TAU * 2 * u + 1.1); }
-  var RIBBON_H = 0.042;
-
-  function buildFibres(C, R, count, perLoop) {
-    var pos = [], idx = [], fr = { p: [0, 0, 0], t: [0, 0, 0], n: [0, 0, 0], b: [0, 0, 0] };
-    var data = [];
-    var vert = 0;
-    for (var f = 0; f < count; f++) {
-      var seed = R(), kind = R(), u0, len, stray = false;
-      if (kind < 0.02) { stray = true; u0 = R(); len = 0.1 + R() * 0.2; }
-      else if (kind < 0.5) { u0 = (R() < 0.5 ? 0 : 0.5) + (R() - 0.5) * 0.12; len = 0.42 + R() * 0.18; }
-      else { u0 = R(); len = 0.7 + R() * 0.3; }
-      // place in an elliptical cross-section (denser to the middle)
-      var r = Math.sqrt(R()), ang = R() * TAU;
-      var a0 = r * Math.cos(ang), b0 = r * Math.sin(ang);
-      if (stray) { a0 *= 1.4; b0 = (R() < 0.5 ? -1 : 1) * (1.5 + R() * 3); }
-      var f1 = 1 + R() * 3, p1 = R() * TAU, f2 = 3 + R() * 6, p2 = R() * TAU, amp = 0.08 + R() * 0.18;
-      var frayK = 0.2 + R() * 1.1, frayDir = gauss(R), frayLift = gauss(R);
-      var n = Math.max(8, Math.ceil(len * perLoop)), start = vert;
-      for (var i = 0; i < n; i++) {
-        var s = i / (n - 1), u = u0 + len * s;
-        sampleCurve(C, u, fr);
-        var th = twist(u), ct = Math.cos(th), st = Math.sin(th);
-        var W = ribbonW(u), H = RIBBON_H, fz = fray(u);
-        // silky waviness: each fibre drifts slowly across the ribbon
-        var a = a0 + amp * Math.sin(TAU * f1 * u + p1) + 0.03 * Math.sin(TAU * f2 * u + p2);
-        var b = b0 + 0.5 * amp * Math.sin(TAU * f1 * u + p2);
-        var spread = 1 + fz * frayK * 0.35;
-        var la = a * W * spread + fz * fz * frayDir * 0.05, lb = b * H * (1 + fz * frayK * 2.5) + fz * fz * frayLift * 0.04;
-        // wide axis and thin axis of the ribbon at u
-        var wx = ct * fr.n[0] + st * fr.b[0], wy = ct * fr.n[1] + st * fr.b[1], wz = ct * fr.n[2] + st * fr.b[2];
-        var hx = -st * fr.n[0] + ct * fr.b[0], hy = -st * fr.n[1] + ct * fr.b[1], hz = -st * fr.n[2] + ct * fr.b[2];
-        var ox = la * wx + lb * hx, oy = la * wy + lb * hy, oz = la * wz + lb * hz;
-        // fraying fibres also stretch outwards past the tips
-        var out = fz * fz * (0.02 + 0.1 * seed) * Math.sign(fr.p[0]);
-        ox += out;
-        // ribbon normal: gradient of the cross-section ellipse (flat faces, rounded edges)
-        var ga = a / (W * 6), gb = b / H;
-        var nx = ga * wx + gb * hx, ny = ga * wy + gb * hy, nz = ga * wz + gb * hz, nl = Math.hypot(nx, ny, nz) || 1;
-        var ao = 0.55 + 0.45 * Math.min(1, Math.abs(b) * 1.2 + 0.2 * r);
-        pos.push(fr.p[0], fr.p[1], fr.p[2], ox, oy, oz, nx / nl, ny / nl, nz / nl, fr.t[0], fr.t[1], fr.t[2]);
-        data.push(seed, s, fz, stray ? -ao : ao);
-        if (i) idx.push(vert - 1, vert);
-        vert++;
-      }
-    }
-    // interleave: 12 floats geometry + 4 floats data
-    var V = new Float32Array(vert * 16);
-    for (var v = 0; v < vert; v++) {
-      for (var k = 0; k < 12; k++) V[v * 16 + k] = pos[v * 12 + k];
-      for (k = 0; k < 4; k++) V[v * 16 + 12 + k] = data[v * 4 + k];
-    }
-    return { V: V, I: new Uint32Array(idx), count: idx.length };
+  function frame() { return { p: [0, 0, 0], t: [0, 0, 0], n: [0, 0, 0], b: [0, 0, 0] }; }
+  function pickGuide(S, R) {
+    var r = R() * S.wsum;
+    for (var i = 0; i < S.guides.length; i++) { r -= S.guides[i].weight; if (r <= 0) return S.guides[i]; }
+    return S.guides[S.guides.length - 1];
+  }
+  // a point on (or just off) the ribbon surface: rad 0..1 inside, >1 outside
+  function onRibbon(g, u, rad, R, fr) {
+    sampleGuide(g, u, fr);
+    var th = g.twist(u), ct = Math.cos(th), st = Math.sin(th), W = g.width(u), fz = g.fray(u);
+    var ang = R() * TAU, a = Math.cos(ang) * rad * W * (1 + fz * 1.6), b = Math.sin(ang) * rad * g.thick * (2.5 + fz * 10);
+    var p = [];
+    for (var d = 0; d < 3; d++) p.push(fr.p[d] + a * (ct * fr.n[d] + st * fr.b[d]) + b * (-st * fr.n[d] + ct * fr.b[d]));
+    return p;
   }
 
-  function buildParticles(C, R, dust, spheres, latent) {
-    var out = [], fr = { p: [0, 0, 0], t: [0, 0, 0], n: [0, 0, 0], b: [0, 0, 0] };
-    function onRibbon(u, rad) {
-      sampleCurve(C, u, fr);
-      var th = twist(u), ct = Math.cos(th), st = Math.sin(th), W = ribbonW(u), fz = fray(u);
-      var ang = R() * TAU, a = Math.cos(ang) * rad * W * (1 + fz * 1.6), b = Math.sin(ang) * rad * RIBBON_H * (2.5 + fz * 10);
-      var p = [];
-      for (var d = 0; d < 3; d++) p.push(fr.p[d] + a * (ct * fr.n[d] + st * fr.b[d]) + b * (-st * fr.n[d] + ct * fr.b[d]));
-      return p;
-    }
+  function buildFibres(S, R, count, resK) {
+    var V = [], idx = [], fr = frame(), vert = 0;
+    S.guides.forEach(function (g) {
+      var nf = Math.round(count * g.weight / S.wsum);
+      for (var f = 0; f < nf; f++) {
+        var seed = R(), stray = R() < g.stray, ul = g.len(R), u0 = ul[0], len = ul[1];
+        if (stray) len *= 0.4;
+        var r = Math.sqrt(R()), ang = R() * TAU;
+        var a0 = r * Math.cos(ang), b0 = r * Math.sin(ang);
+        if (stray) { a0 *= 1.4; b0 = (R() < 0.5 ? -1 : 1) * (1.5 + R() * 3); }
+        var f1 = 1 + R() * 3, p1 = R() * TAU, f2 = 3 + R() * 6, p2 = R() * TAU, amp = (0.08 + R() * 0.18) * (g.wavy || 1);
+        var frayK = 0.2 + R() * 1.1, frayDir = gauss(R), frayLift = gauss(R);
+        var n = Math.max(8, Math.ceil(len * g.res * resK)), sc = g.closed ? 1 : 1;
+        for (var i = 0; i < n; i++) {
+          var s = i / (n - 1), u = u0 + len * s;
+          sampleGuide(g, u, fr);
+          var th = g.twist(u), ct = Math.cos(th), st = Math.sin(th);
+          var W = g.width(u), H = g.thick, fz = g.fray(u);
+          var uu = u * sc;
+          var a = a0 + amp * Math.sin(TAU * f1 * uu + p1) + 0.03 * Math.sin(TAU * f2 * uu + p2);
+          var b = b0 + 0.5 * amp * Math.sin(TAU * f1 * uu + p2);
+          var spread = 1 + fz * frayK * g.spread;
+          var la = a * W * spread + fz * fz * frayDir * 0.05 * g.spread * 3, lb = b * H * (1 + fz * frayK * 2.5) + fz * fz * frayLift * 0.04 * g.spread * 3;
+          var wx = ct * fr.n[0] + st * fr.b[0], wy = ct * fr.n[1] + st * fr.b[1], wz = ct * fr.n[2] + st * fr.b[2];
+          var hx = -st * fr.n[0] + ct * fr.b[0], hy = -st * fr.n[1] + ct * fr.b[1], hz = -st * fr.n[2] + ct * fr.b[2];
+          var ox = la * wx + lb * hx, oy = la * wy + lb * hy, oz = la * wz + lb * hz;
+          if (g.out && fz > 0) {
+            var o = g.out(u, fr.p), k = fz * fz * (0.02 + 0.1 * seed);
+            ox += o[0] * k; oy += o[1] * k; oz += o[2] * k;
+          }
+          var ga = a / (W * 6), gb = b / H;
+          var nx = ga * wx + gb * hx, ny = ga * wy + gb * hy, nz = ga * wz + gb * hz, nl = Math.hypot(nx, ny, nz) || 1;
+          var ao = 0.55 + 0.45 * Math.min(1, Math.abs(b) * 1.2 + 0.2 * r);
+          V.push(fr.p[0], fr.p[1], fr.p[2], ox, oy, oz, nx / nl, ny / nl, nz / nl, fr.t[0], fr.t[1], fr.t[2], seed, s, fz, stray ? -ao : ao);
+          if (i) idx.push(vert - 1, vert);
+          vert++;
+        }
+      }
+    });
+    return { V: new Float32Array(V), I: new Uint32Array(idx), count: idx.length };
+  }
+
+  function buildParticles(S, R, c) {
+    var out = [], fr = frame(), i, q;
     function push(p, dir, seed, size, type, loose) { out.push(p[0], p[1], p[2], dir[0], dir[1], dir[2], seed, size, type, loose); }
-    function cloud(side) {
-      // dust streaming off a tip: denser near it, wider and thinner further out
-      var u = side > 0 ? 0 : 0.5;
-      sampleCurve(C, u + (R() - 0.5) * 0.06, fr);
-      var rr = Math.min(2.0, -Math.log(R() || 1e-6) * 0.58), sig = 0.025 + 0.11 * rr;
-      var dir = [side * (1 + 0.1 * gauss(R)), 0.1 * gauss(R) - 0.06 * side, 0.14 * gauss(R)];
-      var dl = Math.hypot(dir[0], dir[1], dir[2]);
-      dir = [dir[0] / dl, dir[1] / dl, dir[2] / dl];
+    var esum = 0;
+    S.emitters.forEach(function (e) { esum += e.w; });
+    function cloud() {
+      var r = R() * esum, e = S.emitters[0];
+      for (var k = 0; k < S.emitters.length; k++) { r -= S.emitters[k].w; if (r <= 0) { e = S.emitters[k]; break; } }
+      var rr = Math.min(e.len * 4, -Math.log(R() || 1e-6) * e.len), sig = e.sig0 + e.sigK * rr;
+      var dir = norm([e.dir[0] + gauss(R) * e.jit, e.dir[1] + gauss(R) * e.jit, e.dir[2] + gauss(R) * e.jit]);
+      var box = e.box || [0, 0, 0];
       return {
-        p: [fr.p[0] + dir[0] * rr, fr.p[1] + dir[1] * rr + gauss(R) * sig * 0.8, fr.p[2] + dir[2] * rr + gauss(R) * sig],
-        dir: dir, r: rr
+        p: [e.p[0] + dir[0] * rr + gauss(R) * (sig + box[0]), e.p[1] + dir[1] * rr + gauss(R) * (sig + box[1]), e.p[2] + dir[2] * rr + gauss(R) * (sig + box[2])],
+        dir: dir, r: rr / (e.len * 2)
       };
     }
-    var i, u, q;
-    for (i = 0; i < dust; i++) {
-      var size = Math.exp(gauss(R) * 0.5) * 0.005, roll = R();
-      if (roll < 0.32) { // clinging to the ribbon edges, mostly towards the tips
-        u = R(); var tip = R() < 0.6;
-        if (tip) u = (R() < 0.5 ? 0 : 0.5) + gauss(R) * 0.075;
-        push(onRibbon(u, tip ? 0.95 + Math.abs(gauss(R)) * 0.4 : 0.85 + R() * 0.2), [0, 0, 0], R(), tip ? size : size * 0.7, 0, tip ? 0.35 : 0.6);
-      } else { // streaming off the tips
-        q = cloud(R() < 0.5 ? 1 : -1);
+    function cling(rad, tipBias) {
+      var g = pickGuide(S, R), u = S.clingU ? S.clingU(g, R, tipBias) : R();
+      return onRibbon(g, u, rad, R, fr);
+    }
+    var nCloud = esum > 0 ? c.dust * (1 - S.cling) : 0, nCling = c.dust - nCloud;
+    for (i = 0; i < c.dust; i++) {
+      var size = Math.exp(gauss(R) * 0.5) * 0.005 * (S.dustSize || 1);
+      if (i < nCling) {
+        var tip = R() < 0.6;
+        push(cling(tip ? 0.95 + Math.abs(gauss(R)) * 0.4 : 0.85 + R() * 0.2, tip), [0, 0, 0], R(), tip ? size : size * 0.7, 0, tip ? 0.35 : 0.6);
+      } else {
+        q = cloud();
         push(q.p, q.dir, R(), size * (1.1 - 0.4 * Math.min(1, q.r)), 0, 1);
       }
     }
-    for (i = 0; i < spheres; i++) {
-      var rad = Math.exp(gauss(R) * 0.45) * 0.015;
-      if (R() < 0.55) {
-        u = (R() < 0.5 ? 0 : 0.5) + gauss(R) * 0.13;
-        if (R() < 0.3) u = R();
-        push(onRibbon(u, 1.0 + R() * 0.6), [0, 0, 0], R(), rad, 1, 0.3);
-      } else {
-        q = cloud(R() < 0.5 ? 1 : -1);
-        push(q.p, q.dir, R(), rad * (1 - 0.45 * Math.min(1, q.r)), 1, 0.8);
-      }
+    for (i = 0; i < c.spheres; i++) {
+      var rad = Math.exp(gauss(R) * 0.45) * 0.015 * (S.sphereSize || 1);
+      if (esum === 0 || R() < 0.55) push(cling(1.0 + R() * 0.6, R() < 0.6), [0, 0, 0], R(), rad, 1, 0.3);
+      else { q = cloud(); push(q.p, q.dir, R(), rad * (1 - 0.45 * Math.min(1, q.r)), 1, 0.8); }
     }
-    for (i = 0; i < latent; i++) { // hidden inside the ribbon; shows when a burst shatters the fibres
-      push(onRibbon(R(), Math.sqrt(R()) * 0.9), [0, 0, 0], R(), Math.exp(gauss(R) * 0.4) * 0.006, 2, 0.9);
+    if (S.pearls) S.pearls.forEach(function (p) { push(p, [0, 0, 0], R(), Math.exp(gauss(R) * 0.2) * 0.02 * (S.pearlSize || 1), 1, 0.5); });
+    if (S.halo) {
+      for (i = 0; i < c.halo; i++) { q = S.halo(R); push(q.p, q.dir, R(), Math.exp(gauss(R) * 0.5) * 0.005 * (q.big ? 3 : 1), q.big ? 1 : 0, 1); }
+    }
+    for (i = 0; i < c.latent; i++) { // hidden inside the ribbons; shows when a burst shatters the fibres
+      push(onRibbon(pickGuide(S, R), R(), Math.sqrt(R()) * 0.9, R, fr), [0, 0, 0], R(), Math.exp(gauss(R) * 0.4) * 0.006, 2, 0.9);
     }
     return { V: new Float32Array(out), count: out.length / 10 };
+  }
+
+  // ------------------------------------------------------------ shapes
+  // C1: a trefoil knot, three ideas tied into one; each lobe frays into dust.
+  function trefoil() {
+    var s = 0.43;
+    var g = guide(function (v) {
+      var t = v * TAU;
+      return [s * (Math.sin(t) + 2 * Math.sin(2 * t)), s * (Math.cos(t) - 2 * Math.cos(2 * t)), s * -1.1 * Math.sin(3 * t)];
+    }, 3072, true, function () { return [0, 0, 1]; }, true);
+    // lobe tips: the three points furthest from the centre
+    var tips = [];
+    for (var i = 0; i < g.n; i++) {
+      var r0 = Math.hypot(g.P[i * 3], g.P[i * 3 + 1]);
+      var ra = Math.hypot(g.P[((i + 1) % g.n) * 3], g.P[((i + 1) % g.n) * 3 + 1]), rb = Math.hypot(g.P[((i - 1 + g.n) % g.n) * 3], g.P[((i - 1 + g.n) % g.n) * 3 + 1]);
+      if (r0 >= ra && r0 > rb) tips.push(i / g.n);
+    }
+    function near(u) { var m = 0; tips.forEach(function (c) { m = Math.max(m, Math.exp(-Math.pow(wrapDist(u, c) / 0.05, 2))); }); return m; }
+    g.width = function (u) { return 0.17 + 0.05 * near(u); };
+    g.thick = 0.04;
+    g.twist = function (u) { return TAU * 1.5 * u + 0.4; };
+    g.fray = near;
+    g.out = function (u, p) { return norm([p[0], p[1], 0]); };
+    g.len = function (R) { return [R(), 0.35 + R() * 0.65]; };
+    g.res = 230;
+    var emitters = tips.map(function (u) {
+      var fr = frame(); sampleGuide(g, u, fr);
+      return { p: fr.p.slice(), dir: norm([fr.p[0], fr.p[1], 0.1]), jit: 0.12, len: 0.42, sig0: 0.025, sigK: 0.11, w: 1 };
+    });
+    return {
+      guides: [g], emitters: emitters, cling: 0.3, radius: 1.45,
+      clingU: function (gg, R, tip) { return tip ? tips[Math.floor(R() * 3)] + gauss(R) * 0.045 : R(); },
+      view: function (t) { return [0.16 + 0.08 * Math.sin(t * 0.07), 0.32 * Math.sin(t * 0.09 + 0.6), 0.25 + t * 0.045]; },
+      counts: { fibres: [2600, 1200], dust: [15000, 6000], spheres: [80, 40], latent: [9000, 3000], halo: [0, 0] },
+      layout: { wide: [0.0, 0.15, 0.55], tall: [0, 0.45, 0.8] }
+    };
+  }
+
+  // C2: a double helix: two silk ribbons wound round each other, base pairs strung
+  // between them as thin threads with pearls; both ends fray into dust.
+  function helix() {
+    var guides = [], emitters = [], L = 2.5, r = 0.4, w = TAU / 1.7;
+    function frayEnds(u) { return Math.max(smooth(0.1, 0, u), smooth(0.9, 1, u)); }
+    [0, Math.PI].forEach(function (ph) {
+      var g = guide(function (v) {
+        var x = -L + 2 * L * v;
+        return [x, r * Math.cos(w * x + ph), r * Math.sin(w * x + ph)];
+      }, 1600, false, function (p) { return norm([0, p[1], p[2]]); }, true);
+      g.width = function (u) { return 0.11 * (1 - 0.3 * frayEnds(u)); };
+      g.thick = 0.035;
+      g.twist = function () { return 0; };
+      g.fray = frayEnds;
+      g.out = function (u, p) { return [Math.sign(p[0]), 0, 0]; };
+      g.len = function (R) { var a = R() * 0.6 - 0.1; return [Math.max(0, a), 0.35 + R() * 0.75]; };
+      g.res = 260; g.weight = 5; g.spread = 0.5;
+      guides.push(g);
+    });
+    // base pairs: short straight bundles across the axis
+    var rungs = [];
+    for (var x = -L + 0.32; x < L - 0.3; x += 0.17) {
+      (function (x) {
+        var a = [x, r * Math.cos(w * x), r * Math.sin(w * x)], b = [x, -a[1], -a[2]];
+        var g = guide(function (v) { return [a[0], a[1] + (b[1] - a[1]) * v, a[2] + (b[2] - a[2]) * v]; }, 24, false,
+          function () { return [1, 0, 0]; }, false);
+        g.width = function () { return 0.014; };
+        g.thick = 0.014;
+        g.len = function (R) { var s0 = R() * 0.1; return [s0, 1 - s0 - R() * 0.1]; };
+        g.res = 24; g.weight = 0.06; g.stray = 0; g.wavy = 0.3;
+        guides.push(g);
+        rungs.push(a, b);
+      })(x);
+    }
+    [-1, 1].forEach(function (sd) {
+      emitters.push({ p: [sd * L * 0.97, 0, 0], dir: [sd, 0, 0], jit: 0.18, len: 0.45, sig0: 0.08, sigK: 0.14, w: 1, box: [0, r * 0.6, r * 0.6] });
+    });
+    return {
+      guides: guides, emitters: emitters, cling: 0.34, radius: 1.6,
+      clingU: function (g, R, tip) { return tip ? (R() < 0.5 ? R() * 0.14 : 1 - R() * 0.14) : R(); },
+      pearls: rungs, // a pearl at each end of every base pair
+      view: function (t) { return [0.25 + 0.04 * Math.sin(t * 0.07), -0.35 + 0.12 * Math.sin(t * 0.06), 0.42, t * 0.22]; },
+      counts: { fibres: [3000, 1400], dust: [12000, 5000], spheres: [50, 26], latent: [8000, 3000], halo: [0, 0] },
+      layout: { wide: [0.52, 0.02, 0.9], tall: [0.1, 0.42, 1.05] }
+    };
+  }
+
+  // C3: a knowledge sphere: silk ribbons orbiting on great circles round an inner
+  // graph of pearls (papers) joined by fine threads (links), in a halo of dust.
+  function orb(R0) {
+    var guides = [], pearls = [], i, j;
+    var RIB = 9;
+    for (i = 0; i < RIB; i++) {
+      // well spread ring axes (golden spiral)
+      var y = 1 - 2 * (i + 0.5) / RIB, rr = Math.sqrt(1 - y * y), ph = i * 2.39996;
+      var A = [Math.cos(ph) * rr, y, Math.sin(ph) * rr];
+      var e1 = norm(cross(A, Math.abs(A[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0])), e2 = cross(A, e1);
+      var rad = 0.94 + 0.12 * (i % 3) / 2, wob = 0.03 * R0(), wk = 2 + Math.floor(R0() * 3);
+      (function (A, e1, e2, rad) {
+        var g = guide(function (v) {
+          var t = v * TAU, q = rad * (1 + wob * Math.sin(wk * t));
+          return [q * (Math.cos(t) * e1[0] + Math.sin(t) * e2[0]), q * (Math.cos(t) * e1[1] + Math.sin(t) * e2[1]), q * (Math.cos(t) * e1[2] + Math.sin(t) * e2[2])];
+        }, 1200, true, function (p) { return norm(p); }, true);
+        g.width = function (u) { return 0.075 + 0.025 * Math.sin(TAU * 2 * u + rad * 9); };
+        g.thick = 0.03;
+        g.twist = function (u) { return 0.5 * Math.sin(TAU * u * 2 + rad * 5); };
+        g.len = function (R) { return [R(), 0.4 + R() * 0.6]; };
+        g.res = 240; g.weight = 1;
+        guides.push(g);
+      })(A, e1, e2, rad);
+    }
+    // the inner graph: nodes and their two or three nearest links
+    var nodes = [];
+    for (i = 0; i < 30; i++) {
+      var d = norm([gauss(R0), gauss(R0), gauss(R0)]), r = 0.25 + 0.55 * Math.sqrt(R0());
+      nodes.push([d[0] * r, d[1] * r, d[2] * r]);
+    }
+    var seen = {};
+    nodes.forEach(function (a, ia) {
+      var near = nodes.map(function (b, ib) { return [Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]), ib]; })
+        .sort(function (x, y) { return x[0] - y[0]; }).slice(1, 2 + (ia % 2) + 1);
+      near.forEach(function (n) {
+        var key = Math.min(ia, n[1]) + '-' + Math.max(ia, n[1]);
+        if (seen[key]) return;
+        seen[key] = 1;
+        var b = nodes[n[1]], bend = [gauss(R0) * 0.06, gauss(R0) * 0.06, gauss(R0) * 0.06];
+        var g = guide(function (v) {
+          var k = Math.sin(Math.PI * v);
+          return [a[0] + (b[0] - a[0]) * v + bend[0] * k, a[1] + (b[1] - a[1]) * v + bend[1] * k, a[2] + (b[2] - a[2]) * v + bend[2] * k];
+        }, 32, false, function () { return [0, 1, 0.3]; }, false);
+        g.width = function () { return 0.008; };
+        g.thick = 0.008;
+        g.len = function (R) { var s0 = R() * 0.08; return [s0, 1 - s0 - R() * 0.08]; };
+        g.res = 32; g.weight = 0.035; g.stray = 0; g.wavy = 0.4;
+        guides.push(g);
+      });
+      pearls.push(a);
+    });
+    return {
+      guides: guides, emitters: [], cling: 1, radius: 1.2, pearls: pearls, pearlSize: 1.5,
+      halo: function (R) {
+        var d = norm([gauss(R), gauss(R), gauss(R)]), big = R() < 0.01, rr = 1.1 + Math.abs(gauss(R)) * (big ? 0.15 : 0.3);
+        return { p: [d[0] * rr, d[1] * rr, d[2] * rr], dir: d, big: big };
+      },
+      view: function (t) { return [0.3 + 0.06 * Math.sin(t * 0.05), t * 0.06, 0.12 * Math.sin(t * 0.04)]; },
+      counts: { fibres: [3000, 1400], dust: [3000, 1200], spheres: [40, 20], latent: [7000, 2500], halo: [9000, 3500] },
+      layout: { wide: [0.0, 0.02, 0.86], tall: [0, 0.33, 0.92] }
+    };
+  }
+
+  var SHAPES = { trefoil: trefoil, helix: helix, orb: orb };
+  function makeShape(name) {
+    var S = (SHAPES[name] || trefoil)(rng(77));
+    S.wsum = 0;
+    S.guides.forEach(function (g) { S.wsum += g.weight; });
+    return S;
   }
 
   // ------------------------------------------------------------ shaders
@@ -438,9 +599,10 @@
     }
 
     var small = Math.min(window.innerWidth, screen.width || 9999) < 700;
-    var C = buildCurve(), R = rng(20251021);
-    var fib = buildFibres(C, R, small ? 1300 : 2800, small ? 120 : 170);
-    var pts = buildParticles(C, R, small ? 6000 : 16000, small ? 40 : 75, small ? 3000 : 9000);
+    var S = makeShape(opts.shape || container.getAttribute('data-shape')), R = rng(20251021), Q = small ? 1 : 0;
+    var fib = buildFibres(S, R, S.counts.fibres[Q], small ? 0.7 : 1);
+    var pts = buildParticles(S, R, { dust: S.counts.dust[Q], spheres: S.counts.spheres[Q], latent: S.counts.latent[Q], halo: S.counts.halo[Q] });
+    var alpha = +(opts.alpha || container.getAttribute('data-alpha') || 1);
 
     // fibre buffers
     var vaoF = gl.createVertexArray();
@@ -469,7 +631,7 @@
     fib.V = null; pts.V = null; // let the CPU copies go
 
     // ---------------------------------------------------------- state
-    var W = 0, H = 0, dpr = 1, proj, aspect = 1, dist = 7;
+    var W = 0, H = 0, dpr = 1, proj, aspect = 1, dist = 7, offX = 0, offY = 0;
     var t = opts.time || 0, raf = 0, last = 0, visible = false, alive = true;
     var intro = opts.noIntro ? 0 : 1;
     var bursts = new Float32Array(MAX_BURSTS * 4), bi = 0;
@@ -500,18 +662,20 @@
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       var fov = 26 * Math.PI / 180, tn = Math.tan(fov / 2);
-      // fit: the knot plus most of its dust across, the loops top to bottom
-      var halfW = W < 560 ? 1.72 : 2.6;
-      dist = Math.max(halfW / (tn * aspect), 1.05 / tn);
+      // place the object: layout = [x, y, size] in screen units; size is its radius as a
+      // share of the half-height (landscape) or the half-width (portrait)
+      var L = aspect >= 1 ? S.layout.wide : S.layout.tall;
+      dist = S.radius / (L[2] * tn * (aspect >= 1 ? 1 : aspect));
+      offX = L[0] * tn * dist * aspect; offY = L[1] * tn * dist;
       proj = perspective(fov, aspect, 0.1, 40);
       return true;
     }
 
     function view(time) {
-      var ry = 0.32 * Math.sin(time * 0.11) + 0.1 * Math.sin(time * 0.047 + 1.0);
-      var rx = 0.42 + 0.07 * Math.sin(time * 0.083 + 0.4);
-      var rz = -0.1 + 0.035 * Math.sin(time * 0.06);
-      return mul(translate(0, 0.04, -dist), mul(rotX(rx), mul(rotY(ry), rotZ(rz))));
+      var r = S.view(time);
+      var M = mul(translate(offX, offY, -dist), mul(rotX(r[0]), mul(rotY(r[1]), rotZ(r[2]))));
+      if (r[3]) M = mul(M, rotX(r[3]));
+      return S.pre ? mul(M, S.pre) : M;
     }
 
     function draw() {
@@ -541,7 +705,7 @@
         gl.uniform3fv(P.u.uHi, col.hi);
         gl.uniform3fv(P.u.uAcc, col.acc);
         if (P.u.uDark) gl.uniform1f(P.u.uDark, col.dark);
-        if (P.u.uAlpha) gl.uniform1f(P.u.uAlpha, 1.0);
+        if (P.u.uAlpha) gl.uniform1f(P.u.uAlpha, alpha);
         if (P.u.uFarRef) gl.uniform1f(P.u.uFarRef, dist);
       }
       // fibres
@@ -639,6 +803,7 @@
     api.burst = function (x, y, s) { burst(x, y, s || 2); };
     api.setTime = function (v) { t = v; };
     api.now = function () { return t; };
+    api.endIntro = function () { intro = 0; };
     api.freeze = function (on) { alive = !on; if (on && raf) { cancelAnimationFrame(raf); raf = 0; } if (!on) update(); };
     api.hover = function (x, y, a) { hover.x = x; hover.y = y; hover.amt = hover.target = a; };
     api.draw = draw;
@@ -651,7 +816,13 @@
   window.PMHeroC = { init: init };
   function auto() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-pm-hero-c]'), function (el) {
-      if (el.getAttribute('data-pm-hero-c') !== 'manual') init(el);
+      if (el.getAttribute('data-pm-hero-c') === 'manual') return;
+      // build a variant only once it is shown (the switcher hides the others)
+      if (!window.IntersectionObserver) { init(el); return; }
+      var io = new IntersectionObserver(function (es) {
+        if (es[es.length - 1].isIntersecting && el.offsetWidth) { io.disconnect(); init(el); }
+      });
+      io.observe(el);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
