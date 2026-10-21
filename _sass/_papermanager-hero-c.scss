@@ -13,24 +13,27 @@
  * visitor's pick on .pm[data-cx-mat].
  ******************************************************************************/
 
-// ground and text colours per material: bg, ink, ink-2, word, button bg, button ink, rule
+// ground and text colours per material, all in the page accent hue (set live on .pm by the
+// switcher script as --pm-accent-h etc.; violet until it runs):
+// bg, ink, ink-2, word, button bg, button ink, rule
+@function cxh($s, $l, $a: 1) { @return unquote('hsl(var(--pm-accent-h, 262) #{$s} #{$l} / #{$a})'); }
 $cx-light: (
-  'silver': (#e9e7e3, #141414, #45433f, rgba(70, 60, 50, 0.055), #141414, #fff, rgba(20, 20, 20, 0.35)),
-  'champagne': (#f2ebdf, #1d160c, #5a4c38, rgba(120, 90, 40, 0.07), #1d160c, #fff, rgba(29, 22, 12, 0.35)),
-  'ink': (#f7f4ec, #0e0e10, #3d3c3a, rgba(0, 0, 0, 0.05), #0e0e10, #fff, rgba(14, 14, 16, 0.4)),
-  'iridescent': (#ecebf1, #121218, #4a4a58, rgba(60, 60, 90, 0.06), #121218, #fff, rgba(18, 18, 24, 0.35)),
-  'glow': (#0c0a14, #f3f0ff, #c3bdd8, rgba(200, 180, 255, 0.05), #f3f0ff, #0c0a14, rgba(243, 240, 255, 0.35)),
-  'aurora': (#eeeef3, #121218, #4a4a58, rgba(60, 60, 90, 0.06), #121218, #fff, rgba(18, 18, 24, 0.35)),
-  'ice': (#e7edf3, #0f1722, #44516a, rgba(40, 70, 110, 0.06), #0f1722, #fff, rgba(15, 23, 34, 0.35)),
-  'night': (#070b18, #eef3ff, #b6c2dc, rgba(150, 190, 255, 0.05), #eef3ff, #070b18, rgba(238, 243, 255, 0.35)),
+  'silver': (cxh(8%, 90%), cxh(10%, 8%), cxh(6%, 27%), cxh(20%, 25%, 0.055), cxh(10%, 8%), #fff, cxh(10%, 8%, 0.35)),
+  'champagne': (cxh(45%, 92%), cxh(40%, 8%), cxh(22%, 28%), cxh(40%, 30%, 0.07), cxh(40%, 8%), #fff, cxh(40%, 8%, 0.35)),
+  'ink': (cxh(30%, 96%), cxh(10%, 6%), cxh(6%, 24%), cxh(10%, 10%, 0.05), cxh(10%, 6%), #fff, cxh(10%, 6%, 0.4)),
+  'iridescent': (cxh(18%, 94%), cxh(15%, 8%), cxh(10%, 32%), cxh(25%, 30%, 0.06), cxh(15%, 8%), #fff, cxh(15%, 8%, 0.35)),
+  'glow': (cxh(50%, 5%), cxh(60%, 97%), cxh(25%, 80%), cxh(70%, 80%, 0.05), cxh(60%, 97%), cxh(50%, 5%), cxh(60%, 97%, 0.35)),
+  'aurora': (cxh(15%, 94%), cxh(15%, 8%), cxh(10%, 32%), cxh(25%, 30%, 0.06), cxh(15%, 8%), #fff, cxh(15%, 8%, 0.35)),
+  'ice': (cxh(30%, 93%), cxh(35%, 10%), cxh(20%, 34%), cxh(45%, 30%, 0.06), cxh(35%, 10%), #fff, cxh(35%, 10%, 0.35)),
+  'night': (cxh(60%, 6%), cxh(70%, 97%), cxh(30%, 80%), cxh(80%, 80%, 0.05), cxh(70%, 97%), cxh(60%, 6%), cxh(70%, 97%, 0.35)),
 );
 // dark site theme: materials that have a dark ground of their own
 $cx-dark: (
-  'silver': (#1b1a18, #f2efea, #c4bfb7, rgba(255, 250, 240, 0.045), #f2efea, #141414, rgba(242, 239, 234, 0.35)),
-  'champagne': (#1c1710, #f5ecdc, #cbbb9f, rgba(255, 230, 180, 0.05), #f5ecdc, #1c1710, rgba(245, 236, 220, 0.35)),
-  'iridescent': (#111218, #f0f0f6, #b8b8c8, rgba(220, 220, 255, 0.045), #f0f0f6, #111218, rgba(240, 240, 246, 0.35)),
-  'aurora': (#101016, #f0f0f6, #b8b8c8, rgba(220, 220, 255, 0.045), #f0f0f6, #101016, rgba(240, 240, 246, 0.35)),
-  'ice': (#0e141d, #eef3fa, #b2bfd2, rgba(180, 210, 255, 0.045), #eef3fa, #0e141d, rgba(238, 243, 250, 0.35)),
+  'silver': (cxh(8%, 10%), cxh(15%, 94%), cxh(8%, 75%), cxh(30%, 95%, 0.045), cxh(15%, 94%), cxh(10%, 8%), cxh(15%, 94%, 0.35)),
+  'champagne': (cxh(35%, 9%), cxh(45%, 92%), cxh(25%, 70%), cxh(60%, 85%, 0.05), cxh(45%, 92%), cxh(35%, 9%), cxh(45%, 92%, 0.35)),
+  'iridescent': (cxh(18%, 8%), cxh(20%, 95%), cxh(12%, 75%), cxh(40%, 90%, 0.045), cxh(20%, 95%), cxh(18%, 8%), cxh(20%, 95%, 0.35)),
+  'aurora': (cxh(15%, 7%), cxh(20%, 95%), cxh(12%, 75%), cxh(40%, 90%, 0.045), cxh(20%, 95%), cxh(15%, 7%), cxh(20%, 95%, 0.35)),
+  'ice': (cxh(35%, 8%), cxh(40%, 95%), cxh(20%, 75%), cxh(60%, 85%, 0.045), cxh(40%, 95%), cxh(35%, 8%), cxh(40%, 95%, 0.35)),
 );
 @mixin cx-vars($c) {
   --cx-bg: #{nth($c, 1)};
@@ -57,7 +60,7 @@ html[data-theme='dark'] .pm-cx { @include cx-vars(map-get($cx-dark, 'silver')); 
   background-image: radial-gradient(ellipse at 62% 42%, color-mix(in srgb, var(--pm-accent) 22%, transparent), transparent 62%);
 }
 .pm-cx[data-mat='night'], .pm[data-cx-mat='night'] .pm-cx.pm-cx {
-  background-image: radial-gradient(ellipse at 68% 45%, rgba(70, 120, 255, 0.16), transparent 60%);
+  background-image: radial-gradient(ellipse at 68% 45%, rgb(var(--pm-accent-rgb, 124 58 237) / 0.18), transparent 60%);
 }
 .pm[data-cx-mat]:not([data-cx-mat='glow']):not([data-cx-mat='night']) .pm-cx.pm-cx { background-image: none; }
 
@@ -413,4 +416,31 @@ html[data-theme='dark'] .pm-cx { @include cx-vars(map-get($cx-dark, 'silver')); 
     .pm-switch-body { flex-wrap: wrap; justify-content: center; row-gap: 6px; }
     .pm-switch-set { flex-wrap: wrap; justify-content: center; }
   }
+}
+
+// free colour picker beside the six presets (an <input type="color"> dressed as a swatch)
+.pm-switch-pick {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 0 0 0 2px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: conic-gradient(#f43f5e, #f59e0b, #84cc16, #10b981, #0ea5e9, #6366f1, #d946ef, #f43f5e);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  &::after {
+    // the picked colour as a centre dot, or a "+" until something is picked
+    content: '+';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: var(--sw, transparent);
+    color: #fff;
+    font: 700 11px/12px 'Inter', system-ui, sans-serif;
+    text-align: center;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+  }
+  &[aria-pressed='true'] { outline: 2px solid var(--pm-ink); outline-offset: 2px; &::after { content: ''; box-shadow: 0 0 0 1px #fff; } }
+  input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
 }

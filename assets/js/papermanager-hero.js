@@ -833,13 +833,98 @@
     if (sw) Array.prototype.forEach.call(sw.querySelectorAll('[data-set-theme]'), function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-set-theme') === t ? 'true' : 'false');
     });
+    if (save) { store('pm-theme', t); setParam('theme', t); custom = null; store('pm-accent', ''); setParam('accent', ''); }
+    applyAccent();
+  }
+
+  // ------------------------------------------------------------ accent: presets, free picker, shared contract
+  // Whatever sets the accent (preset, picker, URL, load), applyAccent() ends by publishing on .pm:
+  //   --pm-accent (hex), --pm-accent-rgb ("124 58 237"), --pm-accent-h (degrees, no unit),
+  //   --pm-accent-s / --pm-accent-l (with %), --pm-accent-soft, --pm-accent-ink (readable dark variant),
+  // then dispatches document 'pm:accent' {detail: {hex, rgb, h, s, l}}; window.PMAccent.get() returns it.
+  // A picked colour is clamped for UI use: white text stays readable on it in light mode, dark
+  // text in dark mode. Presets keep their hand-picked light/dark pairs from the stylesheet.
+  var custom = null, accentNow = null;
+  var OWN = ['--pm-accent', '--pm-accent-soft', '--pm-accent-2', '--pm-accent-rgb', '--pm-accent-h', '--pm-accent-s', '--pm-accent-l', '--pm-accent-ink'];
+  function hex(c) { return '#' + c.map(function (x) { return ('0' + Math.round(Math.max(0, Math.min(255, x))).toString(16)).slice(-2); }).join(''); }
+  function toHsl(c) {
+    var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, h = 0, s = 0, d = mx - mn;
+    if (d) {
+      s = d / (1 - Math.abs(2 * l - 1));
+      h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h = (h * 60 + 360) % 360;
+    }
+    return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+  }
+  function fromHsl(h, s, l) {
+    s /= 100; l /= 100;
+    var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l);
+    var f = function (n) { return 255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))); };
+    return [f(0), f(8), f(4)];
+  }
+  function lum(c) {
+    var v = c.map(function (x) { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
+    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+  }
+  function contrast(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+  function derive(picked) {
+    var q = toHsl(parse(picked)), h = q[0], s = Math.max(q[1], 20), l = q[2];
+    if (isDark()) { // buttons carry dark text on the accent
+      l = Math.max(55, Math.min(82, l));
+      while (l < 90 && contrast(fromHsl(h, s, l), [20, 16, 31]) < 4.5) l += 2;
+    } else { // buttons carry white text on the accent
+      l = Math.max(22, Math.min(60, l));
+      while (l > 18 && contrast(fromHsl(h, s, l), [255, 255, 255]) < 4.5) l -= 2;
+    }
+    return {
+      accent: hex(fromHsl(h, s, l)),
+      soft: hex(isDark() ? fromHsl(h, Math.min(s, 45), 16) : fromHsl(h, Math.min(s, 85), 96)),
+      two: hex(fromHsl((h + 40) % 360, s, l))
+    };
+  }
+  function applyAccent() {
+    OWN.forEach(function (v) { root.style.removeProperty(v); });
+    if (custom) {
+      var d = derive('#' + custom);
+      root.style.setProperty('--pm-accent', d.accent);
+      root.style.setProperty('--pm-accent-soft', d.soft);
+      root.style.setProperty('--pm-accent-2', d.two);
+    }
+    var cs = getComputedStyle(root), c = parse(cs.getPropertyValue('--pm-accent')).map(Math.round), q = toHsl(c);
+    root.style.setProperty('--pm-accent', hex(c));
+    root.style.setProperty('--pm-accent-soft', cs.getPropertyValue('--pm-accent-soft').trim());
+    root.style.setProperty('--pm-accent-rgb', c.join(' '));
+    root.style.setProperty('--pm-accent-h', String(q[0]));
+    root.style.setProperty('--pm-accent-s', q[1] + '%');
+    root.style.setProperty('--pm-accent-l', q[2] + '%');
+    root.style.setProperty('--pm-accent-ink', hex(fromHsl(q[0], Math.min(q[1], 70), Math.min(q[2], 30))));
+    accentNow = { hex: hex(c), rgb: c, h: q[0], s: q[1], l: q[2] };
+    if (sw) {
+      var pick = sw.querySelector('.pm-switch-pick');
+      if (pick) {
+        pick.setAttribute('aria-pressed', custom ? 'true' : 'false');
+        pick.style.setProperty('--sw', custom ? '#' + custom : 'transparent');
+        var inp = pick.querySelector('input');
+        if (inp && custom) inp.value = '#' + custom;
+      }
+      if (custom) Array.prototype.forEach.call(sw.querySelectorAll('[data-set-theme]'), function (b) { b.setAttribute('aria-pressed', 'false'); });
+    }
     scenes.forEach(function (s) { s.recolour(); });
-    if (save) { store('pm-theme', t); setParam('theme', t); }
+    try { document.dispatchEvent(new CustomEvent('pm:accent', { detail: accentNow })); } catch (e) { /* very old browser */ }
+  }
+  window.PMAccent = { get: function () { return accentNow; } };
+  function setCustom(v, save) {
+    v = String(v || '').replace('#', '').toLowerCase();
+    if (!/^[0-9a-f]{6}$/.test(v)) return;
+    custom = v;
+    applyAccent();
+    if (save) { store('pm-accent', v); setParam('accent', v); }
   }
   function setParam(k, v) {
     try {
       var u = new URL(location.href);
-      u.searchParams.set(k, v);
+      if (v) u.searchParams.set(k, v); else u.searchParams.delete(k);
       history.replaceState(history.state, '', u.pathname + u.search + u.hash);
     } catch (e) { /* old browser */ }
   }
@@ -863,10 +948,23 @@
     }
   }
 
+  // free colour picker next to the presets
+  var pickIn = sw && sw.querySelector('.pm-switch-pick input');
+  if (pickIn) {
+    pickIn.addEventListener('input', function () { setCustom(pickIn.value, false); });
+    pickIn.addEventListener('change', function () { setCustom(pickIn.value, true); });
+  }
+  (function () {
+    var a = '';
+    try { a = new URLSearchParams(location.search).get('accent') || ''; } catch (e) { /* old browser */ }
+    if (!/^#?[0-9a-fA-F]{6}$/.test(a)) a = load('pm-accent') || '';
+    if (/^#?[0-9a-fA-F]{6}$/.test(a)) custom = a.replace('#', '').toLowerCase();
+  })();
+
   setHero(root.getAttribute('data-hero') || 'a', false);
   setTheme(root.getAttribute('data-pm-theme') || 'violet', false);
 
   // site light/dark toggle
-  new MutationObserver(function () { scenes.forEach(function (s) { s.recolour(); }); })
+  new MutationObserver(function () { applyAccent(); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 })();

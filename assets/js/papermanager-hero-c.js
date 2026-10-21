@@ -609,7 +609,7 @@
     '  if (uMode > 0.5 && uMode < 1.5) { vec3 ir = pal3(dot(N, V) * 0.9 + vG * 0.8 + vS * 0.35); c = mix(c, c * (0.45 + 0.9 * ir) + ir * 0.12, 0.85) + ir * spec * 0.35; }',
     '  if (uMode > 1.5 && uMode < 2.5) { c = uMid * (0.2 + 0.7 * d) + uHi * spec * 1.1 + uAcc * 0.08; }',
     '  if (uMode > 3.5) { vec3 ir = pal3(dot(N, V) * 0.7 + vG * 0.9 + vS * 0.3); c = ir * (0.18 + 0.8 * d) + uHi * spec * 1.0; }',
-    '  if (uMode > 2.5 && uMode < 3.5) { float f = clamp(vS * 0.55 + vG * 0.6 - 0.05, 0.0, 1.0); vec3 gr = f < 0.55 ? mix(uAcc, uAcc2, f / 0.55) : mix(uAcc2, vec3(1.0, 0.78, 0.36), (f - 0.55) / 0.45);',
+    '  if (uMode > 2.5 && uMode < 3.5) { float f = clamp(vS * 0.55 + vG * 0.6 - 0.05, 0.0, 1.0); vec3 gr = f < 0.55 ? mix(uAcc, uAcc2, f / 0.55) : mix(uAcc2, uPc, (f - 0.55) / 0.45);',
     '    c = mix(c, gr * (0.3 + 0.85 * d) + uHi * spec * 0.45, 0.82); }',
     '  c = mix(c, mix(uLo, uAcc, 0.5), 0.07 * (1.0 - d));', // accent in the shadows
         // depth: far strands lighter and fainter
@@ -701,33 +701,66 @@
   }
 
   // ------------------------------------------------------------ materials
-  // name: [light, dark] -> { lo, mid, hi (fibre shade ramp), dust, mode, spec }; "acc" in a
-  // ramp means the page accent, so the colour themes still steer glow and aurora.
-  var MATERIALS = {
-    silver: [{ lo: [0.22, 0.19, 0.155], mid: [0.64, 0.585, 0.51], hi: [1.0, 0.98, 0.94], dust: [0.78, 0.69, 0.55] },
-      { lo: [0.16, 0.15, 0.14], mid: [0.55, 0.52, 0.48], hi: [0.97, 0.95, 0.91], dust: [0.7, 0.64, 0.55] }],
-    champagne: [{ lo: [0.3, 0.2, 0.08], mid: [0.8, 0.62, 0.34], hi: [1.0, 0.95, 0.8], dust: [0.86, 0.68, 0.38] },
-      { lo: [0.2, 0.13, 0.05], mid: [0.72, 0.55, 0.28], hi: [1.0, 0.93, 0.74], dust: [0.82, 0.64, 0.34] }],
-    ink: [{ lo: [0.03, 0.03, 0.04], mid: [0.13, 0.13, 0.15], hi: [0.52, 0.52, 0.55], dust: [0.2, 0.2, 0.21], spec: 0.45 }],
-    iridescent: [{ lo: [0.3, 0.3, 0.36], mid: [0.74, 0.74, 0.8], hi: [1.0, 1.0, 1.0], dust: [0.76, 0.76, 0.86], mode: 1 },
-      { lo: [0.14, 0.14, 0.18], mid: [0.6, 0.6, 0.68], hi: [1.0, 1.0, 1.0], dust: [0.7, 0.7, 0.8], mode: 1 }],
-    glow: [{ lo: 'acc', mid: 'acc', hi: [1.0, 0.96, 1.0], dust: 'acc', mode: 2, spec: 1 }],
-    aurora: [{ lo: [0.2, 0.2, 0.26], mid: [0.66, 0.66, 0.72], hi: [1.0, 1.0, 1.0], dust: [0.7, 0.7, 0.8], mode: 3 },
-      { lo: [0.12, 0.12, 0.16], mid: [0.56, 0.56, 0.64], hi: [1.0, 1.0, 1.0], dust: [0.66, 0.66, 0.76], mode: 3 }],
-    // cool iridescence: ice blue -> violet -> teal, on a pale cool ground (ice) or glowing on deep night blue (night)
-    ice: [{ lo: [0.2, 0.25, 0.34], mid: [0.66, 0.74, 0.86], hi: [1.0, 1.0, 1.0], dust: [0.62, 0.72, 0.88], mode: 1, pal: 'cool' },
-      { lo: [0.1, 0.13, 0.2], mid: [0.5, 0.6, 0.76], hi: [1.0, 1.0, 1.0], dust: [0.55, 0.66, 0.85], mode: 1, pal: 'cool' }],
-    night: [{ lo: [0.05, 0.07, 0.14], mid: [0.5, 0.62, 0.9], hi: [0.95, 0.98, 1.0], dust: [0.6, 0.75, 1.0], mode: 4, pal: 'cool', spec: 1 }]
-  };
-  var PALETTES = {
-    warm: [[0.56, 0.36, 1.0], [0.18, 0.82, 0.78], [1.0, 0.78, 0.34]],
-    cool: [[0.55, 0.84, 1.0], [0.6, 0.48, 1.0], [0.26, 0.9, 0.84]]
-  };
+  // Every material keeps its character but takes its hues from the page accent, so the colour
+  // presets and the free picker recolour fibres, dust and pearls live (the ground follows in CSS).
+  // -> { lo, mid, hi (fibre shade ramp), dust, mode (0 plain, 1 iridescent, 2 glow, 3 aurora,
+  //      4 glowing iridescence), spec, pal (three hues for the sheen) }
+  function rgb2hsl(c) {
+    var r = c[0], g = c[1], b = c[2], mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, h = 0, s = 0, d = mx - mn;
+    if (d) {
+      s = d / (1 - Math.abs(2 * l - 1));
+      h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h = (h * 60 + 360) % 360;
+    }
+    return [h, s, l];
+  }
+  function hsl(h, s, l) {
+    h = ((h % 360) + 360) % 360;
+    var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l);
+    var f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); };
+    return [f(0), f(8), f(4)];
+  }
+  function mixc(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
+  var MAT_NAMES_ALL = ['silver', 'champagne', 'ink', 'iridescent', 'glow', 'aurora', 'ice', 'night'];
   function material(name, dark, acc, acc2) {
-    var m = MATERIALS[name], v = m[dark && m[1] ? 1 : 0];
-    function c(x, k) { return x === 'acc' ? [acc[0] * k + (1 - k) * 0.9, acc[1] * k + (1 - k) * 0.9, acc[2] * k + (1 - k) * 0.95] : x; }
-    return { lo: c(v.lo, 0.35).map(function (q) { return v.lo === 'acc' ? q * 0.3 : q; }), mid: c(v.mid, 0.85), hi: v.hi, dust: c(v.dust, 0.6),
-      mode: v.mode || 0, spec: v.spec === undefined ? 1 : v.spec, pal: PALETTES[v.pal || 'warm'] };
+    var q = rgb2hsl(acc), h = q[0], S = Math.max(0.35, Math.min(0.9, q[1]));
+    function C(dh, s, l) { return hsl(h + dh, s, l); }
+    var m = { mode: 0, spec: 1, pal: [C(-70, 0.75, 0.66), C(0, 0.85, 0.62), C(70, 0.8, 0.62)] };
+    switch (name) {
+      case 'champagne': // metallic, in the accent hue (gold when the accent is amber)
+        m.lo = C(0, 0.55, dark ? 0.08 : 0.12); m.mid = C(0, 0.55, dark ? 0.42 : 0.48); m.hi = C(6, 0.7, dark ? 0.86 : 0.9); m.dust = C(0, 0.5, 0.6);
+        break;
+      case 'ink': // near-black, accent-tinted highlights
+        m.lo = C(0, 0.2, 0.035); m.mid = C(0, 0.15, 0.12); m.hi = C(0, 0.55, 0.55); m.dust = C(0, 0.12, 0.2); m.spec = 0.5;
+        break;
+      case 'iridescent': // a sheen that moves round the accent hue
+        m.lo = mixc(dark ? [0.14, 0.14, 0.18] : [0.3, 0.3, 0.36], C(0, 0.3, 0.3), 0.25); m.mid = mixc(dark ? [0.6, 0.6, 0.68] : [0.74, 0.74, 0.8], C(0, 0.4, 0.75), 0.25);
+        m.hi = [1, 1, 1]; m.dust = C(0, 0.35, 0.8); m.mode = 1;
+        break;
+      case 'glow': // lit from within, accent on a night ground
+        m.lo = mixc(acc, [0, 0, 0], 0.7); m.mid = mixc(acc, [0.9, 0.9, 0.95], 0.15); m.hi = C(0, 0.6, 0.97); m.dust = mixc(acc, [0.9, 0.9, 0.95], 0.4); m.mode = 2;
+        break;
+      case 'aurora': // accent -> accent 2 -> a third hue along each fibre
+        m.lo = dark ? [0.12, 0.12, 0.16] : [0.2, 0.2, 0.26]; m.mid = dark ? [0.56, 0.56, 0.64] : [0.66, 0.66, 0.72]; m.hi = [1, 1, 1];
+        m.dust = C(0, 0.3, 0.75); m.mode = 3; m.pal = [acc, acc2, C(80, 0.85, 0.62)];
+        break;
+      case 'ice': // cool iridescence round the accent, on a pale ground
+        m.lo = C(0, 0.25, dark ? 0.12 : 0.25); m.mid = C(0, 0.3, dark ? 0.58 : 0.76); m.hi = [1, 1, 1]; m.dust = C(0, 0.5, 0.75); m.mode = 1;
+        m.pal = [C(-45, 0.85, 0.74), C(0, 0.8, 0.68), C(55, 0.75, 0.62)];
+        break;
+      case 'night': // the same sheen glowing on deep night
+        m.lo = C(0, 0.4, 0.08); m.mid = C(0, 0.6, 0.7); m.hi = C(0, 0.3, 0.97); m.dust = C(0, 0.8, 0.78); m.mode = 4;
+        m.pal = [C(-45, 0.9, 0.72), C(0, 0.85, 0.7), C(55, 0.8, 0.64)];
+        break;
+      default: { // silver: neutral, with a faint accent tint
+        var t = 0.12;
+        m.lo = mixc(dark ? [0.16, 0.15, 0.14] : [0.22, 0.19, 0.155], C(0, S, dark ? 0.15 : 0.2), t);
+        m.mid = mixc(dark ? [0.55, 0.52, 0.48] : [0.64, 0.585, 0.51], C(0, S, 0.55), t);
+        m.hi = dark ? [0.97, 0.95, 0.91] : [1.0, 0.98, 0.94];
+        m.dust = mixc([0.78, 0.69, 0.55], C(0, S, 0.6), 0.2);
+      }
+    }
+    return m;
   }
 
   // ------------------------------------------------------------ init
@@ -812,7 +845,7 @@
       var acc = parseColor(cs.getPropertyValue('--pm-accent') || '#7c3aed');
       var acc2 = parseColor(cs.getPropertyValue('--pm-accent-2') || '#2563eb');
       var name = (src.getAttribute && src.getAttribute('data-cx-mat')) || container.getAttribute('data-mat') || 'silver';
-      col = material(MATERIALS[name] ? name : 'silver', dark, acc, acc2);
+      col = material(MAT_NAMES_ALL.indexOf(name) >= 0 ? name : 'silver', dark, acc, acc2);
       col.acc = acc; col.acc2 = acc2; col.dark = dark ? 1 : 0;
     }
     colours();
@@ -963,6 +996,7 @@
     new MutationObserver(recolour).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     var pm = container.closest('.pm');
     if (pm) new MutationObserver(recolour).observe(pm, { attributes: true, attributeFilter: ['data-pm-theme', 'data-cx-mat'] });
+    document.addEventListener('pm:accent', recolour);
     canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); alive = false; fallback(); });
 
     resize();

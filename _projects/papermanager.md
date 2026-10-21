@@ -11,7 +11,7 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
 {%- assign repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
 {%- assign docs = 'https://niklasabraham.github.io/PaperManager/' -%}
 <div class="pm" id="pm" data-hero="a">
-<script>(function(){var r=document.getElementById('pm'),H=/^([abdef]|c[1-7]?)$/,T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(!H.test(h))h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(H.test(h)){r.setAttribute('data-hero',h[0]);if(h[0]==='c')r.setAttribute('data-hero-c',h[1]||'1');}if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);var M=/^(silver|champagne|ink|iridescent|glow|aurora|ice|night)$/,m=(q.get('mat')||'').toLowerCase();try{if(!M.test(m))m=localStorage.getItem('pm-cx-mat')||'';}catch(e){}if(M.test(m))r.setAttribute('data-cx-mat',m);})();</script>
+<script>(function(){var r=document.getElementById('pm'),H=/^([abdef]|c[1-7]?)$/,T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(!H.test(h))h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(H.test(h)){r.setAttribute('data-hero',h[0]);if(h[0]==='c')r.setAttribute('data-hero-c',h[1]||'1');}if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);var M=/^(silver|champagne|ink|iridescent|glow|aurora|ice|night)$/,m=(q.get('mat')||'').toLowerCase();try{if(!M.test(m))m=localStorage.getItem('pm-cx-mat')||'';}catch(e){}if(M.test(m))r.setAttribute('data-cx-mat',m);var a=(q.get('accent')||'').replace('#','');try{if(!/^[0-9a-fA-F]{6}$/.test(a))a=localStorage.getItem('pm-accent')||'';}catch(e){}if(/^[0-9a-fA-F]{6}$/.test(a))r.style.setProperty('--pm-accent','#'+a);})();</script>
 
 <!-- Design preview: pick a hero and a colour theme for this page (owner tool, not part of the content) -->
 <div class="pm-switch" id="pm-switch" role="group" aria-label="Design preview">
@@ -58,6 +58,7 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
       <button type="button" data-set-theme="rose" title="Rose" style="--sw:#e11d48"></button>
       <button type="button" data-set-theme="blue" title="Blue" style="--sw:#2563eb"></button>
       <button type="button" data-set-theme="graphite" title="Graphite" style="--sw:#475569"></button>
+      <label class="pm-switch-pick" title="Any colour" aria-pressed="false"><input type="color" value="#7c3aed" aria-label="Pick any accent colour"></label>
     </div>
   </div>
 </div>

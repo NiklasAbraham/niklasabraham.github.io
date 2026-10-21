@@ -878,8 +878,8 @@ $pm-themes: (
   line-height: 1rem;
   font-weight: 600;
   white-space: nowrap;
-  background: var(--pm-ink);
-  color: var(--global-bg-color);
+  background: var(--pm-accent-ink, var(--pm-ink));
+  color: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   &.pm-badge-secondary { background: var(--pm-accent-soft); color: var(--pm-ink); box-shadow: none; }
   &.pm-badge-outline { background: transparent; color: var(--pm-ink); border-color: var(--pm-border); box-shadow: none; }
@@ -911,7 +911,7 @@ $pm-themes: (
   border-radius: 0.5rem;
   border: 1px solid var(--pm-border);
   background: var(--global-bg-color);
-  color: var(--pm-ink);
+  color: var(--pm-accent);
   svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 }
 
