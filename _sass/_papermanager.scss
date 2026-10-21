@@ -225,20 +225,170 @@ $pm-themes: (
   border-top: 1px solid var(--pm-border);
 }
 
-.pm-chat-demo { margin: 0; }
-.pm-chat-demo-wait {
-  height: 700px;
+.pm-chat-stage { position: relative; margin: 2.6rem 0 0; }
+.pm-chat-pitch { text-align: center; margin: 0 auto 2.6rem; max-width: 46rem; }
+.pm-chat-pitch .pm-kicker { margin-bottom: 0.5rem; }
+.pm-chat-line {
+  margin: 0;
+  font-size: clamp(1.35rem, 1rem + 1.4vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 650;
+  color: var(--pm-ink);
+}
+
+// Two columns: a menu of the examples in very large type, and the chat window of the active one.
+.pm-chat-show {
+  padding: 0 0 2rem;
   display: grid;
-  place-items: center;
-  border: 1px solid var(--pm-border);
-  border-radius: 14px;
-  background: linear-gradient(90deg, #f6f5f8 0 262px, #fff 262px);
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.78rem;
-  color: #6b7280;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
+}
+.pm-chat-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.6rem, 3vh, 2.6rem);
+  li { margin: 0; }
+}
+.pm-cm {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:focus { outline: none; }
+  &:focus-visible .pm-cm-head { text-decoration: underline 3px var(--pm-accent); text-underline-offset: 7px; }
+}
+.pm-cm-num {
+  flex: none;
+  margin-top: 0.3rem;
+  font-size: 1.65rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #a1a1aa;
+  transition: color 0.3s, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pm-cm-text { display: block; min-width: 0; }
+.pm-cm-head {
+  display: block;
+  font-size: clamp(2.1rem, 1rem + 2.6vw, 3.7rem);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+  color: #71717a;
+  opacity: 0.4;
+  transition: opacity 0.35s, color 0.35s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pm-cm-sub {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--pm-muted);
+  opacity: 0.55;
+  transition: opacity 0.35s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  em { font-style: normal; font-weight: 600; color: var(--pm-ink-2); }
+}
+.pm-cm:hover .pm-cm-head { opacity: 0.7; }
+.pm-cm[aria-selected='true'] {
+  .pm-cm-num { color: var(--pm-accent); transform: scale(1.1); }
+  .pm-cm-head { opacity: 1; color: var(--pm-ink); transform: translateX(1rem); }
+  .pm-cm-sub { opacity: 1; transform: translateX(1rem); }
+}
+html[data-theme='dark'] .pm-cm[aria-selected='false'] .pm-cm-head {
+  color: transparent;
+  -webkit-text-stroke: 1px #a1a1aa;
+  opacity: 0.55;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pm-cm-num, .pm-cm-head, .pm-cm-sub { transition: none; }
+}
+
+.pm-chat-frame {
+  position: relative;
+  isolation: isolate;
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px rgba(17, 24, 39, 0.06),
+    0 30px 60px -30px rgba(17, 24, 39, 0.35),
+    0 60px 120px -60px color-mix(in srgb, var(--pm-accent) 55%, transparent);
+  &::before {
+    // a soft glow of the accent behind the window
+    content: '';
+    position: absolute;
+    inset: -14% -8% -16%;
+    z-index: -1;
+    background:
+      radial-gradient(50% 55% at 40% 45%, color-mix(in srgb, var(--pm-accent) 24%, transparent), transparent 72%),
+      radial-gradient(40% 45% at 75% 65%, color-mix(in srgb, var(--pm-accent-2, var(--pm-accent)) 14%, transparent), transparent 72%);
+    filter: blur(48px);
+    pointer-events: none;
+  }
+}
+// The window is what the example reveal clips (entry.ts in the demo bundle): WebKit clips it, not the shadow host.
+.pm-chat-window {
+  position: relative;
+  isolation: isolate;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  overflow: hidden;
+}
+.pm-chat-chrome {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  border-bottom: 1px solid #ececf1;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(#fbfbfd, #f4f4f7);
+  i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; }
+  i:nth-child(2) { background: #febc2e; }
+  i:nth-child(3) { background: #28c840; }
+  span {
+    margin: 0 auto;
+    padding: 3px 14px;
+    border-radius: 7px;
+    background: #fff;
+    border: 1px solid #ececf1;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: #6b7280;
+    transform: translateX(-22px);
+  }
+}
+.pm-chat-demo { margin: 0; min-height: 640px; }
+// the window's glow reaches past the column; where the page has no margin for it, clip it
+@media (max-width: 1320px) { .pm-chat-show { overflow-x: clip; } }
+@media (max-width: 960px) {
+  .pm-chat-show { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
+  .pm-chat-menu { gap: 0.2rem; }
+  .pm-cm { align-items: baseline; gap: 0.8rem; padding: 0.5rem 0.2rem; }
+  .pm-cm-num { margin: 0; font-size: 1rem; }
+  .pm-cm-head { font-size: 1.45rem; line-height: 1; letter-spacing: -0.03em; br { display: none; } }
+  .pm-cm-sub { display: none; margin-top: 0.3rem; }
+  .pm-cm[aria-selected='true'] {
+    .pm-cm-head, .pm-cm-sub { transform: none; }
+    .pm-cm-sub { display: block; }
+  }
 }
 @media (max-width: 800px) {
-  .pm-chat-demo-wait { height: 660px; background: #fff; }
+  .pm-chat-demo { min-height: 600px; }
+  .pm-chat-window, .pm-chat-frame { border-radius: 12px; }
+  .pm-chat-chrome { height: 30px; border-radius: 12px 12px 0 0; i { width: 9px; height: 9px; } span { display: none; } }
 }
 
 // ---------------------------------------------------------------- small cards

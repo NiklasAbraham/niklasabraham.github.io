@@ -358,14 +358,39 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
         model through LiteLLM.
       </p>
     </div></div>
-    <div class="pm-chat-demo" data-pm-chat-demo="{{ '/assets/pm-chat-demo/data/' | relative_url }}">
-      <div class="pm-chat-demo-wait" aria-hidden="true"><span>Loading the live demo of the knowledge chat …</span></div>
-      <noscript><style>.pm-chat-demo-wait { display: none; }</style><figure class="pm-shot"><img src="{{ img }}chat-preview.webp" width="1600" height="1000"
-        alt="Knowledge chat comparing AlphaFold 2 and AlphaFold 3, with the cited AlphaFold 3 paper open in a pane beside the answer"></figure></noscript>
+    <div class="pm-chat-stage">
+      <div class="pm-chat-pitch">
+        <p class="pm-kicker">Recorded from a real PaperManager library</p>
+        <p class="pm-chat-line">Ask your library. It answers with formulas, plots and proteins.</p>
+      </div>
+      <div class="pm-chat-show">
+        <ol class="pm-chat-menu" id="pm-chat-menu" aria-label="Examples">
+          <li><button type="button" class="pm-cm" data-pm-chat-tab="0" aria-selected="true">
+            <span class="pm-cm-num">01</span>
+            <span class="pm-cm-text"><span class="pm-cm-head">Concept<br> cards</span><span class="pm-cm-sub"><em>Classifier-Free Diffusion Guidance</em> · a formula and a plot, drawn from the answer</span></span>
+          </button></li>
+          <li><button type="button" class="pm-cm" data-pm-chat-tab="1" aria-selected="false">
+            <span class="pm-cm-num">02</span>
+            <span class="pm-cm-text"><span class="pm-cm-head">Live<br> animation</span><span class="pm-cm-sub"><em>Flow Matching for Generative Modeling</em> · noise flowing into data, animated</span></span>
+          </button></li>
+          <li><button type="button" class="pm-cm" data-pm-chat-tab="2" aria-selected="false">
+            <span class="pm-cm-num">03</span>
+            <span class="pm-cm-text"><span class="pm-cm-head">Protein<br> in 3D</span><span class="pm-cm-sub"><em>AlphaFold 3</em> · the SARS-CoV-2 spike, to turn and inspect</span></span>
+          </button></li>
+          <li><button type="button" class="pm-cm" data-pm-chat-tab="3" aria-selected="false">
+            <span class="pm-cm-num">04</span>
+            <span class="pm-cm-text"><span class="pm-cm-head">Cited<br> answers</span><span class="pm-cm-sub"><em>Extracting Training Data from Diffusion Models</em> · a short answer that cites its source</span></span>
+          </button></li>
+        </ol>
+        <div class="pm-chat-frame"><div class="pm-chat-window" data-pm-chat-clip>
+          <div class="pm-chat-chrome" aria-hidden="true"><i></i><i></i><i></i><span>PaperManager &nbsp;·&nbsp; Knowledge Chat</span></div>
+          <div class="pm-chat-demo" id="pm-chat-demo" data-framed data-pm-chat-menu="#pm-chat-menu" data-pm-chat-demo="{{ '/assets/pm-chat-demo/data/' | relative_url }}">{% include pm-chat-demo.html %}</div>
+        </div></div>
+      </div>
     </div>
     <p class="pm-caption">
-      Real conversations over a library of public papers, replayed with the app's own components:
-      pick an example, open a citation, step through a formula, pause an animation, turn a molecule.<br>
+      Four papers from the library, one recorded question each, shown with the app's own components:
+      pick an example, step through the formula, pause the animation, turn the protein.<br>
       Concept visualisations are adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0);
       structures are drawn with <a href="https://3dmol.csb.pitt.edu">3Dmol.js</a> (BSD-3-Clause).
     </p>
@@ -636,3 +661,4 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
 <script defer src="{{ '/assets/js/papermanager-hero.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script defer src="{{ '/assets/js/papermanager-hero-c.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script type="module" src="{{ '/assets/pm-chat-demo/pm-chat-demo.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/papermanager-recolor.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

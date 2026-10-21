@@ -1,0 +1,157 @@
+{
+ "tabs": [
+  {
+   "slug": "guidance",
+   "short": "Classifier-free guidance",
+   "hint": "formula & plot",
+   "paper": {
+    "title": "Classifier-Free Diffusion Guidance",
+    "authors": "Ho & Salimans",
+    "year": 2022,
+    "venue": null,
+    "blurb": "Classifier-free guidance eliminates the need for a separately trained classifier in guided diffusion model sampling.",
+    "link": "https://doi.org/10.48550/arXiv.2207.12598"
+   },
+   "question": "How does classifier-free guidance combine the conditional and unconditional scores, and why does a larger guidance weight trade diversity for fidelity? Answer in three short paragraphs with the key formula.",
+   "answer": "In [Classifier-Free Diffusion Guidance](/paper/ae7c3fc8-72bd-4054-b534-4b2b611a86cb), Ho and Salimans use a single network $\\epsilon_\\theta$ to predict noise both with and without the class label. During training, the label $c$ is replaced by a null token $\\varnothing$ with probability $p_{\\text{uncond}}$, which is around 0.1–0.2 in their experiments. At sampling time, each step combines the conditional and unconditional predictions linearly:\n\n$$\n\\tilde\\epsilon_\\theta(z_\\lambda, c) = (1+w)\\,\\epsilon_\\theta(z_\\lambda, c) - w\\,\\epsilon_\\theta(z_\\lambda).\n$$\n\nThe noise prediction is a scaled negative score, $\\epsilon \\approx -\\sigma_\\lambda \\nabla_z \\log p(z_\\lambda)$. In score terms, the guided score is therefore\n\n$$\n(1+w)\\nabla\\log p(z|c) - w\\nabla\\log p(z) = \\nabla\\log p(z|c) + w\\,\\nabla\\log p_i(c|z),\n$$\n\nwhere $p_i(c|z) \\propto p(z|c)/p(z)$ is an \"implicit classifier\" given by Bayes' rule. This has the same form as classifier guidance, except that the classifier gradient comes from the difference between the two generative scores, so no separate classifier is trained.\n\nThe trade-off follows from the density that the guided score targets: $\\tilde p_w(z|c) \\propto p(z|c)\\,p_i(c|z)^w \\propto p(z|c)^{1+w}/p(z)^w$. Raising $p_i(c|z)$ to the power $w>0$ tilts probability mass towards regions where the class is easiest to identify. Those are the prototypical, high-density parts of the class-conditional distribution. Atypical samples, which also fit other classes, are suppressed. The effect is similar to low-temperature sampling or GAN truncation: individual samples look more like their class (higher Inception Score) while within-class variety shrinks (FID eventually gets worse). The paper's ImageNet results show this:\n\n- **64×64:** the best FID is 1.55 at $w=0.1$, and IS rises steadily to 260.2 at $w=4$.\n- **128×128:** the best FID is 2.43 at $w=0.3$. At $w=4$, IS is 421 but FID degrades to 21.5.\n\nThis explanation is a heuristic. The authors stress that an unconstrained network produces a vector field that is not the gradient of any function, so $\\tilde\\epsilon$ is not exactly the gradient of any classifier. Applying the tilt separately at every noise level also does not give exact samples from $\\tilde p_w$ at $t=0$. [Selective Underfitting in Diffusion Models](/paper/9193fc14-dade-4c6d-b545-d7a8bb56a8f6) adds a related point. On the noisy points seen during training, the conditional and unconditional scores barely differ. The difference that drives guidance appears in regions sampling trajectories reach but training never covered, where the two predictions diverge. So the size of the effect depends on how each model generalises there, not just on Bayes' rule. The cost is two forward passes per sampling step.",
+   "concepts": [
+    {
+     "label": "Guided noise prediction and score",
+     "section": 0,
+     "spec": {
+      "type": "formula",
+      "title": "Classifier-free guidance as conditional score plus implicit classifier gradient",
+      "caption": "The guided noise prediction (1+w)ε(z,c) − wε(z) corresponds to the conditional score plus w times the gradient of an implicit classifier, so raising w sharpens samples toward the condition c, increasing fidelity at the cost of diversity.",
+      "main_latex": "\\tilde{\\epsilon}(z,c) = (1+w)\\,\\epsilon(z,c) - w\\,\\epsilon(z) \\;\\Longleftrightarrow\\; \\tilde{s}(z,c) = \\nabla_z \\log p(z\\mid c) + w\\,\\nabla_z \\log p_i(c\\mid z)",
+      "steps": [
+       {
+        "latex": "\\epsilon(z,c) \\approx -\\sigma\\,\\nabla_z \\log p(z\\mid c), \\qquad \\epsilon(z) \\approx -\\sigma\\,\\nabla_z \\log p(z)",
+        "explanation": "Noise prediction is, up to a factor of the noise scale σ, the negative score of the corresponding distribution."
+       },
+       {
+        "latex": "\\tilde{\\epsilon}(z,c) \\approx -\\sigma\\left[(1+w)\\nabla_z \\log p(z\\mid c) - w\\,\\nabla_z \\log p(z)\\right]",
+        "explanation": "Substituting these into the guided noise gives the same linear combination of conditional and unconditional scores."
+       },
+       {
+        "latex": "\\tilde{s}(z,c) = \\nabla_z \\log p(z\\mid c) + w\\left[\\nabla_z \\log p(z\\mid c) - \\nabla_z \\log p(z)\\right]",
+        "explanation": "Regrouping, with s̃ = −ε̃/σ, shows the guidance is the conditional score plus w times the difference of the two scores."
+       },
+       {
+        "latex": "p_i(c\\mid z) \\propto \\frac{p(z\\mid c)}{p(z)} \\;\\Rightarrow\\; \\nabla_z \\log p_i(c\\mid z) = \\nabla_z \\log p(z\\mid c) - \\nabla_z \\log p(z)",
+        "explanation": "By Bayes' rule, that score difference is exactly the gradient of an implicit classifier, since p(c) does not depend on z."
+       },
+       {
+        "latex": "\\tilde{s}(z,c) = \\nabla_z \\log p(z\\mid c) + w\\,\\nabla_z \\log p_i(c\\mid z)",
+        "explanation": "A larger w up-weights the implicit classifier and pushes samples toward regions where c is highly identifiable, which raises fidelity and narrows diversity."
+       }
+      ]
+     }
+    },
+    {
+     "label": "FID and IS versus guidance weight",
+     "section": 0,
+     "spec": {
+      "type": "graph",
+      "title": "FID rises as guidance weight w increases (ImageNet)",
+      "caption": "Reported FID values only: the best FID at 64x64 (w=0.1) and at 128x128 (w=0.3), and the 128x128 FID at w=4. Lower FID is better. Over the same range of w, IS rises: 64x64 reaches 260.2 at w=4, and 128x128 reaches 421 at w=4. Larger w therefore gives higher fidelity (IS) but lower diversity (worse FID).",
+      "chart_type": "bars",
+      "x_label": "Model and guidance weight (w)",
+      "y_label": "FID (lower is better)",
+      "data_json": "{\"bars\":[{\"label\":\"64x64, w=0.1 (best FID)\",\"value\":1.55},{\"label\":\"128x128, w=0.3 (best FID)\",\"value\":2.43},{\"label\":\"128x128, w=4\",\"value\":21.5}]}"
+     }
+    }
+   ],
+   "cited": {
+    "ae7c3fc8-72bd-4054-b534-4b2b611a86cb": {
+     "title": "Classifier-Free Diffusion Guidance",
+     "link": "https://doi.org/10.48550/arXiv.2207.12598"
+    },
+    "9193fc14-dade-4c6d-b545-d7a8bb56a8f6": {
+     "title": "SELECTIVE UNDERFITTING IN DIFFUSION MODELS",
+     "link": "https://arxiv.org/abs/2510.01378"
+    }
+   },
+   "icon": "∑"
+  },
+  {
+   "slug": "flow-matching",
+   "short": "Flow matching",
+   "hint": "animation",
+   "paper": {
+    "title": "Flow Matching for Generative Modeling",
+    "authors": "Lipman, Chen, Ben-Hamu, Nickel & Le",
+    "year": 2023,
+    "venue": "ICLR",
+    "blurb": "The paper introduces Flow Matching (FM), a simulation-free training paradigm for Continuous Normalizing Flows (CNFs) that allows for scalable training by regressing onto target vector fields of fixed conditional probability paths.",
+    "link": "https://arxiv.org/abs/2210.02747"
+   },
+   "question": "How does flow matching turn noise into data? Explain the conditional flow matching objective in three short paragraphs.",
+   "answer": "In [Flow Matching for Generative Modeling](/paper/19a5a197-0082-44a1-b961-e320a27d46e0), a network learns a time-dependent vector field $v_t(x;\\theta)$, $t\\in[0,1]$. Generation starts from noise $x_0\\sim p_0=\\mathcal N(0,I)$ and integrates the ODE $\\tfrac{d}{dt}\\phi_t(x)=v_t(\\phi_t(x))$ up to $t=1$. Moving all the samples this way carries the noise density along a probability path $p_t$, governed by the continuity equation $\\partial_t p_t+\\nabla\\!\\cdot(p_t v_t)=0$, and the aim is $p_1\\approx q$, the data distribution. The ideal **Flow Matching** loss regresses the network onto a target field $u_t$ that generates a chosen path from $p_0$ to $q$: $\\mathcal L_{\\mathrm{FM}}=\\mathbb E_{t,\\,p_t(x)}\\|v_t(x;\\theta)-u_t(x)\\|^2$. Neither $p_t$ nor $u_t$ is available in closed form, so this loss cannot be computed directly.\n\nThe fix is to build the path one data point at a time. For each sample $x_1$, choose a simple **conditional path** $p_t(x\\mid x_1)$ that starts at $\\mathcal N(0,I)$ and ends at a narrow Gaussian around $x_1$, generated by a known field $u_t(x\\mid x_1)$. Averaging over the data gives the marginal path $p_t(x)=\\int p_t(x\\mid x_1)\\,q(x_1)\\,dx_1$. The paper shows that the matching marginal field is the posterior-weighted average $u_t(x)=\\mathbb E_{x_1\\mid x}[u_t(x\\mid x_1)]$, and that this field generates $p_t$. The **Conditional Flow Matching** loss is\n$$\\mathcal L_{\\mathrm{CFM}}(\\theta)=\\mathbb E_{t\\sim\\mathcal U[0,1],\\,x_1\\sim q,\\,x\\sim p_t(x\\mid x_1)}\\big\\|v_t(x;\\theta)-u_t(x\\mid x_1)\\big\\|^2 .$$\nIt differs from $\\mathcal L_{\\mathrm{FM}}$ only by a term that does not depend on $\\theta$, so $\\nabla_\\theta\\mathcal L_{\\mathrm{CFM}}=\\nabla_\\theta\\mathcal L_{\\mathrm{FM}}$ (Theorem 2). The intuition is that a least-squares fit to a noisy target converges to that target's conditional mean, here $u_t(x)$. Training needs no ODE simulation, and the gradients are unbiased.\n\nThe paper uses Gaussian conditional paths $\\mathcal N(\\mu_t(x_1),\\sigma_t(x_1)^2 I)$; specific choices of $\\mu_t,\\sigma_t$ recover the standard diffusion paths. Its preferred choice is the **OT (displacement) path**: $\\mu_t=t x_1$ and $\\sigma_t=1-(1-\\sigma_{\\min})t$. A noise sample then moves along the straight line $\\psi_t(x_0)=\\sigma_t x_0+t x_1$ at constant velocity, and the loss reduces to\n$$\\mathbb E\\,\\big\\|v_t(\\psi_t(x_0);\\theta)-\\big(x_1-(1-\\sigma_{\\min})x_0\\big)\\big\\|^2 .$$\nAfter training, you draw $x_0\\sim\\mathcal N(0,I)$ and integrate $v_\\theta$ from $t=0$ to $1$ with an off-the-shelf solver (the paper uses dopri5 or midpoint). Each conditional path is straight, but the learned marginal flow is not guaranteed to be straight. In practice its trajectories are much less curved than diffusion paths, which gives faster training and good samples with fewer function evaluations; the paper shows this on ImageNet at 32, 64 and 128 resolution.",
+   "concepts": [
+    {
+     "label": "Noise-to-data flow via ODE",
+     "section": 0,
+     "spec": {
+      "type": "2d-anim",
+      "title": "Flow matching: noise to data along straight ODE paths",
+      "caption": "Samples x0 ~ N(0, I) are carried by dφ_t/dt = v_t(φ_t) from t=0 to 1. With conditional OT paths x_t = (1−t)x0 + t x1, each point moves in a straight line with constant target velocity u_t = x1 − x0. The right panel is a schematic of curved diffusion-style paths, which need more integration steps.",
+      "setup_code": "var seed = 7;\nfunction rnd() { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; var t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }\nfunction gauss() { var u = Math.max(1e-6, rnd()), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.2831853 * v); }\nvar N = 80;\nvar X0 = [], X1 = [];\nfor (var i = 0; i < N; i++) {\n  X0.push([-1.9 + 0.6 * gauss(), 0.6 * gauss()]);\n  var a = rnd() * Math.PI;\n  var p;\n  if (i % 2 === 0) p = [Math.cos(a), Math.sin(a)];\n  else p = [1 - Math.cos(a), 0.5 - Math.sin(a)];\n  X1.push([1.9 + 1.2 * (p[0] - 0.5) + 0.07 * gauss(), 1.2 * (p[1] - 0.25) + 0.07 * gauss()]);\n}\nX0.sort(function (a, b) { return a[1] - b[1]; });\nX1.sort(function (a, b) { return a[1] - b[1]; });\nvar AMP = [];\nfor (var j = 0; j < N; j++) AMP.push((j % 2 ? 1 : -1) * (0.35 + 0.6 * rnd()));\nvar INK = '#1a1a1d';\nfunction clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }\nfunction pos(i, t, k) {\n  var a = X0[i], b = X1[i];\n  var x = (1 - t) * a[0] + t * b[0], y = (1 - t) * a[1] + t * b[1];\n  if (k === 1) {\n    var dx = b[0] - a[0], dy = b[1] - a[1];\n    var L = Math.sqrt(dx * dx + dy * dy) + 1e-6;\n    var o = Math.sin(Math.PI * t) * AMP[i] * 0.6;\n    x += -dy / L * o * 1.0; y += dx / L * o * 1.0;\n  }\n  return [x, y];\n}\nreturn {\n  draw: function (ctx, width, height, time, dt) {\n    ctx.fillStyle = '#ffffff';\n    ctx.fillRect(0, 0, width, height);\n    var period = 9;\n    var tt = time % period;\n    var t = clamp((tt - 1) / 6, 0, 1);\n    var m = 16;\n    var pw = (width - 3 * m) / 2;\n    var top = 56;\n    var ph = Math.min(height - top - 70, pw * 0.7);\n    var titles = ['Flow matching: straight OT paths', 'Diffusion-like paths (schematic)'];\n    var cols = ['#7c3aed', '#0284c7'];\n    for (var k = 0; k < 2; k++) {\n      var ox = m + k * (pw + m), oy = top;\n      var sx = pw / 7.2, sy = ph / 4.4;\n      var cx = ox + pw / 2, cy = oy + ph / 2;\n      var P = function (p) { return [cx + p[0] * sx, cy - p[1] * sy]; };\n      ctx.strokeStyle = '#d4d4d8'; ctx.lineWidth = 1;\n      ctx.strokeRect(ox, oy, pw, ph);\n      ctx.fillStyle = INK; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';\n      ctx.fillText(titles[k], ox, oy - 8);\n      ctx.font = '12px sans-serif';\n      ctx.fillStyle = cols[k];\n      ctx.fillText('p_0 = N(0, I)', ox + 8, oy + ph - 8);\n      ctx.fillStyle = '#d97706';\n      ctx.textAlign = 'right';\n      ctx.fillText('data q', ox + pw - 8, oy + ph - 8);\n      ctx.textAlign = 'left';\n      // faint full paths\n      ctx.lineWidth = 1;\n      for (var i = 0; i < N; i += 2) {\n        ctx.strokeStyle = 'rgba(100,100,110,0.13)';\n        ctx.beginPath();\n        var q = P(pos(i, 0, k)); ctx.moveTo(q[0], q[1]);\n        var S = k === 0 ? 1 : 12;\n        for (var s = 1; s <= S; s++) { q = P(pos(i, s / S, k)); ctx.lineTo(q[0], q[1]); }\n        ctx.stroke();\n      }\n      // traversed trails\n      ctx.strokeStyle = k === 0 ? 'rgba(124,58,237,0.35)' : 'rgba(2,132,199,0.35)';\n      for (var i2 = 0; i2 < N; i2 += 2) {\n        ctx.beginPath();\n        var q2 = P(pos(i2, 0, k)); ctx.moveTo(q2[0], q2[1]);\n        var S2 = k === 0 ? 1 : 12;\n        for (var s2 = 1; s2 <= S2; s2++) { q2 = P(pos(i2, t * s2 / S2, k)); ctx.lineTo(q2[0], q2[1]); }\n        ctx.stroke();\n      }\n      // data ghosts\n      ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1;\n      for (var g = 0; g < N; g++) {\n        var d = P(X1[g]);\n        ctx.beginPath(); ctx.arc(d[0], d[1], 3.2, 0, 6.2832); ctx.stroke();\n      }\n      // velocity arrows (flow panel)\n      if (k === 0 && t > 0 && t < 1) {\n        ctx.strokeStyle = '#059669'; ctx.fillStyle = '#059669'; ctx.lineWidth = 1.5;\n        for (var v = 3; v < N; v += 10) {\n          var pp = pos(v, t, 0);\n          var ux = (X1[v][0] - X0[v][0]) * 0.3, uy = (X1[v][1] - X0[v][1]) * 0.3;\n          var a0 = P(pp), a1 = P([pp[0] + ux, pp[1] + uy]);\n          ctx.beginPath(); ctx.moveTo(a0[0], a0[1]); ctx.lineTo(a1[0], a1[1]); ctx.stroke();\n          var ang = Math.atan2(a1[1] - a0[1], a1[0] - a0[0]);\n          ctx.beginPath(); ctx.moveTo(a1[0], a1[1]);\n          ctx.lineTo(a1[0] - 6 * Math.cos(ang - 0.4), a1[1] - 6 * Math.sin(ang - 0.4));\n          ctx.lineTo(a1[0] - 6 * Math.cos(ang + 0.4), a1[1] - 6 * Math.sin(ang + 0.4));\n          ctx.closePath(); ctx.fill();\n        }\n      }\n      // points\n      ctx.fillStyle = cols[k];\n      for (var n = 0; n < N; n++) {\n        var c = P(pos(n, t, k));\n        ctx.beginPath(); ctx.arc(c[0], c[1], 3, 0, 6.2832); ctx.fill();\n      }\n    }\n    // time bar\n    var bx = m + 30, bw = width - 2 * m - 60, by = top + ph + 30;\n    ctx.fillStyle = INK; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';\n    ctx.fillText('t', m + 8, by + 4);\n    ctx.strokeStyle = '#a1a1aa'; ctx.lineWidth = 2;\n    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + bw, by); ctx.stroke();\n    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 3;\n    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + bw * t, by); ctx.stroke();\n    ctx.fillStyle = '#7c3aed';\n    ctx.beginPath(); ctx.arc(bx + bw * t, by, 5, 0, 6.2832); ctx.fill();\n    ctx.fillStyle = INK;\n    var msg;\n    if (t < 0.02) msg = 't = 0.00: x0 ~ N(0, I)';\n    else if (t > 0.98) msg = 't = 1.00: φ_1 ≈ samples from q';\n    else msg = 't = ' + t.toFixed(2) + ': dφ_t/dt = v_t(φ_t),  x_t = (1−t)x0 + t x1,  u_t = x1 − x0';\n    ctx.fillText(msg, bx, by + 24);\n    ctx.fillStyle = '#059669';\n    ctx.fillText('green arrows: constant velocity u_t', bx, by + 42);\n    ctx.fillStyle = INK;\n    ctx.font = '13px sans-serif';\n    ctx.fillText('Same pairs (x0, x1); flow matching learns v_t ≈ E[u_t | x_t]', m, 22);\n  }\n};"
+     }
+    }
+   ],
+   "cited": {
+    "19a5a197-0082-44a1-b961-e320a27d46e0": {
+     "title": "FLOW MATCHING FOR GENERATIVE MODELING",
+     "link": "https://arxiv.org/abs/2210.02747"
+    }
+   },
+   "icon": "▶"
+  },
+  {
+   "slug": "alphafold3",
+   "short": "AlphaFold 3",
+   "hint": "protein in 3D",
+   "paper": {
+    "title": "Accurate structure prediction of biomolecular interactions with AlphaFold 3",
+    "authors": "Abramson, Adler, Dunger et al.",
+    "year": 2024,
+    "venue": "Nature",
+    "blurb": "AlphaFold 3 (AF3) is a unified deep-learning model that predicts the joint 3D structure of biomolecular complexes containing proteins, nucleic acids (DNA/RNA), small-molecule ligands, ions, and covalently modified residues.",
+    "link": "https://doi.org/10.1038/s41586-024-07487-w"
+   },
+   "question": "In two short paragraphs, how does AlphaFold 3 predict the structure of a protein complex? Show the SARS-CoV-2 spike (PDB 6VXX) in 3D with the receptor-binding domains highlighted.",
+   "answer": "[AlphaFold 3](/paper/423df162-7d89-4df4-9022-e96643aaa393) takes only sequences (and SMILES strings for ligands) as input. It tokenises the complex: one token per standard residue or nucleotide, and one token per atom for ligands and modified residues. A small MSA module (4 blocks with pair-weighted averaging) and template features feed into the **Pairformer**, a stack of 48 blocks. The Pairformer refines a single representation ($n \\times 384$) and a pair representation ($n \\times n \\times 128$) using triangle updates and attention, and recycles them. In AlphaFold 2 the Evoformer kept updating the MSA representation throughout; here the MSA is used only at the start, and the pair representation carries the information that relates residues within a chain and across chains.\n\nThe **diffusion module** then turns these representations into structure. It takes noised atom coordinates and predicts the denoised ones, with no frames, torsion angles or enforced equivariance. At inference it starts from random noise and denoises in about 20 steps. Training at low noise levels teaches local stereochemistry, and training at high noise teaches global arrangement. To stop the model inventing structure in disordered regions, it was also trained on AlphaFold-Multimer v2.3 predictions (cross-distillation). A confidence head trained on \"mini-rollout\" structures predicts pLDDT, PAE, PDE and ipTM, which are used to rank samples. On protein–protein interfaces it beat AlphaFold-Multimer v2.3 (Wilcoxon $P = 1.8\\times10^{-18}$, $n = 1{,}064$ clusters). For antibody–antigen complexes the gain ($P = 6.5\\times10^{-5}$) depended on drawing many seeds (1,000 in that benchmark) and ranking them by confidence.\n\n```structure\n{\"title\": \"SARS-CoV-2 spike trimer, closed prefusion state (6VXX)\",\n \"models\": [{\"pdb\": \"6VXX\", \"color\": \"grey\", \"opacity\": 0.85}],\n \"highlights\": [\n   {\"label\": \"RBD (chain A)\", \"chain\": \"A\", \"resi\": \"319-541\", \"color\": \"warm\"},\n   {\"label\": \"RBD (chain B)\", \"chain\": \"B\", \"resi\": \"319-541\", \"color\": \"blue\"},\n   {\"label\": \"RBD (chain C)\", \"chain\": \"C\", \"resi\": \"319-541\", \"color\": \"green\"},\n   {\"label\": \"glycans\", \"hetero\": true, \"resn\": [\"NAG\"], \"style\": \"sticks\", \"color\": \"violet\"}],\n \"focus\": \"RBD (chain A)\",\n \"caption\": \"In 6VXX all three receptor-binding domains (residues 319–541, coloured by protomer) are in the 'down' conformation, packed together at the apex of the trimer; the grey remainder is the rest of the spike, with N-linked glycans shown as sticks.\"}\n```",
+   "concepts": [],
+   "cited": {
+    "423df162-7d89-4df4-9022-e96643aaa393": {
+     "title": "Accurate structure prediction of biomolecular interactions with AlphaFold 3",
+     "link": "https://doi.org/10.1038/s41586-024-07487-w"
+    }
+   },
+   "icon": "⬢"
+  },
+  {
+   "slug": "extraction",
+   "short": "Training-data extraction",
+   "hint": "cited answer",
+   "paper": {
+    "title": "Extracting Training Data from Diffusion Models",
+    "authors": "Carlini, Hayes, Nasr et al.",
+    "year": 2023,
+    "venue": "USENIX Security",
+    "blurb": "This paper demonstrates that state-of-the-art diffusion models, including Stable Diffusion and Imagen, memorize and regenerate specific individual training examples.",
+    "link": "https://arxiv.org/abs/2301.13188"
+   },
+   "question": "How did this paper extract training images from Stable Diffusion, and how many did it find? Answer briefly and cite the paper.",
+   "answer": "[Extracting Training Data from Diffusion Models](/paper/f65eeee6-a089-4851-a9d3-02142689f71b) attacks Stable Diffusion v1.4 as a black box. The model is only queried, never inspected, and the pipeline has two stages: generate, then filter.\n\n1. **Picking prompts.** Images that appear many times in training are the most likely to be memorized. The authors embedded the LAION training set with CLIP and looked for clusters of near-duplicates by cosine similarity. They then used the captions of the most-duplicated images as prompts (about 350k).\n2. **Generating candidates.** They drew about 500 samples per prompt, roughly 175 million images in total.\n3. **Filtering for memorization.** A memorized image tends to come back almost unchanged across different random seeds, while novel generations vary. So for each prompt they built a graph whose nodes are the generated images. Two images are joined by an edge if they are near-identical, measured by the largest $\\ell_2$ distance between any pair of corresponding $128\\times128$ tiles (16 tiles per image). Using tiles stops a shared background from making two images look like copies. Any clique of at least 10 mutually near-identical images is flagged as a likely memorized sample.\n4. **Checking against the training set.** Each flagged image counts as extracted if it lies within normalized $\\ell_2 \\le 0.15$ of an actual training image.\n\n**Result:** 94 images met the $(\\ell_2, 0.15)$ extraction criterion. Manual inspection found 13 more near-copies, for 109 in total out of about 175M generations. Many were within $\\ell_2 < 0.05$, which is about as close as a JPEG re-encoding of the same image. They included photos of identifiable people and trademarked logos.\n\nThe paper's headline figure of \"over a thousand\" extracted examples covers all the models it attacks, not just Stable Diffusion. The method also depends on knowing training captions, and it is costly: finding about a hundred memorized images took hundreds of millions of samples.",
+   "concepts": [],
+   "cited": {
+    "f65eeee6-a089-4851-a9d3-02142689f71b": {
+     "title": "Extracting Training Data from Diffusion Models",
+     "link": "https://arxiv.org/abs/2301.13188"
+    }
+   },
+   "icon": "❝"
+  }
+ ]
+}

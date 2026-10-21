@@ -1,0 +1,49 @@
+[
+ {
+  "slug": "guidance",
+  "short": "Classifier-free guidance",
+  "hint": "formula & plot",
+  "paper": {
+   "id": "ae7c3fc8-72bd-4054-b534-4b2b611a86cb",
+   "authors": "Ho & Salimans"
+  },
+  "keep": [
+   "Guided noise prediction and score",
+   "FID and IS versus guidance weight"
+  ]
+ },
+ {
+  "slug": "flow-matching",
+  "short": "Flow matching",
+  "hint": "animation",
+  "paper": {
+   "id": "19a5a197-0082-44a1-b961-e320a27d46e0",
+   "title": "Flow Matching for Generative Modeling",
+   "authors": "Lipman, Chen, Ben-Hamu, Nickel & Le",
+   "venue": "ICLR"
+  },
+  "keep": [
+   "Noise-to-data flow via ODE"
+  ]
+ },
+ {
+  "slug": "alphafold3",
+  "short": "AlphaFold 3",
+  "hint": "protein in 3D",
+  "paper": {
+   "id": "423df162-7d89-4df4-9022-e96643aaa393",
+   "authors": "Abramson, Adler, Dunger et al.",
+   "venue": "Nature"
+  }
+ },
+ {
+  "slug": "extraction",
+  "short": "Training-data extraction",
+  "hint": "cited answer",
+  "paper": {
+   "id": "f65eeee6-a089-4851-a9d3-02142689f71b",
+   "authors": "Carlini, Hayes, Nasr et al.",
+   "venue": "USENIX Security"
+  }
+ }
+]
