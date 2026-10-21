@@ -7,3 +7,4 @@ vendor
 .sass-cache
 node_modules
 *.log
+Gemfile.lock
