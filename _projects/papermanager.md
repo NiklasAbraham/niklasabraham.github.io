@@ -23,7 +23,7 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
     <div class="pm-switch-set">
       <button type="button" data-set-hero="a" title="A · Classic">A</button>
       <button type="button" data-set-hero="b" title="B · Banner">B</button>
-      <button type="button" data-set-hero="c" title="C · Living infinity">C</button>
+      <button type="button" data-set-hero="c" title="C · Silk infinity">C</button>
       <button type="button" data-set-hero="d" title="D · Knowledge constellation">D</button>
       <button type="button" data-set-hero="e" title="E · Editorial">E</button>
       <button type="button" data-set-hero="f" title="F · Annotated page">F</button>
@@ -101,31 +101,8 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   </div>
 </section>
 
-<!-- ============================================================ hero C: living infinity -->
-<section class="pm-hv pm-hv-c" data-hero="c" data-name="Living infinity">
-  <div class="pm-c-grid">
-    <div class="pm-c-copy">
-      <p class="pm-eyebrow">Project · open source · self-hosted</p>
-      <h1 class="pm-c-title">A second brain for research papers</h1>
-      <p class="pm-lede">
-        PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
-        Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
-        draws the ideas on each page as interactive visualisations, and maps how every paper in a
-        project connects to the others.
-      </p>
-      <div class="pm-ctas pm-ctas-left">
-        <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
-        <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
-        <a class="pm-btn" href="{{ docs }}"><i class="fas fa-book"></i> Documentation</a>
-      </div>
-    </div>
-    <div class="pm-c-stage">
-      <canvas class="pm-canvas" data-scene="infinity" role="img"
-        aria-label="An infinity loop of flowing particles. Paper cards travel along it through four stations: read, understand, connect and ask."></canvas>
-      <p class="pm-c-note">read → understand → connect → ask, and round again</p>
-    </div>
-  </div>
-</section>
+<!-- ============================================================ hero C: silk infinity -->
+{% include papermanager-hero-c.html %}
 
 <!-- ============================================================ hero D: knowledge constellation -->
 <section class="pm-hv pm-hv-d pm-bleed" data-hero="d" data-name="Knowledge constellation">
@@ -648,3 +625,4 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
 </div>
 
 <script defer src="{{ '/assets/js/papermanager-hero.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/papermanager-hero-c.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
