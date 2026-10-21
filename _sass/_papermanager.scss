@@ -773,6 +773,12 @@ $pm-themes: (
   }
 }
 
+// the same stage as its own section after every hero; hero F already shows it
+.pm-paper-demo { margin-top: 3.5rem; }
+.pm[data-hero='f'] .pm-paper-demo { display: none; }
+.pm-demo-stage canvas { height: 520px; }
+@media (max-width: 700px) { .pm-demo-stage canvas { height: 880px; } }
+
 // ================================================================ design switcher
 
 .pm-switch {

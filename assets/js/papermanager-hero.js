@@ -81,7 +81,7 @@
     new ResizeObserver(function () { if (size() && !raf) still(); }).observe(canvas);
     new IntersectionObserver(function (es) { vis = es[es.length - 1].isIntersecting; update(); }).observe(canvas);
     var s = {
-      hero: canvas.closest('.pm-hv').getAttribute('data-hero'),
+      hero: canvas.closest('.pm-hv') ? canvas.closest('.pm-hv').getAttribute('data-hero') : '*',
       setActive: function (v) { active = v; if (v) size(); update(); },
       recolour: function () { st.C = colours(); if (!raf && active) still(); },
       update: update
@@ -798,10 +798,13 @@
     var make = makers[cv.getAttribute('data-scene')];
     if (!make) return;
     var s;
-    scene(cv, function (st) {
+    var sc = scene(cv, function (st) {
       if (cv.getAttribute('data-scene') !== 'annotate') track(cv.closest('.pm-hv'), st);
       return make(st);
     });
+    // a scene outside the heroes (the "what it does to a paper" section) runs whatever hero is
+    // selected; it pauses by itself when off-screen or hidden (hero F hides the section)
+    if (sc.hero === '*') { var on = sc.setActive; sc.setActive = function () { on(true); }; sc.setActive(); }
   });
 
   // ------------------------------------------------------------ switcher

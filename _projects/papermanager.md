@@ -197,6 +197,20 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
 
 </div>
 
+<!-- ============================================================ what it does to a paper (shown with every hero but F) -->
+<section class="pm-section pm-paper-demo" id="paper">
+  <div class="pm-section-head">
+    <p class="pm-kicker">What it does to a paper</p>
+    <h2>Read, marked up, summarised and pinned</h2>
+    <p>Three papers in turn: highlights sweep across the lines, concept marks land in the margin, the summary writes itself, figures and tables are lifted out, references are collected and the quick tour pins its stops.</p>
+  </div>
+  <div class="pm-f-stage pm-demo-stage">
+    <div class="pm-f-bar" aria-hidden="true"><span></span><span></span><span></span><em>what PaperManager does to a page</em></div>
+    <canvas class="pm-canvas" data-scene="annotate" role="img"
+      aria-label="A paper's PDF page is read and annotated: colour-coded highlights sweep across lines, concept marks appear in the margin, a summary types itself beside the page, figures and tables are lifted into a side panel, references are collected, and quick-tour stops are pinned to the page."></canvas>
+  </div>
+</section>
+
 <!-- ============================================================ why -->
 <section class="pm-section pm-why">
   <div class="pm-section-head">
