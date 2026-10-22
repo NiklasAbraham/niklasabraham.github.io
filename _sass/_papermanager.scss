@@ -237,83 +237,82 @@ $pm-themes: (
   color: var(--pm-ink);
 }
 
-// Two columns: a menu of the examples in very large type, and the chat window of the active one.
+// Full-width stage. The four examples are a row of quiet cards above the window; the selected one
+// is lifted onto the page's panel colour with an accent number and underline.
+.pm-chat-stage { overflow-x: clip; }
 .pm-chat-show {
-  padding: 0 0 2rem;
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  gap: clamp(2rem, 4vw, 4rem);
-  align-items: center;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 clamp(0.8rem, 3vw, 3rem) 1rem;
 }
 .pm-chat-menu {
   list-style: none;
-  margin: 0;
+  margin: 0 0 1rem;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: clamp(1.6rem, 3vh, 2.6rem);
+  align-items: center;
+  gap: 0.6rem;
   li { margin: 0; }
+}
+.pm-chat-menu .pm-chat-tag {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--pm-muted);
 }
 .pm-cm {
   display: flex;
-  align-items: flex-start;
-  gap: 1.1rem;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1.05rem 0.55rem 0.6rem;
+  border: 1px solid var(--pm-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pm-ink-2);
   font: inherit;
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
   &:focus { outline: none; }
-  &:focus-visible .pm-cm-head { text-decoration: underline 3px var(--pm-accent); text-underline-offset: 7px; }
+  &:focus-visible { box-shadow: 0 0 0 2px var(--pm-accent); }
+  &:hover { border-color: color-mix(in srgb, var(--pm-accent) 45%, var(--pm-border)); color: var(--pm-ink); }
 }
 .pm-cm-num {
-  flex: none;
-  margin-top: 0.3rem;
-  font-size: 1.65rem;
-  font-weight: 800;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #a1a1aa;
-  transition: color 0.3s, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.pm-cm-text { display: block; min-width: 0; }
-.pm-cm-head {
-  display: block;
-  font-size: clamp(2.1rem, 1rem + 2.6vw, 3.7rem);
-  font-weight: 900;
-  line-height: 0.85;
-  letter-spacing: -0.055em;
-  text-transform: uppercase;
-  color: #71717a;
-  opacity: 0.4;
-  transition: opacity 0.35s, color 0.35s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.pm-cm-sub {
-  display: block;
-  margin-top: 0.6rem;
-  font-size: 0.86rem;
-  line-height: 1.4;
   color: var(--pm-muted);
-  opacity: 0.55;
-  transition: opacity 0.35s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  em { font-style: normal; font-weight: 600; color: var(--pm-ink-2); }
+  background: var(--pm-panel);
+  transition: background 0.2s, color 0.2s;
 }
-.pm-cm:hover .pm-cm-head { opacity: 0.7; }
+.pm-cm-head {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
 .pm-cm[aria-selected='true'] {
-  .pm-cm-num { color: var(--pm-accent); transform: scale(1.1); }
-  .pm-cm-head { opacity: 1; color: var(--pm-ink); transform: translateX(1rem); }
-  .pm-cm-sub { opacity: 1; transform: translateX(1rem); }
+  background: var(--pm-accent-soft);
+  border-color: var(--pm-accent);
+  color: var(--pm-ink);
+  .pm-cm-num { background: var(--pm-accent); color: #fff; }
 }
-html[data-theme='dark'] .pm-cm[aria-selected='false'] .pm-cm-head {
-  color: transparent;
-  -webkit-text-stroke: 1px #a1a1aa;
-  opacity: 0.55;
-}
-@media (prefers-reduced-motion: reduce) {
-  .pm-cm-num, .pm-cm-head, .pm-cm-sub { transition: none; }
+
+.pm-chat-notes {
+  max-width: 52rem;
+  margin: 1.8rem auto 0;
+  padding-left: 1.2rem;
+  border-left: 3px solid var(--pm-accent);
+  p { margin: 0; font-size: 1.08rem; line-height: 1.55; color: var(--pm-ink-2); min-height: 4.8em; }
+  strong { color: var(--pm-ink); }
+  em { font-style: normal; font-weight: 600; color: var(--pm-ink); }
 }
 
 .pm-chat-frame {
@@ -370,26 +369,36 @@ html[data-theme='dark'] .pm-cm[aria-selected='false'] .pm-cm-head {
     transform: translateX(-22px);
   }
 }
-.pm-chat-demo { margin: 0; min-height: 640px; }
-// the window's glow reaches past the column; where the page has no margin for it, clip it
-@media (max-width: 1320px) { .pm-chat-show { overflow-x: clip; } }
-@media (max-width: 960px) {
-  .pm-chat-show { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
-  .pm-chat-menu { gap: 0.2rem; }
-  .pm-cm { align-items: baseline; gap: 0.8rem; padding: 0.5rem 0.2rem; }
-  .pm-cm-num { margin: 0; font-size: 1rem; }
-  .pm-cm-head { font-size: 1.45rem; line-height: 1; letter-spacing: -0.03em; br { display: none; } }
-  .pm-cm-sub { display: none; margin-top: 0.3rem; }
-  .pm-cm[aria-selected='true'] {
-    .pm-cm-head, .pm-cm-sub { transform: none; }
-    .pm-cm-sub { display: block; }
-  }
-}
+.pm-chat-demo { margin: 0; min-height: clamp(660px, 90vh, 1000px); }
 @media (max-width: 800px) {
+  .pm-chat-menu { overflow-x: auto; scrollbar-width: none; .pm-chat-tag { display: none; } }
+  .pm-cm { padding: 0.45rem 0.85rem 0.45rem 0.45rem; }
+  .pm-cm-head { font-size: 0.88rem; }
   .pm-chat-demo { min-height: 600px; }
   .pm-chat-window, .pm-chat-frame { border-radius: 12px; }
-  .pm-chat-chrome { height: 30px; border-radius: 12px 12px 0 0; i { width: 9px; height: 9px; } span { display: none; } }
 }
+
+// ---------------------------------------------------------------- the problem
+
+.pm-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pm-pn {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--pm-accent);
+}
+.pm-solve {
+  max-width: 48rem;
+  margin: 2rem 0 0;
+  font-size: 1.25rem;
+  line-height: 1.45;
+  color: var(--pm-ink);
+  strong { color: var(--pm-accent); }
+}
+.pm[data-hero='e'] .pm-solve { font-family: 'Newsreader', Georgia, serif; font-size: 1.5rem; }
+.pm-fine { font-size: 0.85rem !important; color: var(--pm-muted); }
+@media (max-width: 800px) { .pm-grid-3 { grid-template-columns: 1fr; } }
 
 // ---------------------------------------------------------------- small cards
 
@@ -812,7 +821,7 @@ html[data-theme='dark'] .pm-cm[aria-selected='false'] .pm-cm-head {
 .pm-e-title {
   font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
   font-optical-sizing: auto;
-  font-size: clamp(2.8rem, 6.4vw, 5.6rem);
+  font-size: clamp(2.6rem, 5vw, 4.5rem);
   line-height: 0.98;
   font-weight: 420;
   letter-spacing: -0.025em;
@@ -873,14 +882,14 @@ html[data-theme='dark'] .pm-cm[aria-selected='false'] .pm-cm-head {
       transition: opacity 0.3s ease;
     }
   }
-  .pm-e-1 { transform: rotate(-8deg) translate(-7%, 2%); }
-  .pm-e-2 { transform: rotate(6deg) translate(7%, 0%); }
-  .pm-e-3 { transform: rotate(-1deg) translateY(4%); z-index: 2; }
+  .pm-e-2 { transform: rotate(-8deg) translate(-7%, 2%); }
+  .pm-e-3 { transform: rotate(6deg) translate(7%, 0%); }
+  .pm-e-1 { transform: rotate(-1deg) translateY(4%); z-index: 2; }
 
   &:hover, &:focus-visible {
-    .pm-e-1 { transform: rotate(-13deg) translate(-14%, 5%); }
-    .pm-e-2 { transform: rotate(11deg) translate(14%, 3%); }
-    .pm-e-3 { transform: rotate(0deg) translateY(-3%) scale(1.03); }
+    .pm-e-2 { transform: rotate(-13deg) translate(-14%, 5%); }
+    .pm-e-3 { transform: rotate(11deg) translate(14%, 3%); }
+    .pm-e-1 { transform: rotate(0deg) translateY(-3%) scale(1.03); }
     figcaption { opacity: 1; }
   }
 }

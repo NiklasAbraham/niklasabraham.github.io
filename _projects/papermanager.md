@@ -10,9 +10,10 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
 {%- assign img = '/assets/papermanager/' | relative_url -%}
 {%- assign repo = 'https://github.com/NiklasAbraham/PaperManager' -%}
 {%- assign docs = 'https://niklasabraham.github.io/PaperManager/' -%}
-<div class="pm" id="pm" data-hero="a">
-<script>(function(){var r=document.getElementById('pm'),H=/^([abdef]|c[1-7]?)$/,T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),h=(q.get('hero')||'').toLowerCase(),t=(q.get('theme')||'').toLowerCase();try{if(!H.test(h))h=localStorage.getItem('pm-hero')||'';if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(H.test(h)){r.setAttribute('data-hero',h[0]);if(h[0]==='c')r.setAttribute('data-hero-c',h[1]||'1');}if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);var M=/^(silver|champagne|ink|iridescent|glow|aurora|ice|night)$/,m=(q.get('mat')||'').toLowerCase();try{if(!M.test(m))m=localStorage.getItem('pm-cx-mat')||'';}catch(e){}if(M.test(m))r.setAttribute('data-cx-mat',m);var a=(q.get('accent')||'').replace('#','');try{if(!/^[0-9a-fA-F]{6}$/.test(a))a=localStorage.getItem('pm-accent')||'';}catch(e){}if(/^[0-9a-fA-F]{6}$/.test(a))r.style.setProperty('--pm-accent','#'+a);})();</script>
+<div class="pm" id="pm" data-hero="e">
+<script>(function(){var r=document.getElementById('pm'),T=['violet','teal','amber','rose','blue','graphite'],q=new URLSearchParams(location.search),t=(q.get('theme')||'').toLowerCase();try{if(T.indexOf(t)<0)t=localStorage.getItem('pm-theme')||'';}catch(e){}if(T.indexOf(t)>=0)r.setAttribute('data-pm-theme',t);var a=(q.get('accent')||'').replace('#','');try{if(!/^[0-9a-fA-F]{6}$/.test(a))a=localStorage.getItem('pm-accent')||'';}catch(e){}if(/^[0-9a-fA-F]{6}$/.test(a))r.style.setProperty('--pm-accent','#'+a);})();</script>
 
+{% comment %}
 <!-- Design preview: pick a hero and a colour theme for this page (owner tool, not part of the content) -->
 <div class="pm-switch" id="pm-switch" role="group" aria-label="Design preview">
   <button type="button" class="pm-switch-toggle" aria-expanded="true" aria-controls="pm-switch-body" title="Hide the design switcher">
@@ -62,8 +63,12 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
     </div>
   </div>
 </div>
+{% endcomment %}
 
 <div class="pm-heroes">
+
+{% comment %}
+Heroes A, B, C, D kept for later; the page shows hero E only.
 
 <!-- ============================================================ hero A: classic -->
 <section class="pm-hv pm-hv-a" data-hero="a" data-name="Classic">
@@ -144,33 +149,34 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
     <p class="pm-d-hint"><span class="pm-d-sq"></span> paper &nbsp; <span class="pm-d-ci"></span> concept <span class="pm-d-move">&nbsp;·&nbsp; move the pointer to pull the graph together</span></p>
   </div>
 </section>
+{% endcomment %}
 
 <!-- ============================================================ hero E: editorial -->
 <section class="pm-hv pm-hv-e" data-hero="e" data-name="Editorial">
   <div class="pm-e-grid">
     <div class="pm-e-copy">
-      <p class="pm-e-kicker">PaperManager, an open-source research tool</p>
-      <h1 class="pm-e-title">A second brain for <em>research papers</em></h1>
+      <p class="pm-e-kicker">PaperManager · open source · self-hosted</p>
+      <h1 class="pm-e-title">Stop collecting papers. <em>Understand</em> them.</h1>
       <p class="pm-e-lede">
-        PaperManager turns a pile of PDFs into a knowledge graph you can read, search and talk to.
-        Drop in a paper and it finds the metadata, writes a summary, pulls out figures and references,
-        draws the ideas on each page as interactive visualisations, and maps how every paper in a
-        project connects to the others.
+        Reference managers store your PDFs and leave the hard part to you. PaperManager reads
+        them with you: a summary, the figures, an interactive picture of every difficult idea,
+        a guided tour, and a chat that answers from your whole library and cites its sources.
       </p>
       <div class="pm-ctas pm-ctas-left">
         <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> Code on GitHub</a>
-        <a class="pm-btn" href="#setup"><i class="fas fa-rocket"></i> Set it up</a>
+        <a class="pm-btn" href="#chat"><i class="fas fa-comments"></i> See the chat</a>
         <a class="pm-e-link" href="{{ docs }}">Documentation <span aria-hidden="true">→</span></a>
       </div>
     </div>
-    <div class="pm-e-fan" tabindex="0" aria-label="Three screenshots: concept tour, interactive concept, project concept map">
-      <figure class="pm-shot pm-e-card pm-e-1"><img src="{{ img }}tour.webp" width="1600" height="1000" loading="lazy" alt="Quick tour of the Feynman-Kac Correctors paper"><figcaption>Quick tour</figcaption></figure>
-      <figure class="pm-shot pm-e-card pm-e-2"><img src="{{ img }}concept-map.webp" width="1600" height="1000" loading="lazy" alt="Concept map of 210 papers"><figcaption>Concept map</figcaption></figure>
-      <figure class="pm-shot pm-e-card pm-e-3"><img src="{{ img }}concepts.webp" width="1600" height="1000" loading="lazy" alt="Interactive concept: the probability flow ODE next to its PDF page"><figcaption>Concepts</figcaption></figure>
+    <div class="pm-e-fan" tabindex="0" aria-label="Three screenshots: interactive concept, quick tour, project concept map">
+      <figure class="pm-shot pm-e-card pm-e-2"><img src="{{ img }}concepts.webp" width="1600" height="1000" loading="lazy" alt="Interactive concept: the probability flow ODE next to its PDF page"><figcaption>Concepts</figcaption></figure>
+      <figure class="pm-shot pm-e-card pm-e-1"><img src="{{ img }}tour.webp" width="1600" height="1000" fetchpriority="high" alt="Quick tour of the Feynman-Kac Correctors paper"><figcaption>Quick tour</figcaption></figure>
+      <figure class="pm-shot pm-e-card pm-e-3"><img src="{{ img }}concept-map.webp" width="1600" height="1000" loading="lazy" alt="Concept map of 210 papers"><figcaption>Concept map</figcaption></figure>
     </div>
   </div>
 </section>
 
+{% comment %}
 <!-- ============================================================ hero F: page to graph -->
 <section class="pm-hv pm-hv-f" data-hero="f" data-name="Annotated page">
   <header class="pm-hero pm-f-head">
@@ -194,35 +200,47 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
       aria-label="A paper's PDF page is read and annotated: colour-coded highlights sweep across lines, concept marks appear in the margin, a summary types itself beside the page, figures and tables are lifted into a side panel, references are collected, and quick-tour stops are pinned to the page."></canvas>
   </div>
 </section>
+{% endcomment %}
 
 </div>
 
-<!-- ============================================================ what it does to a paper (shown with every hero but F) -->
+<!-- ============================================================ the problem -->
+<section class="pm-section pm-problem" id="problem">
+  <div class="pm-section-head">
+    <p class="pm-kicker">The problem</p>
+    <h2>Reading is the slow part of research, and the tools leave it to you</h2>
+  </div>
+  <div class="pm-grid pm-grid-3">
+    <div class="pm-card">
+      <span class="pm-pn">1</span>
+      <h3>Storing is not understanding</h3>
+      <p>Reference managers keep PDFs and citations. None of them explains the formula on page 4.</p>
+    </div>
+    <div class="pm-card">
+      <span class="pm-pn">2</span>
+      <h3>Four tools, no shared memory</h3>
+      <p>The PDF reader, the notes app, the citation tool and the chatbot know nothing about each other.</p>
+    </div>
+    <div class="pm-card">
+      <span class="pm-pn">3</span>
+      <h3>Chatbots do not know your library</h3>
+      <p>A PDF pasted into a chat covers one paper, is forgotten afterwards, and cannot say how it relates to the two hundred before it.</p>
+    </div>
+  </div>
+  <p class="pm-solve"><strong>PaperManager puts it in one place.</strong> A single knowledge graph holds your papers, notes, concepts and citations, and every feature below reads from it.</p>
+</section>
+
+<!-- ============================================================ what it does to a paper -->
 <section class="pm-section pm-paper-demo" id="paper">
   <div class="pm-section-head">
     <p class="pm-kicker">What it does to a paper</p>
-    <h2>Read, marked up, summarised and pinned</h2>
-    <p>Three papers in turn: highlights sweep across the lines, concept marks land in the margin, the summary writes itself, figures and tables are lifted out, references are collected and the quick tour pins its stops.</p>
+    <h2>Read, marked up, summarised, pinned</h2>
+    <p>Highlights sweep the lines, concept marks land in the margin, the summary writes itself, figures and references are lifted out, and the tour pins its stops.</p>
   </div>
   <div class="pm-f-stage pm-demo-stage">
     <div class="pm-f-bar" aria-hidden="true"><span></span><span></span><span></span><em>what PaperManager does to a page</em></div>
     <canvas class="pm-canvas" data-scene="annotate" role="img"
       aria-label="A paper's PDF page is read and annotated: colour-coded highlights sweep across lines, concept marks appear in the margin, a summary types itself beside the page, figures and tables are lifted into a side panel, references are collected, and quick-tour stops are pinned to the page."></canvas>
-  </div>
-</section>
-
-<!-- ============================================================ why -->
-<section class="pm-section pm-why">
-  <div class="pm-section-head">
-    <p class="pm-kicker">Why</p>
-    <h2>Reading papers is the slow part of research</h2>
-    <p>
-      Reference managers store PDFs; they do not help you understand them or see how they fit
-      together. I wanted one place where every paper I read is parsed, summarised, linked to its
-      authors, topics and citations, and explained right next to the page I am on. PaperManager
-      started as my own reading tool during my master's thesis and now holds a few hundred
-      full-text papers and several thousand linked references.
-    </p>
   </div>
 </section>
 
@@ -236,16 +254,9 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
       <p class="pm-kicker">1 · Get papers in</p>
-      <h3>Drop a PDF, paste a link, or import a list</h3></div>
+      <h3>Add a paper in seconds</h3></div>
       <div class="pm-feature-body">
-      <p>Every paper goes through the same pipeline:</p>
-      <ul>
-        <li><strong>Metadata</strong> from the DOI or arXiv id via Semantic Scholar and CrossRef, with fallbacks when a PDF has neither. You review it before anything is saved.</li>
-        <li><strong>Duplicate check</strong> by DOI and title, so the same paper never ends up twice.</li>
-        <li><strong>Summary, topics and tags</strong> written by Claude from the full text.</li>
-        <li><strong>Figures, tables and references</strong> extracted with the Docling layout model; each reference becomes a node in the citation graph.</li>
-      </ul>
-      <p>Besides PDFs, it ingests arXiv, DOI, PubMed and bioRxiv links, bulk lists, literature searches and RSS feeds.</p>
+      <p>Drop a PDF or paste an arXiv, DOI, PubMed or bioRxiv link. Metadata, duplicate check, summary, topics, figures and references are done for you. You check the details once, and nothing is saved before that.</p>
     </div></div>
     <figure class="pm-shot"><a href="{{ img }}library.webp"><img src="{{ img }}library.webp" width="1600" height="1000" loading="lazy"
       alt="Library dashboard with paper, author, topic and tag counts, papers by year, top topics, recently added papers and venues"></a></figure>
@@ -254,19 +265,9 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
       <p class="pm-kicker">2 · Read with help</p>
-      <h3>Summary, figures and chat next to the PDF</h3></div>
+      <h3>Understand a paper next to its PDF</h3></div>
       <div class="pm-feature-body">
-      <p>
-        Each paper opens in one view: abstract, PDF, figures, tables, summary, references,
-        related papers, claims and metadata. The summary splits the paper into contribution,
-        methods, inputs and outputs, with the maths typeset.
-      </p>
-      <p>
-        Highlight passages in five colours (key insight, evidence, context, question, follow-up),
-        keep markdown notes that link <code>@people</code> and <code>#topics</code> into the graph,
-        and ask questions about the paper or about one figure. Export any paper as BibTeX or
-        Markdown.
-      </p>
+      <p>The summary splits the paper into contribution, methods, inputs and outputs, with the maths typeset. Highlight in five colours, keep notes that link <code>@people</code> and <code>#topics</code> into the graph, and ask about the paper or a single figure.</p>
     </div></div>
     <div class="pm-pair">
       <figure class="pm-shot"><a href="{{ img }}summary.webp"><img src="{{ img }}summary.webp" width="1600" height="1000" loading="lazy"
@@ -279,19 +280,10 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
       <p class="pm-kicker">3 · Concepts</p>
-      <h3>The ideas on each page, made visible</h3></div>
+      <h3>See the idea instead of decoding it</h3></div>
       <div class="pm-feature-body">
-      <p>
-        A scan reads every page and picks the ideas a picture would explain better than prose:
-        a sampler, a loss, a scaling law. For each it generates a visualisation, which can be an
-        animation, a formula broken into its parts, a plot of the paper's own numbers, or a
-        short explanation. Marks on the PDF show where each one belongs; click a mark to open it.
-      </p>
-      <p>
-        The animations run in a sandboxed frame, and plots carry data rather than code. The
-        feature is adapted from the open-source project
-        <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0).
-      </p>
+      <p>Every page is scanned for ideas a picture explains better than prose: a sampler, a loss, a scaling law. Each becomes an animation, a formula broken into its parts, or a plot of the paper's own numbers, marked on the PDF where it belongs.</p>
+      <p class="pm-fine">Adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0). Animations run in a sandboxed frame.</p>
     </div></div>
     <figure class="pm-shot"><a href="{{ img }}concepts.webp"><img src="{{ img }}concepts.webp" width="1600" height="1000" loading="lazy"
       alt="Concepts tab: an animated vector field of the probability flow ODE next to the PDF page it explains"></a></figure>
@@ -300,65 +292,40 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
       <p class="pm-kicker">4 · Quick tour</p>
-      <h3>A guided path through a long paper</h3></div>
+      <h3>Skim a long paper without getting lost</h3></div>
       <div class="pm-feature-body">
-      <p>
-        For a paper you do not have time to read end to end, the tour gives a one-paragraph
-        overview, says which parts you can safely skip, and then walks you through 6 to 12 stops:
-        the problem, the key equation, the main result. Each stop is anchored to a verbatim
-        passage, so the PDF jumps to the right page and marks it. Step through with the arrow keys.
-      </p>
+      <p>An overview, a list of what you can safely skip, then 6 to 12 stops: the problem, the key equation, the main result. Each stop jumps the PDF to a verbatim passage. Step through with the arrow keys.</p>
     </div></div>
-    <figure class="pm-shot"><a href="{{ img }}tour.webp"><img src="{{ img }}tour.webp" width="1600" height="1000" loading="lazy"
+    <figure class="pm-shot"><a href="{{ img }}tour.webp"><img src="{{ img }}tour.webp" width="1600" height="1000" fetchpriority="high"
       alt="Tour tab for the Feynman-Kac Correctors paper: overview, what to skip, and stop 2 of 11 opened next to the equations on page 3"></a></figure>
   </div>
 
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
       <p class="pm-kicker">5 · Project concept map</p>
-      <h3>How a whole field fits together</h3></div>
+      <h3>See how a whole field fits together</h3></div>
       <div class="pm-feature-body">
-      <p>
-        Group papers into projects, and PaperManager maps them. For every paper a language model
-        names its key concepts (methods, models, datasets, metrics, theories) and how they relate.
-        Concepts are shared across papers, so the map shows which ideas a field is built on and
-        which papers connect them.
-      </p>
-      <p>
-        Node size counts papers, colour is the kind of concept, and citations between papers are
-        drawn in. Filter by author, year or kind, or by how many papers share a concept. Here,
-        210 thesis papers: image diffusion at the top, protein structure at the bottom.
-      </p>
+      <p>Group papers into a project and every paper's key concepts are mapped and shared across papers: methods, models, datasets, metrics. Size counts papers, colour is the kind of concept, citations are drawn in.</p>
+      <p>Here: 210 thesis papers, image diffusion at the top, protein structure at the bottom.</p>
     </div></div>
     <figure class="pm-shot"><a href="{{ img }}concept-map.webp"><img src="{{ img }}concept-map.webp" width="1600" height="1000" loading="lazy"
       alt="Force-directed concept map of 210 papers, with concepts such as Diffusion Models, Flow Matching, Memorization, AlphaFold3 and Protein Folding coloured by kind"></a></figure>
   </div>
 
-  <div class="pm-feature">
+  <div class="pm-feature pm-feature-chat" id="chat">
     <div class="pm-feature-text"><div class="pm-feature-head">
       <p class="pm-kicker">6 · Knowledge chat</p>
       <h3>Ask your whole library</h3></div>
       <div class="pm-feature-body">
       <p>
-        The knowledge chat answers across papers and is laid out like a desk. Citations in an
-        answer are links: click one and the paper opens beside the conversation with its summary,
-        a link to the PDF and a jump into the library. Under each section of an answer it can
-        draw <strong>concept cards</strong>, the same visualisations as on the PDF pages, and
-        show molecules in 3D: <strong>structure cards</strong> load an entry from the PDB or an
-        AlphaFold DB prediction (coloured by pLDDT), highlight chains and residues, and can be
-        spun, surfaced and saved as an image.
+        Answers come from your papers and cite them. Every citation is a link: click it and the paper
+        opens beside the conversation. Scope a question with <code>@project:</code>, <code>@topic:</code>,
+        <code>@paper:</code>, <code>@person:</code> or <code>@user:</code> (what a teammate has been reading).
+        It follows the graph, runs its own graph queries and searches the web when the library is not enough.
       </p>
-      <p>
-        Scope a question with <code>@project:</code>, <code>@topic:</code>, <code>@tag:</code>,
-        <code>@paper:</code>, <code>@person:</code>, or <code>@user:</code> to ask what a teammate
-        has been reading. It pulls in full texts, follows the graph, runs its own graph queries
-        and searches the web when the library is not enough. Any answer can start a new strand,
-        so a side question does not lose the main thread. Choose the model per conversation:
-        Claude through the API, Claude Code on a Claude subscription, or any OpenAI-compatible
-        model through LiteLLM.
-      </p>
+      <p>Choose the model per conversation: Claude through the API, Claude Code on a subscription, or any OpenAI-compatible model through LiteLLM.</p>
     </div></div>
-    <div class="pm-chat-stage">
+    <div class="pm-chat-stage pm-bleed">
       <div class="pm-chat-pitch">
         <p class="pm-kicker">Recorded from a real PaperManager library</p>
         <p class="pm-chat-line">Ask your library. It answers with formulas, plots and proteins.</p>
@@ -366,31 +333,28 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
       <div class="pm-chat-show">
         <ol class="pm-chat-menu" id="pm-chat-menu" aria-label="Examples">
           <li><button type="button" class="pm-cm" data-pm-chat-tab="0" aria-selected="true">
-            <span class="pm-cm-num">01</span>
-            <span class="pm-cm-text"><span class="pm-cm-head">Concept<br> cards</span><span class="pm-cm-sub"><em>Classifier-Free Diffusion Guidance</em> · a formula and a plot, drawn from the answer</span></span>
-          </button></li>
+            <span class="pm-cm-num">01</span><span class="pm-cm-head">Concept cards</span></button></li>
           <li><button type="button" class="pm-cm" data-pm-chat-tab="1" aria-selected="false">
-            <span class="pm-cm-num">02</span>
-            <span class="pm-cm-text"><span class="pm-cm-head">Live<br> animation</span><span class="pm-cm-sub"><em>Flow Matching for Generative Modeling</em> · noise flowing into data, animated</span></span>
-          </button></li>
+            <span class="pm-cm-num">02</span><span class="pm-cm-head">Live animation</span></button></li>
           <li><button type="button" class="pm-cm" data-pm-chat-tab="2" aria-selected="false">
-            <span class="pm-cm-num">03</span>
-            <span class="pm-cm-text"><span class="pm-cm-head">Protein<br> in 3D</span><span class="pm-cm-sub"><em>AlphaFold 3</em> · the SARS-CoV-2 spike, to turn and inspect</span></span>
-          </button></li>
+            <span class="pm-cm-num">03</span><span class="pm-cm-head">Protein in 3D</span></button></li>
           <li><button type="button" class="pm-cm" data-pm-chat-tab="3" aria-selected="false">
-            <span class="pm-cm-num">04</span>
-            <span class="pm-cm-text"><span class="pm-cm-head">Cited<br> answers</span><span class="pm-cm-sub"><em>Extracting Training Data from Diffusion Models</em> · a short answer that cites its source</span></span>
-          </button></li>
+            <span class="pm-cm-num">04</span><span class="pm-cm-head">Cited answers</span></button></li>
+          <li class="pm-chat-tag" aria-hidden="true">PaperManager · Knowledge Chat</li>
         </ol>
         <div class="pm-chat-frame"><div class="pm-chat-window" data-pm-chat-clip>
-          <div class="pm-chat-chrome" aria-hidden="true"><i></i><i></i><i></i><span>PaperManager &nbsp;·&nbsp; Knowledge Chat</span></div>
           <div class="pm-chat-demo" id="pm-chat-demo" data-framed data-pm-chat-menu="#pm-chat-menu" data-pm-chat-demo="{{ '/assets/pm-chat-demo/data/' | relative_url }}">{% include pm-chat-demo.html %}</div>
         </div></div>
+        <div class="pm-chat-notes" id="pm-chat-notes" aria-live="polite">
+          <p data-note="0"><strong>Concept cards.</strong> Asked about <em>Classifier-Free Diffusion Guidance</em>, the chat draws the guidance formula as a card you can step through, plus a plot of what the scale does. The maths is explained from the answer's own text.</p>
+          <p data-note="1" hidden><strong>Live animation.</strong> Asked about <em>Flow Matching for Generative Modeling</em>, it animates noise flowing into data. A process becomes something you watch; pause it where it gets interesting.</p>
+          <p data-note="2" hidden><strong>Protein in 3D.</strong> Asked about <em>AlphaFold 3</em>, it loads the SARS-CoV-2 spike. Turn it, zoom in, highlight chains and residues. Entries come from the PDB or AlphaFold DB, coloured by pLDDT for predictions.</p>
+          <p data-note="3" hidden><strong>Cited answers.</strong> Asked about <em>Extracting Training Data from Diffusion Models</em>, it answers in a few lines and links the source. Click the citation and the paper opens beside the chat.</p>
+        </div>
       </div>
     </div>
     <p class="pm-caption">
-      Four papers from the library, one recorded question each, shown with the app's own components:
-      pick an example, step through the formula, pause the animation, turn the protein.<br>
+      Four papers from the library, one recorded question each, shown with the app's own components.
       Concept visualisations are adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0);
       structures are drawn with <a href="https://3dmol.csb.pitt.edu">3Dmol.js</a> (BSD-3-Clause).
     </p>
@@ -430,91 +394,15 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   </div>
 </section>
 
-<!-- ============================================================ pipeline timeline -->
-<section class="pm-section pm-tl-section" id="pipeline">
-  <div class="pm-tl-head">
-    <span class="pm-badge pm-badge-outline">Step by step</span>
-    <h2>What happens when you add a paper</h2>
-    <p>Most of the work runs while the paper waits in the upload queue, so saving it is quick. You check the details once; the rest happens on its own or when you ask for it.</p>
-  </div>
-  <ol class="pm-tl">
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14v4.5c0 .8.7 1.5 1.5 1.5h13c.8 0 1.5-.7 1.5-1.5V14"/></svg></span><span class="pm-tl-line" aria-hidden="true"></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">Instant</span><span class="pm-badge">Automatic</span></div>
-        <h3>Drop a PDF or paste a link</h3>
-        <p>Processing starts the moment the file lands in the upload queue, and nothing is saved yet. Links from arXiv, DOI, PubMed and bioRxiv work too, as do bulk lists.</p>
-      </div>
-    </li>
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg></span><span class="pm-tl-line" aria-hidden="true"></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">Seconds</span><span class="pm-badge">Automatic</span></div>
-        <h3>Metadata and duplicate check</h3>
-        <p>The DOI or arXiv id on the first page is looked up in Semantic Scholar, then CrossRef. Without one, a language model reads the first page, with simple heuristics as the last resort. A paper already in your library is flagged before you go any further.</p>
-      </div>
-    </li>
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 21 8l-9 4.5L3 8z"/><path d="m3 12 9 4.5 9-4.5M3 16l9 4.5 9-4.5"/></svg></span><span class="pm-tl-line" aria-hidden="true"></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">In the queue</span><span class="pm-badge">Automatic</span></div>
-        <h3>Layout and analysis, done ahead</h3>
-        <p>Docling finds the figures and tables, and the language models write the summary and suggest topics, claims, references, affiliations and tags. Results are cached by the PDF's hash; the queue row turns green when everything is ready.</p>
-      </div>
-    </li>
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8 12.3 2.7 2.7L16 9.5"/></svg></span><span class="pm-tl-line" aria-hidden="true"></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">When you are ready</span><span class="pm-badge pm-badge-secondary">You confirm</span></div>
-        <h3>Check the details</h3>
-        <p>A form shows the metadata it found. Fix anything that is off, choose paper, book or lecture deck, and optionally change the instructions for the summary. Nothing is stored until you click Upload.</p>
-      </div>
-    </li>
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="2.8"/><path d="M4.5 6v12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V6M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/></svg></span><span class="pm-tl-line" aria-hidden="true"></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">~10–20 s</span><span class="pm-badge">Automatic</span></div>
-        <h3>Into your Drive and the graph</h3>
-        <p>The PDF goes to your Google Drive and the paper becomes a node in Neo4j, or fills in a citation stub that was already there. Authors, topics and claims are linked, figure and table images are stored, and an embedding is added if you configured a model.</p>
-      </div>
-    </li>
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><span class="pm-tl-line" aria-hidden="true"></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">After upload</span><span class="pm-badge pm-badge-secondary">You confirm</span></div>
-        <h3>References, tags, project and people</h3>
-        <p>Review the extracted references: each becomes a linked paper in the citation graph and is merged with the full paper if you add it later. Then accept tag suggestions, pick a project, and note who shared the paper with you.</p>
-      </div>
-    </li>
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.4"/><circle cx="5" cy="6.5" r="1.9"/><circle cx="19" cy="6.5" r="1.9"/><circle cx="12" cy="20" r="1.9"/><path d="M10 10.8 6.6 7.7M14 10.8l3.4-3.1M12 14.4v3.7"/></svg></span><span class="pm-tl-line" aria-hidden="true"></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">Every 10 min</span><span class="pm-badge">Automatic</span></div>
-        <h3>Onto the project's concept map</h3>
-        <p>A background sweep maps every new project paper once it has a summary: 6 to 15 key concepts and how they relate, shared with the other papers in the project.</p>
-      </div>
-    </li>
-    <li class="pm-tl-item">
-      <div class="pm-tl-rail"><span class="pm-tl-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.8 8.6 19 10.2 13.8 12 12 17l-1.8-5L5 10.2l5.2-1.6z"/><path d="m18.5 15.5.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span></div>
-      <div class="pm-tl-body">
-        <div class="pm-tl-top"><span class="pm-tl-when">On demand</span><span class="pm-badge pm-badge-outline">On demand</span></div>
-        <h3>Concepts and a quick tour</h3>
-        <p>While reading, click Find concepts to mark the ideas on each page that a picture explains best and generate their visualisations, or ask for a quick tour: 6 to 12 guided stops through the PDF, ready in about a minute.</p>
-      </div>
-    </li>
-  </ol>
-</section>
-
 <!-- ============================================================ how it works -->
 <section class="pm-section" id="how">
   <div class="pm-section-head">
     <p class="pm-kicker">How it works</p>
     <h2>One graph in the middle</h2>
     <p>
-      A React app talks to a FastAPI backend. The backend keeps every paper, author, topic,
-      tag, note, concept and citation as nodes and relationships in Neo4j. PDFs are stored in
-      Google Drive. Language models are called for the steps that need them, and every prompt
-      is a plain text file you can edit without restarting.
+      A React app talks to a FastAPI backend. Every paper, author, topic, tag, note, concept and
+      citation is a node or relationship in Neo4j; PDFs live in Google Drive; every prompt is a
+      plain text file you can edit.
     </p>
   </div>
 
@@ -556,10 +444,6 @@ og_image: https://niklas-abraham.de/assets/papermanager/og.jpg
   </div>
 
   <div class="pm-grid" style="margin-top:1rem">
-    <div class="pm-card">
-      <h3>An upload, step by step</h3>
-      <p>Parse the PDF → find the DOI → fetch metadata → you confirm → store the PDF → create the paper node (or enrich an existing citation stub) → summary, topics, figures, references → concepts and concept map in the background.</p>
-    </div>
     <div class="pm-card">
       <h3>Models where they fit</h3>
       <p>Claude writes summaries, answers chats and builds tours. A smaller model through LiteLLM handles bulk work such as the concept map. Without a GPU, Docling runs on the CPU inside the container.</p>
@@ -647,7 +531,7 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
 </section>
 
 <section class="pm-end">
-  <h2>Try it, fork it, tell me what breaks</h2>
+  <h2>Stop collecting. Start understanding.</h2>
   <p>PaperManager is open source. Issues, ideas and pull requests are welcome.</p>
   <div class="pm-ctas">
     <a class="pm-btn pm-btn-primary" href="{{ repo }}"><i class="fab fa-github"></i> NiklasAbraham/PaperManager</a>
@@ -659,6 +543,6 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
 </div>
 
 <script defer src="{{ '/assets/js/papermanager-hero.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-<script defer src="{{ '/assets/js/papermanager-hero-c.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script type="module" src="{{ '/assets/pm-chat-demo/pm-chat-demo.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script>(function(){var m=document.getElementById('pm-chat-menu'),n=document.getElementById('pm-chat-notes');if(!m||!n||!window.MutationObserver)return;function sync(){var b=m.querySelector('[aria-selected="true"]');if(!b)return;var i=b.getAttribute('data-pm-chat-tab');Array.prototype.forEach.call(n.querySelectorAll('[data-note]'),function(p){p.hidden=p.getAttribute('data-note')!==i;});}new MutationObserver(sync).observe(m,{attributes:true,subtree:true,attributeFilter:['aria-selected']});sync();})();</script>
 <script defer src="{{ '/assets/js/papermanager-recolor.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
