@@ -459,63 +459,62 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
 <section class="pm-section" id="setup">
   <div class="pm-section-head">
     <p class="pm-kicker">Set it up</p>
-    <h2>Run your own instance in about 20 minutes</h2>
+    <h2>Ask your coding agent to set it up</h2>
     <p>
-      Everything ships as one Docker image with the frontend and backend, plus Neo4j next to it.
-      You need Git, Docker, a Google account (for Drive) and, for the AI features, an
-      <a href="https://console.anthropic.com">Anthropic API key</a>. The full guide, including
-      Heroku hosting and troubleshooting, is in the
-      <a href="{{ docs }}self_hosting/">self-hosting guide</a>.
+      You don't have to read a setup guide. Open Claude Code, Codex or any other coding agent on
+      your computer and paste this:
     </p>
   </div>
 
+  <div class="pm-agent-prompt">
+    <pre><code id="pm-agent-prompt-text">Set up PaperManager for me by following
+https://github.com/NiklasAbraham/PaperManager/blob/main/DEPLOY.md</code></pre>
+    <button type="button" class="pm-btn pm-agent-copy" data-copy="#pm-agent-prompt-text"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+
+  <p class="pm-agent-lede">
+    <a href="{{ repo }}/blob/main/DEPLOY.md"><code>DEPLOY.md</code></a> is a runbook written for the
+    agent, not for you. The agent works through it with you:
+  </p>
+
   <ol class="pm-steps">
     <li>
-      <h3>Get the code and create your settings file</h3>
-<pre><code>git clone https://github.com/NiklasAbraham/PaperManager.git
-cd PaperManager
-cp .env.example .env</code></pre>
-      <p>In <code>.env</code>, set at least these values and leave the rest at their defaults:</p>
-<pre><code>NEO4J_PASSWORD=<span class="c"># any long random string</span>
-JWT_SECRET_KEY=<span class="c"># output of: openssl rand -hex 32</span>
-DEFAULT_USER_NAME=<span class="c"># your login name (owner and admin)</span>
-ANTHROPIC_API_KEY=sk-ant-...
-GOOGLE_DRIVE_FOLDER_ID=<span class="c"># from step 2</span>
-DOCLING_MODE=local</code></pre>
-      <p>Optional: point <code>LITELLM_ENDPOINT</code> at any OpenAI-compatible API (for example OpenRouter) to enable the Gemma model and the project concept map.</p>
+      <h3>It checks your machine</h3>
+      <p>Git and Docker must be present and Docker must be running. If something is missing, the agent explains how to install it and asks before it installs anything.</p>
     </li>
     <li>
-      <h3>Connect Google Drive (once)</h3>
+      <h3>It asks four questions</h3>
       <p>
-        In the Google Cloud console, enable the Drive API, create an OAuth client of type
-        <em>Desktop app</em> and save its JSON as <code>backend/credentials.json</code>. Create a
-        Drive folder for the PDFs and copy its id into <code>.env</code>. Then sign in once:
+        Your login name. Which AI account you have: <strong>Anthropic or OpenAI, one is enough</strong>.
+        Where your PDFs live: on this computer, or in Google Drive. And an accent colour for the app.
       </p>
-<pre><code>python3 -m venv .venv-drive
-.venv-drive/bin/pip install google-auth-oauthlib google-api-python-client
-.venv-drive/bin/python backend/scripts/setup_drive_oauth.py</code></pre>
     </li>
     <li>
-      <h3>Start it</h3>
-<pre><code>docker compose -f docker-compose.selfhost.yml up -d --build   <span class="c"># first build takes ~10 min</span>
-docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c"># wait for "Application startup complete"</span></code></pre>
-    </li>
-    <li>
-      <h3>Create your account and open the app</h3>
-<pre><code>docker compose -f docker-compose.selfhost.yml exec app python scripts/create_default_user.py</code></pre>
-      <p>Then open <strong>http://localhost:8080</strong>, log in and drop in your first PDF.</p>
-    </li>
-    <li>
-      <h3>Optional: connect Claude</h3>
+      <h3>It writes your settings and starts the app</h3>
       <p>
-        Add the MCP server to Claude Desktop or Claude Code to search and annotate your library
-        from a chat. To run chats, concepts and tours on a Claude Pro or Max subscription instead
-        of the API, put a token from <code>claude setup-token</code> into
-        <code>CLAUDE_CODE_OAUTH_TOKEN</code>. See the
-        <a href="{{ docs }}user-guide/mcp-server/">MCP guide</a>.
+        Every answer goes into <code>.env</code>, and the app adapts to it. With an Anthropic key,
+        summaries, topics and the concept map run on Claude Haiku and chat runs on Claude. With an
+        OpenAI key, everything runs on GPT-5 mini. The model menus show the model you actually have,
+        and the interface takes your colour. The agent generates the passwords and secrets itself;
+        you paste your API key into the file, so it never passes through the chat.
+      </p>
+    </li>
+    <li>
+      <h3>You set your password, it checks everything</h3>
+      <p>
+        You type one command in your own terminal to choose a password. The agent then runs
+        <code>check_setup.py</code>, which tests the database, sends one tiny message to your AI
+        provider and checks the file storage. Then it hands you <strong>http://localhost:8080</strong>.
       </p>
     </li>
   </ol>
+
+  <p class="pm-agent-lede">
+    You need no GPU, no LLM proxy and no Google account. Plan for about 15 minutes; most of it is the
+    first Docker build. To do it by hand, every step in <code>DEPLOY.md</code> is a plain command.
+    Heroku hosting, servers and Google Drive storage are in the
+    <a href="{{ docs }}self_hosting/">self-hosting guide</a>.
+  </p>
 </section>
 
 <!-- ============================================================ stack -->
@@ -526,7 +525,7 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
   <div class="pm-chips">
     <span>Python 3.11</span><span>FastAPI</span><span>Neo4j 5</span><span>React 19</span><span>TypeScript</span>
     <span>Vite</span><span>Tailwind CSS</span><span>react-force-graph</span><span>Anthropic SDK</span><span>Claude Code</span>
-    <span>LiteLLM</span><span>Docling</span><span>FastMCP</span><span>Google Drive API</span><span>Docker</span><span>MkDocs</span>
+    <span>LiteLLM</span><span>OpenAI SDK</span><span>Docling</span><span>FastMCP</span><span>Google Drive API</span><span>Docker</span><span>MkDocs</span>
   </div>
 </section>
 
@@ -546,3 +545,4 @@ docker compose -f docker-compose.selfhost.yml logs -f app      <span class="c">#
 <script type="module" src="{{ '/assets/pm-chat-demo/pm-chat-demo.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script>(function(){var m=document.getElementById('pm-chat-menu'),n=document.getElementById('pm-chat-notes');if(!m||!n||!window.MutationObserver)return;function sync(){var b=m.querySelector('[aria-selected="true"]');if(!b)return;var i=b.getAttribute('data-pm-chat-tab');Array.prototype.forEach.call(n.querySelectorAll('[data-note]'),function(p){p.hidden=p.getAttribute('data-note')!==i;});}new MutationObserver(sync).observe(m,{attributes:true,subtree:true,attributeFilter:['aria-selected']});sync();})();</script>
 <script defer src="{{ '/assets/js/papermanager-recolor.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script>document.querySelectorAll('.pm-agent-copy').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector(b.getAttribute('data-copy'));if(!t||!navigator.clipboard)return;navigator.clipboard.writeText(t.textContent).then(function(){b.innerHTML='<i class="fas fa-check"></i> Copied';setTimeout(function(){b.innerHTML='<i class="fas fa-copy"></i> Copy';},1600);});});});</script>

@@ -1155,13 +1155,13 @@ $pm-themes: (
     padding-top: 1.8rem;
     h3 { font-size: clamp(1.6rem, 2.6vw, 2.1rem); font-weight: 440; line-height: 1.12; }
   }
-  .pm-feature-body, .pm-card, .pm-tl-body, .pm-steps > li > p, .pm-end > p {
+  .pm-feature-body, .pm-card, .pm-tl-body, .pm-steps > li > p, .pm-end > p, .pm-agent-lede {
     font-family: $serif;
     font-size: 1.1rem;
     line-height: 1.58;
     p { font-size: inherit; }
   }
-  .pm-feature-body code, .pm-steps code { font-size: 0.8em; }
+  .pm-feature-body code, .pm-steps code, .pm-agent-lede code { font-size: 0.8em; }
 
   .pm-shot {
     border-radius: 3px;
@@ -1289,4 +1289,34 @@ $pm-themes: (
   .pm-arch { overflow-x: auto; padding: 1rem; svg { min-width: 640px; } }
   .pm h2 { font-size: 1.45rem; }
   .pm-section { margin-top: 3rem; }
+}
+
+// Setup section: the prompt to paste into a coding agent.
+.pm-agent-prompt {
+  max-width: 860px;
+  margin: 0 auto 1.2rem !important;
+  position: relative;
+  pre {
+    margin: 0;
+    padding-right: 6.5rem;
+    font-size: 0.95rem;
+    border-color: var(--pm-accent);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .pm-agent-copy {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+  }
+  @media (max-width: 600px) {
+    pre { padding-right: 1.1rem; font-size: 0.85rem; }
+    .pm-agent-copy { position: static; margin-top: 0.5rem; }
+  }
+}
+.pm-agent-lede {
+  max-width: 860px;
+  margin: 0 auto 1.2rem !important;
 }
