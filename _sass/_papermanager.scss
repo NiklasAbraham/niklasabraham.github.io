@@ -369,12 +369,16 @@ $pm-themes: (
     transform: translateX(-22px);
   }
 }
-.pm-chat-demo { margin: 0; min-height: clamp(660px, 90vh, 1000px); }
+.pm-chat-demo {
+  margin: 0;
+  // The widget fills exactly this height (it reads --pm-chat-height through its shadow root).
+  --pm-chat-height: clamp(620px, 82vh, 920px);
+}
 @media (max-width: 800px) {
   .pm-chat-menu { overflow-x: auto; scrollbar-width: none; .pm-chat-tag { display: none; } }
   .pm-cm { padding: 0.45rem 0.85rem 0.45rem 0.45rem; }
   .pm-cm-head { font-size: 0.88rem; }
-  .pm-chat-demo { min-height: 600px; }
+  .pm-chat-demo { --pm-chat-height: clamp(560px, 78vh, 720px); }
   .pm-chat-window, .pm-chat-frame { border-radius: 12px; }
 }
 
