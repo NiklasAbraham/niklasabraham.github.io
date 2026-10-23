@@ -14,7 +14,15 @@
 @media (max-width: 700px) { .fd-side { grid-template-columns: 1fr; } }
 
 // map
-.fd-map { border-radius: 8px; }
+// Maps break out of the text column: to the right on a 1300 px screen (the contents rail is on the left), to both sides on wider ones.
+@media (min-width: 1100px) {
+  .concept.fd-widefig {
+    margin-left: calc(-1 * clamp(0px, calc((100vw - 1300px) / 2), 220px));
+    margin-right: calc(-1 * clamp(0px, calc((100vw - 1300px) / 2 + 215px), 220px));
+  }
+}
+.fd-map { overflow: visible; }
+.fd-dl { position: absolute; top: 10px; right: 10px; z-index: 2; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.68rem; padding: 0.28rem 0.6rem; border-radius: 8px; border: 1px solid var(--global-card-border, #d5dbe6); background: rgba(255, 255, 255, 0.92); color: #0b4fc0; cursor: pointer; opacity: 0.85; transition: opacity 0.2s, background 0.2s; &:hover { opacity: 1; background: #fff; border-color: #0b4fc0; } }
 .fd-c { stroke: #aebbd0; stroke-width: 0.35; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill 0.35s;
   &.nd { fill: #fff; }
   &:hover { stroke: #04204b; stroke-width: 1; }

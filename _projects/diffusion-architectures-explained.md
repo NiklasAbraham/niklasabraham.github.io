@@ -18,7 +18,7 @@ permalink: /projects/diffusion-architectures/explained/
 **A note before you start.** I wrote this while learning the material. Every number is checked against the paper, its supplementary information or the released code, and I say where it comes from — but a text this long certainly still contains mistakes. If you find one, or think an explanation is wrong or misleading, please [drop me a message on LinkedIn](https://www.linkedin.com/in/niklas-abraham-05983b247). Corrections are very welcome and will be credited.
 </div>
 
-The [architecture gallery]({{ g }}) draws fifteen diffusion models side by side, and the [step-by-step walkthrough]({{ '/projects/diffusion-architectures/walkthrough/' | relative_url }}) lets you fold one structure yourself, left to right through an OpenFold3-style model. The drawings show *what* each network is made of; this article explains *why*, and what the papers measured when they made each choice. It has four parts:
+The [architecture gallery]({{ g }}) draws seventeen diffusion models side by side, and the [step-by-step walkthrough]({{ '/projects/diffusion-architectures/walkthrough/' | relative_url }}) lets you fold one structure yourself, left to right through an OpenFold3-style model. The drawings show *what* each network is made of; this article explains *why*, and what the papers measured when they made each choice. It has four parts:
 
 1. **What every denoiser computes.** The task, which is the same for all fourteen models, and the three equivalent ways of writing down its output.
 2. **Building blocks, learned on images.** U-Nets, the noise-level pathway, attention, text conditioning, latents and patches, the training path, and guidance — each with the ablation numbers from the paper that introduced it.

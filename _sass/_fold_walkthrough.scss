@@ -51,7 +51,29 @@ body:has(#fw) { overflow-x: clip; }
 .fw-chip { border-radius: 99px !important; font-weight: 500 !important; font-size: 0.8rem !important; padding: 4px 12px !important; }
 
 // ---------------------------------------------------------------- the workbench: figure + step list
-.fw-main { max-width: 1760px; margin: 0 auto; padding: 22px 28px 34px; display: grid; grid-template-columns: minmax(0, 1fr) 372px; gap: 28px; align-items: start; }
+// one column: the figure takes the full width, the current step's notes sit under the player (the step list is hidden;
+// fw-core.js keeps it in the DOM as the click target the strip and deep links use)
+.fw-main { max-width: 1520px; margin: 0 auto; padding: 22px 28px 34px; display: block; }
+.fw-side { display: none !important; }
+@media (min-width: 1101px) {
+  // the figure card: the stage with the current step's notes beside it, the player under both
+  .fw.started .fw-fig { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 370px); grid-template-areas: 'head head' 'stage notes' 'player player'; column-gap: 26px; }
+  .fw.started .fw-fighead { grid-area: head; } .fw.started .fw-stage { grid-area: stage; } .fw.started .fw-player { grid-area: player; } .fw.started .fw-notes { grid-area: notes; }
+  // as tall as the window allows, so the figure is read at the largest size that still leaves the player in view
+  .fw.started .fw-stage { aspect-ratio: auto; height: clamp(440px, calc(100vh - 290px), 720px); }
+  .fw.started .fw-notes { align-self: stretch; overflow-y: auto; margin: 0; padding: 4px 0 8px 22px; border-top: 0; border-left: 1px solid var(--line); }
+}
+.fw-notes { display: flex; flex-direction: column; gap: 16px; margin: 14px 2px 2px; padding-top: 14px; border-top: 1px solid var(--line);
+  h3 { margin: 0 0 8px; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; color: var(--ink); display: flex; align-items: baseline; gap: 10px;
+    .mono { font-family: var(--mono); font-size: 0.72rem; font-weight: 500; color: var(--blue); } }
+  ul { margin: 0; padding: 0 0 0 1.05rem; font-size: 0.97rem; line-height: 1.6; color: var(--ink); max-width: 88ch; }
+  ul li { margin-bottom: 8px; } ul li::marker { color: var(--blue); }
+  b, strong { font-weight: 650; }
+  .fw-livetag { font-style: normal; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rust); border: 1px solid rgba(180, 85, 47, 0.35); border-radius: 99px; padding: 0 6px; }
+  &:empty { display: none; }
+  &.in > * { animation: fwnarr 0.5s ease both; } }
+.fw:not(.started) .fw-notes { display: none; }
+
 .fw-fig, .fw-side { min-width: 0; }
 .fw-fig { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px 12px;
   box-shadow: 0 1px 2px rgba(4, 32, 75, 0.04), 0 18px 40px -28px rgba(4, 32, 75, 0.25); }
@@ -268,13 +290,12 @@ body:has(#fw) { overflow-x: clip; }
 
 // ---------------------------------------------------------------- responsive
 @media (max-width: 1360px) {
-  .fw-main { grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; }
   .fw-ctab { min-width: 0; .t { font-size: 0.82rem; } }
   .fw-intro { h1 { font-size: clamp(1.6rem, 2.7vw, 2.4rem); } .fw-lede { margin-bottom: 1.1rem; } }
   .fw-choice { padding: 11px 36px 11px 14px; b { font-size: 0.9rem; } }
 }
 @media (max-width: 1100px) {
-  .fw-main { grid-template-columns: minmax(0, 1fr); padding: 16px 16px 26px; }
+  .fw-main { padding: 16px 16px 26px; }
   .fw-side { position: static; max-height: none; display: flex; flex-direction: column; }
   .fw-side > .fw-prin { display: block; order: -1; &:empty { display: none; } }
   .fw-st-prin { display: none; }

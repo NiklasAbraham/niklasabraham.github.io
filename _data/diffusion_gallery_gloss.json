@@ -25,6 +25,11 @@
   "emb": "The input embedder: raw inputs become the single and pair representations the trunk works with, including the relative-position and bond features that tell the network how the tokens are connected.",
   "input": "What the user supplies. Everything downstream is a function of this plus the noise draw, so what can be asked of the model is set here.",
   "out": "What comes back, after any ranking or post-processing that is not part of the network.",
+  "ipa": "Invariant point attention, the layer AlphaFold 2&#x27;s structure module is built from. Each residue carries a rigid frame; besides ordinary query-key attention, every head places a few query and key points in 3D using the residue&#x27;s frame, and the distance between those points enters the attention logit. Rotating the whole structure rotates the points with it, so the output does not change.",
+  "score": "The network&#x27;s output for a score model: an estimate of the gradient of the log-density of the noised data, here per residue and in that residue&#x27;s own frame. A solver turns it into the next, less noisy state; it is not a clean structure itself.",
+  "pairmixer": "A PairMixer block: triangle multiplication (outgoing, then incoming) and a transition on the pair representation, nothing else. No triangle attention and no attention on the single representation, which is what makes it cheaper than a Pairformer block.",
+  "coup": "A coupling step between two residual streams that run at different granularities. Token features are broadcast to their atoms and mixed into the atom stream; the features of each token&#x27;s centre atom are mixed back into the token stream. Both mixes are MLPs gated by the conditioning.",
+  "readout": "The output layer: token and atom features are projected to a common width, added per atom, normalised and mapped to a three-dimensional coordinate update.",
   "mid": "The middle of a U-Net, at the lowest resolution and the widest channels. Attention is affordable here, so this is where the most global reasoning happens."
  }
 }

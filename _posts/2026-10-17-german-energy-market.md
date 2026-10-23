@@ -4,6 +4,7 @@ title: How Germany's energy market works
 description: Where Germany's energy comes from, how the electricity market sets a price every quarter-hour, the laws that frame it, and how supply, demand and prices swing within a day, a week, a year and a decade. With 11 years of hourly data, maps, animations and an explorer.
 date: 2026-10-17
 tags: [energy, electricity-markets, data]
+image: /assets/blog-thumbs/energy.webp
 categories: [long-read]
 read_time: 50 # the word count would include the inlined map SVGs
 ---
@@ -432,5 +433,6 @@ The animations were drafted with a concept-visualisation pipeline adapted from [
 
 </article>
 <script defer src="{{ '/assets/js/concepts.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/figure-tools.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script defer src="{{ '/assets/js/da-guide.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script defer src="{{ '/assets/js/energy-explorer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

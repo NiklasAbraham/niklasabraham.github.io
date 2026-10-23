@@ -9,8 +9,10 @@ Everything behind `/blog/2026/national-budgets/` (`_posts/2026-10-18-national-bu
 | `profiles.py` | One generated card per country (every sentence computed; hand-written caveats in `CAVEAT`) | `_includes/budget-article/profiles.html` |
 | `facts.py` | Prints the rankings quoted in the prose | stdout |
 
+`bonds/` is the pipeline of the bonds section (19): `fetch.py` (FRED, Treasury FiscalData, TIC), `process.py` → `assets/budget-article/bonds.json`, `FACTS.md` / `EPISODES.md` (sourced fact sheets, with the claims that could not be verified) and `prose_check.py`, which re-derives every number quoted in the section from the JSON and prints it next to the prose value (run it after any rebuild). Source tags: `_data/budget_article/refs.yml`, `_includes/bd-ref.html` (tag) and `bd-refs.html` (list in Sources).
+
 Support: `countries.py` (the 33 countries, regions), `cofog_meta.py` (division and group names, the eight colour groups).
-Styles `_sass/_budget_article.scss`; include `_includes/bx.html`; JS `assets/js/budget-explorer.js` (stack bars, sankey, treemap, compare, lines, scatter; vanilla SVG/HTML, no library).
+Styles `_sass/_budget_article.scss`; include `_includes/bx.html`; JS `assets/js/budget-explorer.js` (stack bars, sankey, treemap, compare, lines, scatter; vanilla SVG/HTML, no library) and `assets/js/budget-bonds.js` + `_sass/_budget_bonds.scss` (kinds `yields`, `stock`, `holders`, `rg`, read from `bonds.json`).
 
 Known data limits (also in the post): India, Mexico and Saudi Arabia have no COFOG; Russia's latest is 2020, UAE has one year; COFOG totals differ from IMF headline expenditure for Singapore, Canada, USA, South Africa; the US reports no environment spending; Singapore's net investment is negative (excluded from the economic-type view).
 Prose numbers were typed from `facts.py` output and ad-hoc checks; re-check them if `budget.json` is rebuilt.

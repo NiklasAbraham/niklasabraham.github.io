@@ -483,10 +483,13 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
 
 // ---------------------------------------------------------------- modal
 
+// Near full screen, and nothing inside changes size while you explore: the drawing on the left
+// fits its box once per model, and the explanation lives in a fixed-width panel on the right.
 .dg-modal {
-  width: unquote("min(1240px, calc(100vw - 32px))");
+  width: calc(100vw - 24px);
   max-width: none;
-  max-height: calc(100vh - 48px);
+  height: calc(100vh - 24px);
+  max-height: none;
   padding: 0;
   border: 1px solid var(--global-card-border);
   border-radius: 20px;
@@ -501,9 +504,8 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
 
 .dg-modal-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
-  height: calc(100vh - 50px);
-  max-height: 1000px;
+  grid-template-columns: minmax(0, 1fr) 460px;
+  height: 100%;
 }
 
 .dg-modal-left {
@@ -517,13 +519,13 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
 
 .dg-modal-fig {
   position: relative;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-height: 0;
-  overflow: auto;
-  padding: 1.5rem;
+  overflow: hidden;           // never a scrollbar: one would resize the drawing under the pointer
+  padding: 1.2rem 1.5rem 0.4rem;
   outline: none;
-  .dg-modal-svg { display: flex; justify-content: center; height: 100%; }
-  .dg-svg { width: auto; max-width: 100%; height: 100%; max-height: 100%; }
+  .dg-modal-svg { position: absolute; inset: 1.2rem 1.5rem 0.4rem; }
+  .dg-svg { display: block; width: 100%; height: 100%; }   // viewBox + meet: scales to fit, centred
 
   // Hover is eased rather than instant: the drawings are dense, and a snap on every block the
   // pointer crosses reads as flicker. The JS adds the matching enter/leave delay.
@@ -559,20 +561,26 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
   code { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 }
 
-.dg-insp {
+.dg-modal-hint {
   flex: 0 0 auto;
-  min-height: 132px;
-  max-height: 42%;
-  overflow: auto;
-  margin: 0 0.9rem 0.9rem;
-  padding: 0.85rem 1rem 0.9rem;
-  border: 1px solid var(--global-card-border);
-  border-radius: 14px;
-  background: var(--global-card-bg);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  &.on { border-color: var(--global-theme-color); }
-  h3 { font-size: 1.08rem; font-weight: 700; letter-spacing: -0.02em; margin: 0.35rem 0 0.1rem; }
+  margin: 0;
+  padding: 0.35rem 1.5rem 0.8rem;
+  font-size: 0.78rem;
+  color: var(--global-text-color-light);
+  text-align: center;
+}
+
+// the clicked block, in the right-hand panel in place of the model overview
+.dg-insp {
+  font-size: 0.93rem;
+  line-height: 1.6;
+  &[hidden] { display: none; }
+  .dg-insp-back {
+    border: 0; background: none; padding: 0; margin: 0 0 0.9rem; cursor: pointer;
+    font-size: 0.8rem; color: var(--global-text-color-light);
+    &:hover { color: var(--global-theme-color); }
+  }
+  h3 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; margin: 0.35rem 0 0.1rem; }
   p { margin: 0 0 0.45rem; }
   .dg-insp-empty { color: var(--global-text-color-light); margin: 0.2rem 0; strong { color: var(--global-text-color); } }
   .dg-insp-head { display: flex; align-items: center; justify-content: space-between; }
@@ -628,7 +636,8 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
 }
 
 .dg-modal-side {
-  overflow: auto;
+  overflow-y: auto;
+  scrollbar-gutter: stable;   // the panel keeps its width whether or not the text needs to scroll
   padding: 1.1rem 1.6rem 1.8rem;
   border-left: 1px solid var(--global-card-border);
 }
@@ -707,10 +716,8 @@ html[data-theme='dark'] .dg-kind { color: #7aa2ff; &.warm { color: #e58a63; } }
 
 @media (max-width: 900px) {
   .dg-intro, .dg-three { grid-template-columns: minmax(0, 1fr); }
-  .dg-modal-inner { grid-template-columns: 1fr; height: auto; max-height: calc(100vh - 50px); overflow: auto; }
-  .dg-modal-left { min-height: auto; }
-  .dg-modal-fig { overflow: visible; .dg-modal-svg { height: auto; } .dg-svg { width: 100%; height: auto; } }
-  .dg-insp { max-height: none; }
+  .dg-modal-inner { grid-template-columns: 1fr; grid-template-rows: 58vh minmax(0, 1fr); }
+  .dg-modal-hint { display: none; }
   .dg-modal-side { overflow: visible; border-left: 0; border-top: 1px solid var(--global-card-border); }
   .dg-modal-nav { top: 0; }
   .dg-timeline .pin { font-size: 0.66rem; }

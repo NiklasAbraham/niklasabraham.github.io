@@ -1,0 +1,2 @@
+{%- comment -%} A source tag of the bonds section: {% include bd-ref.html k="mof-jgb" %} renders [MoF JGB holders] linking to the entry in the reference list (_data/budget_article/refs.yml). {%- endcomment -%}
+{%- assign r = site.data.budget_article.refs | where: "key", include.k | first -%}<sup class="bd-ref"><a href="#rb-{{ include.k }}" title="{{ r.title | escape }} ({{ r.status }})">[{{ r.short | default: include.k }}]</a></sup>

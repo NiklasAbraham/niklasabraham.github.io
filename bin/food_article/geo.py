@@ -93,6 +93,12 @@ for code, (name, g) in sorted(raw.items()):
         c = big.representative_point() if not big.centroid.within(big) else big.centroid
         cx, cy = c.x, c.y
     countries[code] = dict(n=name, d=d, x=round(cx, 1), y=round(cy, 1), a=round(sum(q.area for q in polys), 1))
+# the Equal Earth outline (lon = +-180) clipped to the drawn band, as the ocean shape of the maps
+lat = np.linspace(84, -58, 60)
+ox, oy = P(np.full_like(lat, 180.0), lat)
+edge = [(sx(float(a)), sy(float(b))) for a, b in zip(ox, oy)]
+left = [(W - x, y) for x, y in edge]
+OUTLINE = "M" + "L".join(f"{x:.1f},{y:.1f}" for x, y in edge + left[::-1]) + "Z"
 OUT.parent.mkdir(parents=True, exist_ok=True)
-json.dump(dict(w=W, h=round(H, 1), c=countries), open(OUT, "w"), separators=(",", ":"))
+json.dump(dict(w=W, h=round(H, 1), o=OUTLINE, c=countries), open(OUT, "w"), separators=(",", ":"))
 print(len(countries), "countries", OUT.stat().st_size // 1024, "KB", "h=", round(H, 1))

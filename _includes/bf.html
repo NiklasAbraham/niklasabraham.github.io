@@ -1,0 +1,2 @@
+{%- comment -%} An interactive figure of the butterfly long read: kind= (thorax|stroke|lever|muscle|freq|spring|fling), title=, caption=, wide=1 to break out of the text column (read by assets/js/butterfly-figs.js) {%- endcomment -%}
+<figure data-bf="{{ include.kind }}" data-title="{{ include.title }}" data-caption="{{ include.caption }}"{% if include.wide %} class="bf-wide"{% endif %}{% if include.id %} id="{{ include.id }}"{% endif %}></figure>

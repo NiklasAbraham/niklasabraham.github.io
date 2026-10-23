@@ -1,0 +1,65 @@
+// Bonds section of the national-budget long read (section 19, /blog/2026/national-budgets/#bonds): figures built by
+// assets/js/budget-bonds.js. Frame, buttons, chips and tooltip are the budget article's (.concept.bx, .bx-*).
+
+.concept.bd { max-width: 100%; min-width: 0; .bx-stage { padding-bottom: 0.5rem; min-width: 0; overflow-x: hidden; } .bx-seg { flex-wrap: wrap; max-width: 100%; button { border-bottom: 1px solid var(--global-card-border); } } }
+.bd-wait { padding: 1.4rem; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.74rem; color: #8a93a6; }
+.bx-chip.dis { opacity: 0.35; cursor: not-allowed; }
+.bx-chip.static { cursor: default; &:hover { border-color: var(--global-card-border); color: var(--global-text-color); } }
+
+// svg charts
+.bd-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.bd-ax { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; fill: #6b7280; }
+.bd-pt { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; fill: #6b7280; }
+.bd-end { font-family: 'Inter', system-ui, sans-serif; font-size: 11.5px; font-weight: 600; pointer-events: none; }
+.bd-evn { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9px; font-weight: 700; fill: #fff; pointer-events: none; }
+.bd-ev { cursor: default; &:focus { outline: none; circle { stroke: #04204b; stroke-width: 2; } } }
+.bd-evlist { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; font-size: 0.76rem; line-height: 1.45; color: #4a5a78; padding-bottom: 0.25rem;
+  b { display: inline-block; min-width: 1.35rem; height: 1.35rem; line-height: 1.35rem; text-align: center; border-radius: 50%; background: #b4552f; color: #fff; font-size: 0.66rem; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  em { font-style: normal; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.68rem; color: #04204b; }
+  a { color: #0b4fc0; text-decoration: none; white-space: nowrap; &:hover { text-decoration: underline; } } }
+
+// bars of dollars
+.bd-bars { padding: 0.2rem 0 0.2rem; }
+.bd-row { display: flex; align-items: center; gap: 0.6rem; min-height: 25px; cursor: default; &:hover { background: rgba(11, 79, 192, 0.045); }
+  .nm { flex: 0 0 150px; text-align: right; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; small { color: #8a93a6; font-size: 0.66rem; } }
+  .tr { flex: 1; min-width: 0; height: 14px; background: #f1f4f9; border-radius: 3px; overflow: hidden; i { display: block; height: 100%; border-radius: 3px; } }
+  .v { flex: 0 0 84px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.72rem; font-variant-numeric: tabular-nums; } }
+
+// holders
+.bd-hold { padding: 0.2rem 0 0.4rem; }
+.bd-hrow { padding: 0.5rem 0 0.7rem; border-bottom: 1px solid var(--bx-rule, #e3e8f0); &:last-child { border-bottom: 0; }
+  .who { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.25rem; b { font-size: 0.95rem; } small { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.66rem; color: #8a93a6; } }
+  .bar { display: flex; height: 30px; width: 100%; border-radius: 4px; overflow: hidden;
+    i { display: flex; align-items: center; justify-content: center; min-width: 0; border-right: 1.5px solid #fff; box-sizing: border-box; overflow: hidden; cursor: default; &:last-child { border-right: 0; } &:focus { outline: 2px solid #04204b; outline-offset: -2px; }
+      span { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.66rem; color: #fff; font-style: normal; text-shadow: 0 0 2px rgba(0, 0, 0, 0.35); } } }
+  .meta { margin: 0.3rem 0 0; font-size: 0.72rem; line-height: 1.45; color: #6b7280; } }
+.st { display: inline-block; font-style: normal; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.58rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.03rem 0.38rem; border-radius: 999px; border: 1px solid #c9d0dc; color: #6b7280; margin-left: 0.3rem;
+  &.opened { border-color: #138374; color: #138374; } &.primary, &.data { border-color: #0b4fc0; color: #0b4fc0; } &.snippet { border-color: #b4552f; color: #b4552f; } }
+
+// calculator
+.bd-sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem 1.2rem; width: 100%; }
+.bd-sl { display: grid; grid-template-columns: 1fr auto; gap: 0.1rem 0.5rem; align-items: center; margin: 0; .bx-range { grid-column: 1 / -1; width: 100%; } .bd-sv { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.78rem; text-align: right; } }
+.bd-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem 1.2rem; padding: 0.4rem 0 0.6rem;
+  > div { display: flex; flex-direction: column; gap: 0.1rem; }
+  .big { font-size: 1.35rem; letter-spacing: -0.02em; color: #04204b; &.up { color: #b4552f; } &.dn { color: #138374; } }
+  small { font-size: 0.72rem; color: #6b7280; line-height: 1.35; } }
+.bd-tabwrap { overflow-x: auto; max-width: 100%; border-top: 1px solid var(--bx-rule, #e3e8f0); margin-top: 0.5rem; padding-top: 0.5rem; }
+.concept.bd .bd-tab { width: 100%; min-width: 440px; border-collapse: collapse; font-size: 0.76rem; line-height: 1.4;
+  th { text-align: left; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: #6b7280; font-weight: 500; padding: 0.3rem 0.8rem 0.3rem 0; vertical-align: bottom; border-bottom: 1px solid #c9d0dc; }
+  td { font-size: 0.76rem; padding: 0.3rem 0.8rem 0.3rem 0; border-bottom: 1px solid var(--bx-rule, #e3e8f0); }
+  .r { text-align: right; } .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.7rem; } }
+
+// source tags of the bonds section (reference list: _data/budget_article/refs.yml, _includes/bd-refs.html)
+.bd-ref { font-size: 0.64em; line-height: 0; margin-left: 0.1em; a { color: #0b4fc0 !important; text-decoration: none; white-space: nowrap; font-family: 'JetBrains Mono', ui-monospace, monospace; letter-spacing: -0.02em; &:hover { text-decoration: underline; } } }
+.bd-refs { font-size: 0.82rem; line-height: 1.5; padding-left: 0; list-style: none;
+  li { padding: 0.35rem 0; border-bottom: 1px solid var(--bx-rule, #e3e8f0); scroll-margin-top: 90px; &:target { background: rgba(180, 85, 47, 0.08); } }
+  .k { display: inline-block; min-width: 9.5rem; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.68rem; color: #0b4fc0; vertical-align: top; } }
+
+@media (max-width: 640px) {
+  .bd-row .nm { flex-basis: 96px; font-size: 0.72rem; } .bd-row .v { flex-basis: 66px; }
+  .bd-refs .k { display: block; }
+  .bd-out .big { font-size: 1.15rem; }
+}
+
+// the two reconciliation tables of the prose (US debt and US interest definitions)
+.da .bd-tabwrap table { font-size: 0.8rem; min-width: 560px; td, th { vertical-align: top; } }

@@ -4,7 +4,9 @@ title: Where the world's food is grown, and where it goes
 description: Where wheat, rice, soya, palm oil, coffee and 64 other foods are grown, how few countries grow most of them, how much of each crosses a border and who ships it to whom. An article with maps, a time machine, trade flows and a page for every country, built on FAO's production, trade and food-balance statistics.
 date: 2026-10-19
 tags: [food, agriculture, trade, data]
+image: /assets/blog-thumbs/food.webp
 categories: [long-read]
+pinned: true
 read_time: 35 # the word count does not include the interactive figures
 ---
 {%- assign data = '/assets/food-article/' | relative_url -%}
@@ -280,5 +282,6 @@ For anything that matters, go to the original sources below. The article is gene
 </article>
 
 <script defer src="{{ '/assets/js/concepts.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+<script defer src="{{ '/assets/js/figure-tools.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script defer src="{{ '/assets/js/da-guide.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 <script defer src="{{ '/assets/js/food-explorer.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

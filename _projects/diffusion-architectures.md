@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Diffusion Architecture Gallery
-description: Fifteen diffusion models, from DDPM to AlphaFold 3, drawn in one visual language.
+description: Seventeen diffusion models, from DDPM to AlphaFold 3 and BioEmu, drawn in one visual language.
 importance: 1
 category: research
 permalink: /projects/diffusion-architectures/
@@ -14,8 +14,8 @@ permalink: /projects/diffusion-architectures/
   <p class="dg-eyebrow">Project · Architecture gallery · companion to the <a href="{{ longread }}">long read</a></p>
   <h1 class="dg-title">Diffusion models, drawn the same way</h1>
   <p class="dg-lede">
-    Fifteen denoisers, from the DDPM U-Net to AlphaFold 3 and its open reproductions, drawn in one visual
-    language. A block that does the same job looks the same in every drawing, so what changes from card to card
+    Seventeen denoisers, from the DDPM U-Net to AlphaFold 3, its open reproductions and the BioEmu ensemble
+    emulators, drawn in one visual language. A block that does the same job looks the same in every drawing, so what changes from card to card
     is what changed between the models. The drawings show <em>what</em> each network is made of; the
     <a href="{{ longread }}">long read</a> explains <em>why</em>, with the ablations behind each choice.
   </p>
@@ -160,7 +160,7 @@ permalink: /projects/diffusion-architectures/
     </div>
     <div>
       <h3>Biomolecular denoisers are small next to their condition</h3>
-      <p>In AlphaFold 3 and its reproductions the 48–64-block Pairformer does the expensive reasoning once; the 24-block token transformer only refines atoms.</p>
+      <p>In AlphaFold 3 and its reproductions the 48–64-block Pairformer does the expensive reasoning once; the 24-block token transformer only refines atoms. BioEmu-2 shifts the weight the other way: an 86 M pair-only trunk feeds a 425 M denoiser.</p>
     </div>
   </div>
 </section>
@@ -169,9 +169,9 @@ permalink: /projects/diffusion-architectures/
   <h2>Sources and notes</h2>
   <p>
     Numbers for the image models come from the papers and official code linked in each card. Block and
-    parameter counts for Boltz-2, OpenFold3, Protenix and ESMFold2 were read from the released checkpoints and
-    code (Boltz 2.2.1, OpenFold3 0.4.3, Protenix 1.1.0, ESM 3.4.1); AlphaFold 3 follows the supplementary
-    information. Diagrams are simplified: they keep every block that changes how information flows and omit
+    parameter counts for Boltz-2, OpenFold3, Protenix, ESMFold2, BioEmu and BioEmu-2 were read from the released
+    checkpoints and code (Boltz 2.2.1, OpenFold3 0.4.3, Protenix 1.1.0, ESM 3.4.1, BioEmu v1.1, bioemu2-preview);
+    AlphaFold 3 follows the supplementary information. BioEmu-2 has no paper yet; its card is read from the released code, config, checkpoint and model card. Diagrams are simplified: they keep every block that changes how information flows and omit
     dropout, initialisation and most widths.
   </p>
   <p>
@@ -191,7 +191,7 @@ permalink: /projects/diffusion-architectures/
   <div class="dg-modal-inner">
     <div class="dg-modal-left">
       <div class="dg-modal-fig"><div class="dg-modal-svg"></div><div class="dg-tip" hidden></div></div>
-      <div class="dg-insp" aria-live="polite"></div>
+      <p class="dg-modal-hint">Hover a block for its shape · click it for the full explanation on the right</p>
     </div>
     <aside class="dg-modal-side">
       <div class="dg-modal-nav">
@@ -201,6 +201,7 @@ permalink: /projects/diffusion-architectures/
         <button class="dg-png" aria-label="Download this drawing as a PNG" title="Download this drawing as a PNG">PNG</button>
         <button class="dg-close" aria-label="Close">✕</button>
       </div>
+      <div class="dg-insp" aria-live="polite" hidden></div>
       <div class="dg-modal-body"></div>
     </aside>
   </div>

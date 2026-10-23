@@ -1,0 +1,6 @@
+<ol class="ai-refs">
+{%- assign rs = site.data.butterfly_article.refs | sort: "key" -%}
+{%- for r in rs %}
+<li id="r-{{ r.key }}"><span class="k">[{{ r.short }}]</span> {{ r.pub }}, <a href="{{ r.url }}" rel="noopener">{{ r.title }}</a>, {{ r.date }}.<span class="st {{ r.status }}">{{ r.status }}</span></li>
+{%- endfor %}
+</ol>

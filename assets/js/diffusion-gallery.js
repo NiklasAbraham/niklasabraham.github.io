@@ -52,6 +52,31 @@
   });
   const maxStack = Math.max(...Object.values(perYear).map((n) => Math.ceil(n / 2)));
   axis.style.height = 18 + maxStack * 23 + 'px';
+  // The year positions above are where pins would like to sit. Crowded years (and long labels at the
+  // ends of the axis) overlap there, so pack them: left to right, each pin takes the lowest row in which
+  // it clears its left neighbour, and no pin sticks out of the axis.
+  pins.forEach((p) => (p.dataset.left = p.style.left));
+  function fitPins() {
+    const a = axis.getBoundingClientRect();
+    if (!a.width) return;
+    const items = pins.map((p) => {
+      p.style.left = p.dataset.left;
+      const r = p.getBoundingClientRect();
+      return { p, w: r.width, c: r.left + r.width / 2 - a.left };
+    }).sort((x, y) => x.c - y.c);
+    const ends = [];
+    items.forEach(({ p, w, c }) => {
+      c = Math.min(Math.max(c, w / 2), a.width - w / 2);
+      let row = ends.findIndex((e) => c - w / 2 >= e + 6);
+      if (row < 0) { row = ends.length; ends.push(0); }
+      ends[row] = c + w / 2;
+      p.style.left = c + 'px';
+      p.style.bottom = 6 + row * 23 + 'px';
+    });
+    axis.style.height = 18 + ends.length * 23 + 'px';
+  }
+  fitPins();
+  window.addEventListener('resize', fitPins);
 
   // ---------------------------------------------------------------- filtering
   function visible(id) {
@@ -98,6 +123,7 @@
   const figWrap = dlg.querySelector('.dg-modal-fig');
   const tip = dlg.querySelector('.dg-tip');
   const insp = dlg.querySelector('.dg-insp');
+  const side = dlg.querySelector('.dg-modal-side');
   const body = dlg.querySelector('.dg-modal-body');
   const count = dlg.querySelector('.dg-modal-count');
   const ROLE = {
@@ -110,8 +136,6 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const ext = (u, label) => `<a href="${esc(u)}" target="_blank" rel="noopener">${label} <span aria-hidden="true">↗</span></a>`;
 
-  const EMPTY = '<p class="dg-insp-empty"><strong>Explore the drawing.</strong> Hover a block for its tensor shapes; ' +
-    'click it to pin the full explanation and the paper it comes from.</p>';
 
   // "What this kind of layer does": the same words wherever that layer type appears. Opening it
   // once is a preference, so it stays open for the next block and the next visit.
@@ -123,19 +147,23 @@
   function renderInspector(k) {
     const m = byId[current];
     const b = k && m.blocks[k];
-    if (!b) { insp.innerHTML = EMPTY; insp.classList.remove('on'); return; }
-    insp.classList.add('on');
+    // The right-hand panel shows either the model or the clicked block, never both, and it is the
+    // only thing that changes on a click: the drawing on the left keeps its size.
+    side.scrollTop = 0;
+    if (!b) { insp.hidden = true; insp.innerHTML = ''; body.hidden = false; return; }
+    body.hidden = true;
+    insp.hidden = false;
     const g = glossFor(b, k);
     insp.innerHTML =
-      `<div class="dg-insp-head"><span class="dg-role ${b.role}"><i></i>${ROLE[b.role] || b.role}</span>` +
-      `<button class="dg-insp-x" aria-label="Clear selection">✕</button></div>` +
+      `<button class="dg-insp-back" aria-label="Back to the model overview">← ${esc(m.name)} overview</button>` +
+      `<div class="dg-insp-head"><span class="dg-role ${b.role}"><i></i>${ROLE[b.role] || b.role}</span></div>` +
       `<h3>${b.title}</h3>` + (b.sub ? `<p class="dg-insp-sub">${b.sub}</p>` : '') +
       (b.dims ? `<div class="dg-insp-dims"><span>shape</span><code>${b.dims}</code></div>` : '') +
       (b.text ? `<p class="dg-insp-text">${b.text}</p>` : '') +
       (g ? `<details class="dg-gloss"${glossOpen ? ' open' : ''}>` +
            `<summary>What this kind of layer does</summary><p>${g}</p></details>` : '') +
       (b.refs.length ? `<p class="dg-insp-refs"><span>Read more</span>${b.refs.map((r) => ext(r.url, esc(r.label))).join('')}</p>` : '');
-    insp.querySelector('.dg-insp-x').addEventListener('click', () => select(null));
+    insp.querySelector('.dg-insp-back').addEventListener('click', () => select(pinned));
     const det = insp.querySelector('.dg-gloss');
     if (det) det.addEventListener('toggle', () => {
       glossOpen = det.open;
@@ -170,14 +198,16 @@
     tip.innerHTML = `<strong>${b.title}</strong>${b.dims ? `<code>${b.dims}</code>` : b.sub ? `<span>${b.sub}</span>` : ''}`;
     tip.hidden = false;
     if (ev) moveTip(ev);
-    if (!pinned) renderInspector(k);
   }
+  // The tooltip stays inside the figure: if it could stick out, the figure would gain a scrollbar
+  // and the drawing would resize under the pointer.
   function moveTip(ev) {
     const r = figWrap.getBoundingClientRect();
     const x = Math.min(ev.clientX - r.left + 14, r.width - tip.offsetWidth - 8);
-    const y = ev.clientY - r.top + figWrap.scrollTop + 16;
+    let y = ev.clientY - r.top + 16;
+    if (y + tip.offsetHeight > r.height - 8) y = ev.clientY - r.top - tip.offsetHeight - 12;
     tip.style.left = Math.max(8, x) + 'px';
-    tip.style.top = y + 'px';
+    tip.style.top = Math.max(8, y) + 'px';
   }
   function select(k) {
     pinned = pinned === k ? null : k;
@@ -204,7 +234,6 @@
       g.addEventListener('mouseenter', (e) => hover(k, e));
       g.addEventListener('mousemove', moveTip);
       g.addEventListener('mouseleave', () => hover(null));
-      g.addEventListener('focus', () => { if (!pinned) renderInspector(k); });
       g.addEventListener('click', (e) => { e.stopPropagation(); tip.hidden = true; select(k); });
       g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(k); } });
     });
@@ -228,8 +257,7 @@
       `<h4>At a glance</h4><dl class="dg-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` +
       `<h4>Details</h4><ul>${m.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` +
       `<p class="dg-paper">${m.url ? ext(m.url, esc(m.paper)) : esc(m.paper)}</p>`;
-    dlg.querySelector('.dg-modal-side').scrollTop = 0;
-    figWrap.scrollTop = 0;
+    side.scrollTop = 0;
     const list = order();
     count.textContent = `${list.indexOf(id) + 1} / ${list.length}`;
     if (!dlg.open) dlg.showModal();

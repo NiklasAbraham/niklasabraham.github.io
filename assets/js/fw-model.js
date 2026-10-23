@@ -371,16 +371,203 @@
     s += g(dc + at2, { an: 'a', d: 2.9 }) + T(632, 168, 'atom decoder', { size: 17, w: 700, anchor: 'middle', an: 'a', d: 2.9 }) + T(632, 190, '3 blocks', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 2.9 });
     s += arrow(654, 334, 680, 334, INK, { an: 'draw', d: 3.1 });
     s += T(756, 168, 'guess x̂', { size: 17, w: 700, anchor: 'middle', an: 'a', d: 3.2 });
-    s += protein(d, 756, 330, 64, 0, { draw: 3.3, lw: 2.2 });
+    s += protein(d, 756, 330, 110, 0, { draw: 3.3, lw: 2.2 });
     s += T(756, 478, 'x̂ = D_{θ}(x, σ | c)', { size: 15, mono: true, anchor: 'middle', an: 'a', d: 4.1 });
     s += foot('one call per sampler step, 200 per structure · s and z also reach the atom encoder', 4.2);
+    return svg(DW, DH, s);
+  };
+  // ------------------------------------------------------------------ the denoiser, part by part (OpenFold3 0.4 defaults)
+  const SD = 16;                                        // σ_data, Å
+  V.precond = (d) => {
+    let s = head('Scaling in, scaling out', 'the network sees the noisy atoms at unit scale and predicts a correction, not x̂ itself');
+    const rows = [
+      ['in', 'r = x / √(σ^{2} + σ_{data}^{2})', 'noisy atoms at unit size, whatever σ is', Q],
+      ['noise level', 'n = ¼ ln(σ / σ_{data})', '→ 256 Fourier features, added to s', INK],
+      ['out', 'x̂ = c_{skip} x + c_{out} F_{θ}(r, n | c)', 'keep part of the input, add the network’s update F', R],
+    ];
+    rows.forEach(([k, f, u, col], n) => {
+      const y = 150 + n * 120, dd = 0.3 + n * 0.7;
+      s += rect(40, y, 380, 96, n === 2 ? rgba(R, 0.06) : FAINT, { rx: 10, stroke: n === 2 ? rgba(R, 0.4) : LINE, an: 'a', d: dd });
+      s += T(58, y + 30, k.toUpperCase(), { size: 15, mono: true, fill: col, w: 700, ls: '0.1em', an: 'a', d: dd });
+      s += T(58, y + 60, f, { size: 19, w: 700, an: 'a', d: dd + 0.1 });
+      s += T(58, y + 84, u, { size: 15, fill: MUTED, an: 'a', d: dd + 0.2 });
+    });
+    // c_skip(σ) and c_out(σ)/σ_data on a log σ axis from 0.0064 to 2560 Å
+    const X0 = 480, X1 = 820, Y0 = 170, Y1 = 430, lo = Math.log10(0.0064), hi = Math.log10(2560);
+    const px = (sg) => X0 + (Math.log10(sg) - lo) / (hi - lo) * (X1 - X0), py = (v) => Y1 - v * (Y1 - Y0);
+    const cs = (sg) => SD * SD / (SD * SD + sg * sg), co = (sg) => sg / Math.sqrt(SD * SD + sg * sg);
+    let a = '', b = '';
+    for (let k = 0; k <= 120; k++) { const sg = Math.pow(10, lo + k / 120 * (hi - lo)); a += (k ? 'L' : 'M') + px(sg).toFixed(1) + ',' + py(cs(sg)).toFixed(1); b += (k ? 'L' : 'M') + px(sg).toFixed(1) + ',' + py(co(sg)).toFixed(1); }
+    s += line(X0, Y1, X1, Y1, LINE, 1.2, { an: 'a', d: 2.4 }) + line(X0, Y0 - 10, X0, Y1, LINE, 1.2, { an: 'a', d: 2.4 });
+    [0.01, 1, 100].forEach((v) => { s += line(px(v), Y1, px(v), Y1 + 6, MUTED, 1, { an: 'a', d: 2.4 }) + T(px(v), Y1 + 26, v >= 1 ? `${v} Å` : `${v}`, { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 2.4 }); });
+    s += T(X0 - 8, py(1) + 5, '1', { size: 15, mono: true, fill: MUTED, anchor: 'end', an: 'a', d: 2.4 }) + T(X0 - 8, py(0) + 5, '0', { size: 15, mono: true, fill: MUTED, anchor: 'end', an: 'a', d: 2.4 });
+    s += T((X0 + X1) / 2, Y1 + 50, 'noise level σ (log scale)', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 2.4 });
+    s += line(px(SD), Y0 - 10, px(SD), Y1, R, 1.2, { dash: '4 4', an: 'a', d: 2.6 }) + T(px(SD) + 6, Y0 - 18, 'σ_{data} = 16 Å', { size: 15, mono: true, fill: R, an: 'a', d: 2.6 });
+    s += path(a, { stroke: INK, sw: 2.6, an: 'draw', d: 2.8 }) + path(b, { stroke: R, sw: 2.6, an: 'draw', d: 3.1 });
+    s += T(px(0.03), py(1) - 12, 'c_{skip}', { size: 17, w: 700, an: 'a', d: 3.2 }) + T(X1, py(1) + 26, 'c_{out} / σ_{data}', { size: 17, w: 700, fill: R, anchor: 'end', an: 'a', d: 3.4 });
+    s += T(X0 + 10, py(0.5) - 8, 'little noise: keep x,', { size: 15, fill: MUTED, an: 'a', d: 3.8 }) + T(X0 + 10, py(0.5) + 12, 'correct it slightly', { size: 15, fill: MUTED, an: 'a', d: 3.8 });
+    s += T(X1, py(0.5) - 8, 'much noise: x is', { size: 15, fill: MUTED, anchor: 'end', an: 'a', d: 4 }) + T(X1, py(0.5) + 12, 'useless, F decides', { size: 15, fill: MUTED, anchor: 'end', an: 'a', d: 4 });
+    s += foot('c_{skip} = σ_{data}^{2} / (σ_{data}^{2} + σ^{2}) · c_{out} = σ_{data} σ / √(σ_{data}^{2} + σ^{2}) · Karras et al. 2022, as in AlphaFold 3', 4.3);
+    return svg(DW, DH, s);
+  };
+  V.atomenc = (d) => {
+    let s = head('Atom encoder: attention in local windows', 'every heavy atom is a token of its own here; 32 atoms look at 128 neighbours in sequence order');
+    // the attention mask: 12 query blocks of 32 atoms, each sees a 128-key window centred on it
+    const MX = 60, MY = 150, MS = 300, NB = 12, cb = MS / NB, on = 5;
+    s += T(MX + MS / 2, MY - 14, 'keys: atoms in sequence order →', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 0.2 });
+    s += `<g transform="rotate(-90 ${MX - 14} ${MY + MS / 2})">${T(MX - 14, MY + MS / 2, '← queries', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 0.2 })}</g>`;
+    s += rect(MX, MY, MS, MS, PAPER, { stroke: LINE, sw: 1, an: 'a', d: 0.2 });
+    for (let q = 0; q < NB; q++) {
+      const c0 = Math.max(0, Math.min(NB - 4, q - 1.5)), dd = 0.4 + q * 0.06;
+      s += rect(MX + c0 * cb, MY + q * cb + 1, 4 * cb, cb - 2, q === on ? rgba(Q, 0.55) : rgba(Q, 0.16), { rx: 2, an: 'a', d: dd });
+    }
+    s += rect(MX - 4, MY + on * cb - 2, MS + 8, cb + 4, 'none', { stroke: Q, sw: 2, rx: 4, an: 'pop', d: 1.4 });
+    s += T(MX + MS + 14, MY + on * cb + cb / 2 - 4, '32 queries', { size: 15, mono: true, fill: Q, w: 700, an: 'a', d: 1.5 }) + T(MX + MS + 14, MY + on * cb + cb / 2 + 16, 'see 128 keys', { size: 15, mono: true, fill: MUTED, an: 'a', d: 1.55 });
+    s += T(MX, MY + MS + 30, 'cost grows like N_{atoms}, not N_{atoms}^{2}', { size: 16, w: 650, an: 'a', d: 1.7 });
+    // what each atom carries
+    const PX = 520; let y = 150;
+    s += kicker(PX, y, 'each atom starts with', 300, null, { an: 'a', d: 2 }); y += 40;
+    [['its noisy position', 'r, scaled to unit size', Q], ['its reference conformer', 'element, charge, name, ideal xyz', INK], ['its token’s s and z', 'the trunk, broadcast to atoms', R]].forEach(([t, u, col], k) => {
+      s += rect(PX, y, 6, 40, col, { rx: 3, an: 'a', d: 2.1 + k * 0.2 }) + T(PX + 18, y + 16, t, { size: 16, w: 700, an: 'a', d: 2.1 + k * 0.2 }) + T(PX + 18, y + 36, u, { size: 15, mono: true, fill: MUTED, an: 'a', d: 2.15 + k * 0.2 });
+      y += 56;
+    });
+    // pooling atoms → one token
+    y += 26; s += kicker(PX, y, 'then: atoms → tokens', 300, null, { an: 'a', d: 2.9 }); y += 28;
+    const atoms = ['N', 'Cα', 'C', 'O', 'Cβ', 'Cγ', 'Oδ'];
+    atoms.forEach((a, k) => { s += circle(PX + 16 + k * 32, y + 22, 13, PAPER, { stroke: INK, sw: 1.3, an: 'pop', d: 3 + k * 0.05 }) + T(PX + 16 + k * 32, y + 27, a, { size: 13, anchor: 'middle', w: 600, an: 'a', d: 3 + k * 0.05 }); });
+    s += path(`M${PX + 16},${y + 40} C${PX + 16},${y + 66} ${PX + 112},${y + 56} ${PX + 112},${y + 74}`, { stroke: Q, sw: 1.4, an: 'draw', d: 3.4 }) + path(`M${PX + 208},${y + 40} C${PX + 208},${y + 66} ${PX + 112},${y + 56} ${PX + 112},${y + 74}`, { stroke: Q, sw: 1.4, an: 'draw', d: 3.4 });
+    s += hvec(PX + 52, y + 78, 120, 18, INK, 24, 77, { an: 'grow', d: 3.6 }) + T(PX + 184, y + 92, 'mean → one token, width 768', { size: 15, mono: true, fill: MUTED, an: 'a', d: 3.7 });
+    s += foot('3 blocks · 4 heads · atom width 128, atom-pair width 16 · the decoder uses the same windows on the way back', 3.9);
+    return svg(DW, DH, s);
+  };
+  V.adaln = (d) => {
+    let s = head('How s and σ enter every layer: adaptive layer norm', 's (trunk + noise level) sets a scale and a shift per channel, then a gate per block');
+    const rr = rnd(5), N = 24, X = 40, W = 160, BH = 120, Y = 200, GAP = 66;
+    const raw = Array.from({ length: N }, () => (rr() - 0.35) * 2.4), mu = raw.reduce((p, q) => p + q, 0) / N, sd = Math.sqrt(raw.reduce((p, q) => p + (q - mu) * (q - mu), 0) / N);
+    const ln = raw.map((v) => (v - mu) / sd), gs = Array.from({ length: N }, () => 0.15 + rr() * 0.85), b = Array.from({ length: N }, () => (rr() - 0.5) * 1.2);
+    const out = ln.map((v, k) => gs[k] * v + b[k]);
+    const bars = (vals, x, col, dd, lab, sub, sc) => {
+      let r = line(x, Y + BH / 2, x + W, Y + BH / 2, LINE, 1); const bw = W / N;
+      vals.forEach((v, k) => { const hgt = Math.max(-1, Math.min(1, v * sc)) * BH / 2; r += rect((x + k * bw + 1).toFixed(1), (Y + BH / 2 - Math.max(hgt, 0)).toFixed(1), (bw - 2).toFixed(1), Math.max(Math.abs(hgt), 0.8).toFixed(1), col, { op: 0.85 }); });
+      return g(r, { an: 'a', d: dd }) + T(x + W / 2, Y - 30, lab, { size: 17, w: 700, anchor: 'middle', an: 'a', d: dd }) + T(x + W / 2, Y - 10, sub, { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: dd });
+    };
+    const xs = [X, X + W + GAP, X + 2 * (W + GAP)];
+    s += bars(raw, xs[0], MUTED, 0.3, 'token vector a', '24 of 768 shown', 0.4);
+    s += arrow(xs[0] + W + 12, Y + BH / 2, xs[1] - 12, Y + BH / 2, INK, { an: 'draw', d: 0.8 });
+    s += bars(ln, xs[1], INK, 1, 'LayerNorm(a)', 'mean 0, spread 1', 0.4);
+    s += arrow(xs[1] + W + 12, Y + BH / 2, xs[2] - 12, Y + BH / 2, INK, { an: 'draw', d: 2.2 });
+    s += bars(out, xs[2], Q, 2.6, 'g ⊙ LN(a) + b', 'scaled, shifted by s', 0.4);
+    s += T(xs[2] + W + 22, Y + BH / 2 + 6, '→ attention or MLP', { size: 15, mono: true, fill: MUTED, an: 'a', d: 2.9 });
+    // where g and b come from
+    const SY = 418, SX = 60;
+    s += hvec(SX, SY, 200, 22, R, 24, 12, { an: 'grow', d: 1.6 }) + T(SX, SY + 46, 's_{i} = trunk s + noise level n', { size: 15, mono: true, fill: R, an: 'a', d: 1.7 });
+    s += T(SX, SY + 70, 'g = sigmoid(Lin(s)) · b = Lin(s)', { size: 15, mono: true, fill: R, w: 700, an: 'a', d: 1.8 });
+    s += arrow(SX + 150, SY - 6, xs[2] + W * 0.3, Y + BH + 10, R, { an: 'draw', d: 2 }) + arrow(SX + 170, SY - 6, xs[2] + W * 0.7, Y + BH + 10, R, { an: 'draw', d: 2.05 });
+    // the gate on every block's output
+    const GX = 500, GY = 420;
+    s += T(GX, GY, 'and on every block’s output', { size: 16, w: 700, an: 'a', d: 3.1 });
+    s += T(GX, GY + 26, 'a ← a + sigmoid(Lin(s)) ⊙ block(a)', { size: 15, mono: true, an: 'a', d: 3.2 });
+    s += T(GX, GY + 54, 'bias starts at −2, so sigmoid ≈ 0.12: a new', { size: 15, fill: MUTED, an: 'a', d: 3.3 }) + T(GX, GY + 74, 'block starts close to doing nothing', { size: 15, fill: MUTED, an: 'a', d: 3.3 });
+    s += foot('the same s enters every one of the 24 blocks · bars illustrative, the formula is OpenFold3’s AdaLN', 3.6);
+    return svg(DW, DH, s);
+  };
+  V.tblock = (d) => {
+    let s = head('One token block, 24 times', 'attention across all tokens, then a per-token MLP; each added back with a gate');
+    const X = 70, BW = 330, items = [
+      ['AdaLN(a, s)', 'scale and shift from s', FAINT, INK],
+      ['attention, 16 heads × 48', 'q, k, v from a; + bias from z', rgba(Q, 0.12), Q],
+      ['gate · sigmoid(Lin(s))', 'then add to a', FAINT, INK],
+      ['AdaLN(a, s)', '', FAINT, INK],
+      ['transition (SwiGLU)', '768 → 1536 → 768, per token', rgba(Q, 0.12), Q],
+      ['gate · sigmoid(Lin(s))', 'then add to a', FAINT, INK],
+    ];
+    let y = 136;
+    s += T(X + BW / 2, y - 6, 'a: N × 768 in', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 0.2 });
+    y += 6;
+    items.forEach(([t, u, fill, col], k) => {
+      const dd = 0.3 + k * 0.32, hh = 50;
+      if (k === 3) { s += circle(X + BW / 2, y + 6, 11, PAPER, { stroke: INK, sw: 1.5, an: 'pop', d: dd - 0.1 }) + T(X + BW / 2, y + 12, '+', { size: 18, anchor: 'middle', w: 700, an: 'a', d: dd - 0.1 }); y += 26; }
+      s += rect(X, y, BW, hh, fill, { rx: 8, stroke: rgba(col, 0.45), sw: 1.1, an: 'a', d: dd });
+      s += T(X + 16, y + 22, t, { size: 16, w: 700, fill: col, an: 'a', d: dd }) + T(X + 16, y + 41, u, { size: 15, mono: true, fill: MUTED, an: 'a', d: dd });
+      y += hh + 6;
+    });
+    s += circle(X + BW / 2, y + 6, 11, PAPER, { stroke: INK, sw: 1.5, an: 'pop', d: 2.2 }) + T(X + BW / 2, y + 12, '+', { size: 18, anchor: 'middle', w: 700, an: 'a', d: 2.2 });
+    // residual lines
+    s += path(`M${X - 14},142 L${X - 14},${142 + 3 * 56 + 6} L${X + BW / 2 - 12},${142 + 3 * 56 + 6}`, { stroke: MUTED, sw: 1.3, dash: '4 4', mk: true, an: 'draw', d: 1.4 });
+    s += path(`M${X + BW + 14},${142 + 3 * 56 + 18} L${X + BW + 14},${y + 6} L${X + BW / 2 + 12},${y + 6}`, { stroke: MUTED, sw: 1.3, dash: '4 4', mk: true, an: 'draw', d: 2.3 });
+    s += T(X + BW / 2, y + 40, '× 24, new weights each time', { size: 16, w: 700, fill: R, anchor: 'middle', an: 'a', d: 2.5 });
+    // right: what flows in from the trunk
+    const RX = 500;
+    s += line(470, 140, 470, 530, LINE, 1, { an: 'a', d: 2.6 });
+    s += kicker(RX, 150, 'from the trunk, every block', 320, R, { an: 'a', d: 2.7 });
+    s += mapBox(d, 1, RX, 190, 120, { an: 'a', d: 2.8 });
+    s += arrow(RX + 128, 250, RX + 168, 250, R, { an: 'draw', d: 3 });
+    for (let h = 0; h < 4; h++) s += mapBox(d, 1, RX + 176 + h * 9, 196 + h * 9, 92, { an: 'a', d: 3.1 + h * 0.08, chains: false });
+    s += T(RX + 60, 330, 'z: N × N × 128', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 2.9 });
+    s += T(RX + 240, 330, 'Lin(LN(z)): 16 biases', { size: 15, mono: true, fill: R, anchor: 'middle', an: 'a', d: 3.3 }) + T(RX + 240, 350, 'one map per head', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 3.3 });
+    s += hvec(RX, 392, 160, 18, R, 24, 41, { an: 'grow', d: 3.5 }) + T(RX + 172, 406, 's: scales, shifts, gates', { size: 15, mono: true, fill: R, an: 'a', d: 3.5 });
+    s += T(RX, 460, 'Neither s nor z is updated here:', { size: 16, w: 700, an: 'a', d: 3.8 }) + T(RX, 482, 'only a, the token state, changes', { size: 16, an: 'a', d: 3.8 }) + T(RX, 504, 'from block to block.', { size: 16, an: 'a', d: 3.8 });
+    s += foot('no triangle updates in the denoiser: the pair map is read, never rewritten · OpenFold3 adds the residual after each sub-layer', 4);
+    return svg(DW, DH, s);
+  };
+  V.atomdec = (d) => {
+    let s = head('Back to atoms: a position update per atom', 'tokens hand their state back to their atoms; 3 local blocks; 3 numbers per atom come out');
+    s += hvec(40, 170, 150, 18, INK, 24, 91, { an: 'grow', d: 0.2 }) + T(40, 156, 'token state a (one residue)', { size: 15, mono: true, fill: MUTED, an: 'a', d: 0.2 });
+    const atoms = ['N', 'Cα', 'C', 'O', 'Cβ', 'Cγ', 'Oδ'];
+    atoms.forEach((a, k) => {
+      const y = 228 + k * 40, dd = 0.6 + k * 0.06;
+      s += curve(190, 179, 250, y, rgba(Q, 0.5), 1.2, { an: 'draw', d: dd });
+      s += circle(268, y, 14, PAPER, { stroke: INK, sw: 1.3, an: 'pop', d: dd }) + T(268, y + 5, a, { size: 13, anchor: 'middle', w: 600, an: 'a', d: dd });
+      s += hvec(292, y - 8, 80, 16, Q, 12, 120 + k, { an: 'grow', d: dd + 0.3 });
+      s += arrow(380, y, 420, y, MUTED, { sw: 1.2, an: 'draw', d: 1.6 + k * 0.05 });
+      s += T(430, y + 5, 'Δ = (' + ['0.4', '−1.2', '0.9'].map((v, j) => ((+v.replace('−', '-') * (0.6 + ((k * 7 + j * 3) % 5) / 5)).toFixed(1)).replace('-', '−')).join(', ') + ')', { size: 15, mono: true, fill: R, an: 'a', d: 1.8 + k * 0.05 });
+    });
+    s += T(332, 524, '3 atom blocks, same windows as the encoder', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 1.4 });
+    s += line(600, 140, 600, 530, LINE, 1, { an: 'a', d: 2.4 });
+    s += T(620, 180, 'the guess', { size: 17, w: 700, an: 'a', d: 2.5 });
+    s += T(620, 210, 'x̂ = c_{skip} x + c_{out} Δ', { size: 18, w: 700, fill: R, an: 'a', d: 2.6 });
+    s += protein(d, 724, 360, 170, 0, { draw: 2.8, lw: 2 });
+    s += T(712, 500, 'all atoms at once: one call', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 3.6 });
+    s += foot('Δ values illustrative · c_{out} scales the update to Å: at σ = 2560 Å it is ≈ 16 Å per unit, at σ = 0.01 Å ≈ 0.01 Å', 3.8);
+    return svg(DW, DH, s);
+  };
+  // the sampler, AlphaFold 3's Algorithm 18
+  V.sampler = (d) => {
+    let s = head('The sampler: 200 calls, noise walked down', 'AlphaFold 3’s stochastic sampler, step by step');
+    const sig = schedule(200), X0 = 60, X1 = 420, Y0 = 160, Y1 = 420, lo = Math.log10(0.0064), hi = Math.log10(2560);
+    const px = (i) => X0 + i / 200 * (X1 - X0), py = (v) => Y1 - (Math.log10(v) - lo) / (hi - lo) * (Y1 - Y0);
+    let p = ''; sig.forEach((v, i) => { p += (i ? 'L' : 'M') + px(i).toFixed(1) + ',' + py(v).toFixed(1); });
+    s += line(X0, Y1, X1, Y1, LINE, 1.2, { an: 'a', d: 0.2 }) + line(X0, Y0 - 6, X0, Y1, LINE, 1.2, { an: 'a', d: 0.2 });
+    [2560, 16, 1, 0.01].forEach((v) => { s += T(X0 - 8, py(v) + 5, v >= 1 ? `${v} Å` : `${v}`, { size: 15, mono: true, fill: MUTED, anchor: 'end', an: 'a', d: 0.2 }) + line(X0, py(v), X1, py(v), FAINT, 1, { an: 'a', d: 0.2 }); });
+    [0, 100, 200].forEach((i) => { s += T(px(i), Y1 + 24, `${i}`, { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 0.2 }); });
+    s += T((X0 + X1) / 2, Y1 + 48, 'step', { size: 15, mono: true, fill: MUTED, anchor: 'middle', an: 'a', d: 0.2 });
+    s += path(p, { stroke: INK, sw: 2.6, an: 'draw', d: 0.4 });
+    const i1 = sig.findIndex((v) => v < 1);
+    s += rect(px(0), Y0 - 6, px(i1) - px(0), Y1 - Y0 + 6, rgba(R, 0.06), { an: 'a', d: 1.4 }) + T(px(i1) - 8, Y1 - 14, 'churn: fresh noise each step', { size: 15, mono: true, fill: R, anchor: 'end', an: 'a', d: 1.5 });
+    s += T(px(i1) + 8, Y0 + 16, 'σ < 1 Å:', { size: 15, mono: true, fill: MUTED, an: 'a', d: 1.6 }) + T(px(i1) + 8, Y0 + 36, 'no churn', { size: 15, mono: true, fill: MUTED, an: 'a', d: 1.6 });
+    s += T(X0, 512, 'σ_{i} = σ_{data} (σ_{max}^{1/ρ} + i/200 (σ_{min}^{1/ρ} − σ_{max}^{1/ρ}))^{ρ}, ρ = 7', { size: 15, mono: true, an: 'a', d: 1.8 });
+    // one step, as a list
+    const RX = 480; let y = 152;
+    s += line(456, 140, 456, 530, LINE, 1, { an: 'a', d: 2 });
+    s += kicker(RX, y, 'one step of the 200', 340, null, { an: 'a', d: 2 }); y += 34;
+    [['1', 'rotate and shift x at random', 'the model has no built-in symmetry'],
+     ['2', 'raise the noise: σ_{+} = (1 + γ) σ', 'γ = 0.8 while σ > 1 Å, else 0'],
+     ['3', 'add noise ξ, scale λ = 1.003', 'x̃ = x + λ √(σ_{+}^{2} − σ^{2}) ε'],
+     ['4', 'ask the denoiser', 'x̂ = D_{θ}(x̃, σ_{+} | c)'],
+     ['5', 'step towards x̂, overshoot η = 1.5', 'x ← x̃ + η (σ’ − σ_{+})(x̃ − x̂) / σ_{+}']].forEach(([n, t, u], k) => {
+      const dd = 2.2 + k * 0.4;
+      s += circle(RX + 12, y + 12, 12, k === 3 ? Q : PAPER, { stroke: k === 3 ? Q : INK, sw: 1.3, an: 'pop', d: dd }) + T(RX + 12, y + 17, n, { size: 14, anchor: 'middle', w: 700, fill: k === 3 ? PAPER : INK, an: 'a', d: dd });
+      s += T(RX + 34, y + 12, t, { size: 16, w: 700, an: 'a', d: dd }) + T(RX + 34, y + 33, u, { size: 15, mono: true, fill: MUTED, an: 'a', d: dd + 0.05 });
+      y += 62;
+    });
+    s += foot('σ_{max} = 160 σ_{data} = 2560 Å, σ_{min} = 4 · 10^{−4} σ_{data} = 0.0064 Å · γ, λ, η: AlphaFold 3 defaults', 4.4);
     return svg(DW, DH, s);
   };
   const SL0 = 186, SL1 = 456;                           // the bias-strength slider track (design units)
   V.pairbias = (d) => {
     let s = head('How c steers: attention with a pair bias', 'every block and head adds a bias from z to its attention scores');
     const P = pbTokens(d), X = [144, 386, 628], Y = 262, PT = 34, Rr = 13;
-    const titles = [['q · k / √d', 'from the noisy atoms'], ['+ b_{ij} = Linear(z_{ij})', 'from the trunk, fixed'], ['softmax', 'rows sum to 1']];
+    const titles = [['q · k / √d', 'from the token state'], ['+ b_{ij} = Linear(z_{ij})', 'from the trunk, fixed'], ['softmax', 'rows sum to 1']];
     titles.forEach(([t, u], k) => { s += T(X[k] + 2.5 * PT, 156, t, { size: 17, w: 700, anchor: 'middle', fill: k === 1 ? R : INK, an: 'a', d: 0.2 + k * 0.5 }) + T(X[k] + 2.5 * PT, 180, u, { size: 15, mono: true, fill: k === 1 ? R : MUTED, anchor: 'middle', an: 'a', d: 0.25 + k * 0.5 }); });
     P.forEach((p, a) => {
       s += T(X[0] - 22, Y + a * PT + 5, `${p.aa} ${p.tag}`, { size: 15, mono: true, fill: chainCol(d, p.k), anchor: 'end', an: 'a', d: 0.3 });
@@ -471,24 +658,20 @@
   const COLS = [
     { id: 'tokens', name: 'Tokens', step: 'tokens' }, { id: 'embedding', name: 'Embedding', step: 'embedding' }, { id: 'msa', name: 'MSA', step: 'msa' },
     { id: 'pair', name: 'Pair map', step: 'pair' }, { id: 'pairformer', name: 'Pairformer', step: 'triangle' }, { id: 'cond', name: 'c = (s, z)', step: 'cond' },
-    { id: 'denoiser', name: 'Denoiser', step: 'denoiser' }, { id: 'sampler', name: 'Sampler', step: 'sampler' }, { id: 'structure', name: 'Structure', step: 'again' },
+    { id: 'denoiser', name: 'Denoiser', step: 'denoiser' }, { id: 'sampler', name: 'Sampler', step: 'sampler' }, { id: 'structure', name: 'Structure', step: 'film' },
   ];
   const NC = COLS.length, LIVE = 7;
   const CW = 36, CG = 6, XG = 26, MG = 16;   // compact width, gap between compact columns, gap beside the open column, gap between overview columns
   const easeIO = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   let SX = null;                     // the strip, kept across steps
 
+  // overview: all columns side by side. Focus: the open column takes the whole width; the others fold away to
+  // either side (width 0) and the chain bar above the stage shows where in the chain the reader is.
   function layout(W, focus) {
     const out = [];
     if (focus == null) { const w = (W - (NC - 1) * MG) / NC; for (let k = 0; k < NC; k++) out.push({ x: k * (w + MG), w, m: 'm' }); return out; }
-    const fk = focus === 'live' ? LIVE : focus, last = focus === 'live' ? LIVE : NC - 1;
-    let fixed = 0;
-    for (let k = 0; k <= last; k++) { if (k !== fk) fixed += CW; if (k < last) fixed += (k === fk - 1 || k === fk) ? XG : CG; }
-    const ew = W - fixed; let x = 0;
-    for (let k = 0; k < NC; k++) {
-      if (k > last) { out.push({ x: W, w: 0, m: 'h' }); continue; }
-      const w = k === fk ? ew : CW; out.push({ x, w, m: k === fk ? 'x' : 'c' }); x += w + ((k === fk - 1 || k === fk) ? XG : CG);
-    }
+    const fk = focus === 'live' ? LIVE : focus;
+    for (let k = 0; k < NC; k++) out.push(k < fk ? { x: 0, w: 0, m: 'h' } : k === fk ? { x: 0, w: W, m: 'x' } : { x: W, w: 0, m: 'h' });
     return out;
   }
   // port (top, bottom in px) of a column in a given mode at a given size
@@ -546,7 +729,7 @@
     const k = focus === 'live' ? LIVE : focus;
     S.root.querySelectorAll('.fwx-bar button').forEach((b) => { const j = +b.dataset.k; b.classList.toggle('on', k != null && (j === k || (focus === 'live' && j === NC - 1))); b.classList.toggle('done', k != null && j < k); });
     S.cols.forEach((el, j) => { el.classList.toggle('done', k != null && j < k); });
-    if (S.narrow) { const on = S.root.querySelector('.fwx-bar button.on'); if (on) { const bar = S.root.querySelector('.fwx-bar'); bar.scrollTo({ left: on.offsetLeft - bar.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' }); } }
+    if (focus != null) { const on = S.root.querySelector('.fwx-bar button.on'); if (on) { const bar = S.root.querySelector('.fwx-bar'); bar.scrollTo({ left: on.offsetLeft - bar.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' }); } }
   }
   // show `target` = { focus: null | column | 'live', view, fill(host) } — animating from wherever the strip is
   function strip(el, ctx, target) {
@@ -626,11 +809,29 @@
       pts: ['The trunk’s output <b>c = (s, z)</b> is handed to the denoiser.', 'It is the same for all 200 calls. Only the noisy atoms and the noise level <b>σ</b> change.'],
       prin: 'Everything the model learned from sequence and evolution reaches the structure through this one hand-over.' },
     { id: 'denoiser', focus: 6, view: 'denoiser', title: 'Denoiser', fig: 'inside one denoiser call',
-      pts: ['Noisy atoms in; local attention among atoms (32 queries see 128 keys); the atoms of each residue are pooled into one token.', 'A 24-block transformer over tokens, then back to atoms: out comes the guess <b>x̂</b>.'],
+      pts: ['One call takes the noisy atoms <b>x</b>, the noise level <b>σ</b> and the condition <b>c</b>, and returns a guess <b>x̂</b> of the clean structure.', 'Three parts: an atom encoder that pools atoms into tokens, a 24-block transformer over tokens, and an atom decoder back to positions. The next six steps open them one by one.'],
       prin: 'Ideally x̂ is the average of every clean structure compatible with the noisy input. That average is what the sampler steps towards.' },
-    { id: 'pairbias', focus: 6, view: 'pairbias', title: 'Pair bias', fig: 'how c steers attention',
-      pts: ['Attention scores come from two places: <b>q · k</b> from the noisy atoms, and a bias <b>b<sub>ij</sub></b> from the trunk’s pair map.', 'Drag the bias strength: the stronger the bias, the less the attention pattern changes with the noisy input.'],
+    { id: 'precond', focus: 6, view: 'precond', title: 'Scaling in and out', fig: 'preconditioning: c_in, c_noise, c_skip, c_out',
+      pts: ['The noisy atoms are divided by <b>√(σ² + σ<sub>data</sub>²)</b>, so the network sees inputs of the same size at σ = 2560 Å and at σ = 0.01 Å. σ itself enters as 256 Fourier features of ¼ ln(σ/σ<sub>data</sub>).', 'The output is a blend: <b>x̂ = c<sub>skip</sub> x + c<sub>out</sub> F</b>. At low noise x̂ is mostly the input plus a small correction; at high noise it is the network’s update alone.'],
+      prin: 'This is the EDM parameterisation (Karras et al. 2022) with σ<sub>data</sub> = 16 Å. It keeps the training target at unit scale for every noise level.', dur: 15000 },
+    { id: 'atomenc', focus: 6, view: 'atomenc', title: 'Atom encoder', fig: 'local attention among atoms, then pooling',
+      pts: ['Every heavy atom carries its noisy position, its reference conformer (element, charge, ideal geometry) and the trunk’s s and z of its residue.', 'Attention is local: blocks of <b>32 atoms</b> look at <b>128 neighbours</b> in sequence order. The atoms of each residue are then averaged into one token of width 768.'],
+      prin: 'Atoms only talk to nearby atoms; long-range structure is left to the token transformer, where the trunk’s pair map is available.', dur: 14000 },
+    { id: 'adaln', focus: 6, view: 'adaln', title: 'Adaptive layer norm', fig: 'how s and σ enter every layer',
+      pts: ['Before each sub-layer the token vector is normalised, then scaled and shifted channel by channel with numbers computed from <b>s</b>: g ⊙ LN(a) + b.', 's carries both the trunk’s per-token output and the noise level, so the same weights behave differently at σ = 1000 Å and at σ = 1 Å.'],
+      prin: 'Each block’s output passes a gate sigmoid(Lin(s)) whose bias starts at −2: a new block begins almost switched off and learns how much to contribute.', dur: 14000 },
+    { id: 'pairbias', focus: 6, view: 'pairbias', title: 'Pair bias', fig: 'how z steers attention',
+      pts: ['Attention scores come from two places: <b>q · k</b> from the current token state, and a bias <b>b<sub>ij</sub></b> from the trunk’s pair map, one per head.', 'Drag the bias strength: the stronger the bias, the less the attention pattern changes with the noisy input.'],
       prin: 'This is how the trunk’s pair map reaches every attention layer of the denoiser: as an additive bias that does not change from call to call.', live: pairbiasLive, dur: 15000 },
+    { id: 'tblock', focus: 6, view: 'tblock', title: '24 token blocks', fig: 'one block of the token transformer',
+      pts: ['Each block: AdaLN, attention over all tokens with 16 heads and the pair bias, a gated residual; then AdaLN, a SwiGLU transition per token, another gated residual.', 'Twenty-four such blocks, width 768. Only the token state <b>a</b> changes; <b>s</b> and <b>z</b> come in unchanged at every block.'],
+      prin: 'Unlike the trunk, the denoiser never rewrites the pair map. What it knows about which residues touch is fixed before the first call.', dur: 14000 },
+    { id: 'atomdec', focus: 6, view: 'atomdec', title: 'Atom decoder', fig: 'back to one update per atom',
+      pts: ['Each token hands its state back to its atoms; three local atom blocks refine them; a final linear layer gives three numbers per atom.', 'Those numbers, scaled by c<sub>out</sub> and added to c<sub>skip</sub> x, are the guess <b>x̂</b> for every atom at once.'],
+      prin: 'One call of the denoiser moves every atom in one go. The sampler decides how far to trust that move.', dur: 13000 },
+    { id: 'sampler', focus: 7, view: 'sampler', title: 'Sampler', fig: 'AlphaFold 3’s sampler, step by step',
+      pts: ['The noise level falls from <b>2560 Å</b> to <b>0.0064 Å</b> in 200 steps on the Karras schedule (ρ = 7): fast at first, then slow near the end.', 'Each step: rotate the structure at random, add a little fresh noise, ask the denoiser for x̂, and step towards it, overshooting by η = 1.5.'],
+      prin: 'The trunk ran once; the sampler calls the denoiser 200 times. Different starting noise can end in different structures.', dur: 15000 },
   ];
   FW.chapter({ id: 'model', title: 'Inside the model', kicker: 'Part 2 · the model' });
   MODEL_STEPS.forEach((S) => FW.step({ chapter: 'model', id: S.id, title: S.title, caption: S.fig, points: S.pts, principle: S.prin, duration: S.dur || 13000,

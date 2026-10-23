@@ -691,24 +691,29 @@ def _cofold(f, spec):
     f.arrow([(ex_t, y_trunk_top), (ex_t, yc + 5)])
     f.chip(cx_c, yc, lab, "pl ink", "middle", key="c", title="trunk output c")
     # --- diffusion module, bottom to top
-    f.box(xr, H - 50, wr, 38, "noise at σ_{max}", "atom coordinates x", role="io", key="noise")
+    nz = spec.get("noise", ("noise at σ_{max}", "atom coordinates x"))
+    f.box(xr, H - 50, wr, 38, nz[0], nz[1], role="io", key="noise")
     y = H - 50
     dg_bot = y - 14
     f.arrow([(cr, y), (cr, y - 26)])
     y -= 26
     tops = {}
-    for i, (t, s, role, key) in enumerate(spec["diffusion"]):
-        h = 48 if s and "\n" in s else 40
-        y -= h
-        f.box(xr + 10, y, wr - 20, h, t, s, role=role, diff=key in d, key=key)
-        tops[key] = (y, h)
-        if i < len(spec["diffusion"]) - 1:
-            f.arrow([(cr, y), (cr, y - 12)])
-            y -= 12
+    if spec.get("diffusion_fn"):
+        # a denoiser that is not a plain stack draws itself; it must report the 'cond' and 'tok' boxes
+        y = spec["diffusion_fn"](f, xr, wr, y, d, tops)
+    else:
+        for i, (t, s, role, key) in enumerate(spec["diffusion"]):
+            h = 48 if s and "\n" in s else 40
+            y -= h
+            f.box(xr + 10, y, wr - 20, h, t, s, role=role, diff=key in d, key=key)
+            tops[key] = (y, h)
+            if i < len(spec["diffusion"]) - 1:
+                f.arrow([(cr, y), (cr, y - 12)])
+                y -= 12
     y_den_top = y
     dg_top = y - 34
-    f.group(xr - 10, dg_top, wr + 20, dg_bot - dg_top + 4, "denoiser D_θ(x, σ | c)", spec["steps"],
-            rep_left=True, label_dy=24)
+    f.group(xr - 10, dg_top, wr + 20, dg_bot - dg_top + 4, spec.get("den_label", "denoiser D_θ(x, σ | c)"),
+            spec["steps"], rep_left=True, label_dy=24)
     # step loop on the right edge
     f.curve(f"M{xr + wr + 6:.1f},{dg_top + 24:.1f} C{xr + wr + 26:.1f},{dg_top + 40:.1f} {xr + wr + 26:.1f},"
             f"{dg_bot - 30:.1f} {xr + wr - 2:.1f},{dg_bot - 10:.1f}", "w dsh")
@@ -720,7 +725,7 @@ def _cofold(f, spec):
     f.text(bus + 11, (yc + yk) / 2, spec.get("bus_label", "c, the same at every step"), "lab w vert halo",
            "middle", late=True)
     # conditioning → token transformer (s through AdaLN, z as pair bias), inside the frame on the right
-    yt_, ht_ = tops["tok"]
+    yt_, ht_ = tops[spec.get("tok_key", "tok")]
     xin = xr + wr + 2
     f.arrow([(xr + wr - 10, yk + hk / 2), (xin, yk + hk / 2), (xin, yt_ + ht_ / 2), (xr + wr - 10, yt_ + ht_ / 2)],
             "w dsh")
@@ -729,7 +734,7 @@ def _cofold(f, spec):
     xh = spec.get("xhat", ("structure x̂", "S samples"))
     out = spec.get("out", ("S structures + confidence", "pLDDT · PAE · pTM"))
     f.arrow([(ex_d, y_den_top), (ex_d, yt + 140)])
-    f.box(xr, yt + 104, wr, 36, xh[0], xh[1], role="io", key="xhat")
+    f.box(xr, yt + 104, wr, 36, xh[0], xh[1], role="io", key=spec.get("xhat_key", "xhat"))
     if spec.get("conf"):
         f.box(xl, yt + 96, wl, 52, spec["conf"][0], spec["conf"][1], role="pair", diff="conf" in d, key="conf")
         f.arrow([(ex_t, yc - 11), (ex_t, yt + 148)])
@@ -848,6 +853,96 @@ def draw_rfd3(mid):
                           absent=("what AF3 has here", ["MSA module", "template module", "confidence head"]),
                           bus_label="c from 2 layers, not 48",
                           step_label="x̂ → next x · step scale · recycled every step"))
+
+
+def draw_bioemu(mid):
+    """BioEmu 1: a frozen AlphaFold 2 encoder on the left, a small IPA score model over backbone frames on
+    the right. Same two columns as AF3, because the split is the same: condition once, denoise many times."""
+    f = Fig(mid, 1000, crop=True)
+    trunk_pre = [("MSA search", "ColabFold MMseqs2 · no templates", "embed", "msasearch")]
+    trunk = [("AlphaFold 2 Evoformer", "48 blocks · weights frozen\nmodel 3 · no recycling", "pair", "evo")]
+    diff = [("input projections", "s → 512 ⊕ sinusoidal(t)\nz → 256 ⊕ rel. position", "cond", "cond"),
+            ("IPA layer", "8 layers × 32 heads · 512\npoint attention in x_t's frames", "attn", "ipa"),
+            ("score heads", "translation · rotation", "mlp", "heads")]
+    return cofold(f, dict(trunk_pre=trunk_pre, trunk=trunk, diffusion=diff,
+                          input="protein sequence", input_sub="one chain · no ligands",
+                          recycle=None, trunk_label="frozen AF2 · once per sequence", tok_key="ipa",
+                          noise=("noise at t = 1", "Cα Gaussian · uniform rotations"),
+                          den_label="score model s_θ(x_t, t | c)",
+                          steps="× 49 steps · 31 M", conf=None,
+                          xhat=("scores ŝ_r, ŝ_Q", "per residue, in its own frame"), xhat_key="score",
+                          out=("backbone ensemble", "10⁴ samples · side chains by H-Packer"),
+                          absent=("not in BioEmu", ["no trained trunk: AF2 is frozen",
+                                                    "no atoms beyond the backbone", "no confidence head"]),
+                          bus_label="c, cached once per sequence",
+                          step_label="score → DPM-Solver-2 step · t → 0"))
+
+
+def _bioemu2_denoiser(f, xr, wr, y, d, tops):
+    """Two residual streams side by side, atoms on the left and tokens on the right, joined by a coupling
+    step in every layer. There is no atom encoder or decoder around a token transformer as in AF3."""
+    x0, x1 = xr + 10, xr + wr - 10
+    lw = (x1 - x0 - 8) / 2
+    xa, xt = x0, x1 - lw                       # left edges of the atom and the token lane
+    ca, ct = xa + lw / 2, xt + lw / 2
+    # conditioning: c from the trunk, the noise level and the lag; z for the pair bias
+    y -= 48
+    f.box(x0, y, x1 - x0, 48, "conditioning", "s ⊕ Fourier(σ) ⊕ lag Δt → 768\nz ⊕ rel. pos. → 256 · cached",
+          role="cond", diff="cond" in d, key="cond")
+    tops["cond"] = (y, 48)
+    for cx in (ca, ct):
+        f.arrow([(cx, y), (cx, y - 12)])
+    y -= 12 + 40
+    f.box(xa, y, lw, 40, "atoms q", "x_t + reference\n(+ start frame)", role="embed", diff="ain" in d, key="ain",
+          small=True)
+    f.box(xt, y, lw, 40, "tokens a", "s^{trunk} + x_t\nof centre atom", role="embed", diff="tin" in d, key="tin",
+          small=True)
+    for cx in (ca, ct):
+        f.arrow([(cx, y), (cx, y - 22)])
+    # one dual-stream layer
+    gb = y - 12
+    y = gb - 12
+    y -= 38
+    f.box(xa, y, lw, 38, "atom attn", "window 32×128", role="attn", diff="aatt" in d, key="aatt", small=True)
+    f.box(xt, y, lw, 38, "token attn", "pair bias z", role="attn", diff="tok" in d, key="tok", small=True)
+    tops["tok"] = (y, 38)
+    for cx in (ca, ct):
+        f.arrow([(cx, y), (cx, y - 10)])
+    y -= 10 + 24
+    f.box(xa, y, lw, 24, "MLP · 128", None, role="mlp", diff="amlp" in d, key="amlp", small=True)
+    f.box(xt, y, lw, 24, "MLP · 768", None, role="mlp", diff="tmlp" in d, key="tmlp", small=True)
+    for cx in (ca, ct):
+        f.arrow([(cx, y), (cx, y - 12)])
+    y -= 12 + 40
+    f.box(x0, y, x1 - x0, 40, "atom ↔ token coupling", "via each token's centre atom", role="mlp",
+          diff="coup" in d, key="coup")
+    gt = y - 32
+    f.group(x0 - 6, gt, x1 - x0 + 12, gb - gt, "dual-stream layer", "× 16")
+    for cx in (ca, ct):
+        f.arrow([(cx, y), (cx, gt - 12)])
+    y = gt - 12 - 40
+    f.box(x0, y, x1 - x0, 40, "readout", "token ⊕ atom → Δx per atom", role="embed", diff="readout" in d,
+          key="readout")
+    return y
+
+
+def draw_bioemu2(mid):
+    f = Fig(mid, 1000, crop=True)
+    trunk_pre = [("input embedder", "atoms → tokens · 3 blocks", "embed", "emb"),
+                 ("mode · contacts", "MD or non-MD token · contacts", "cond", "mode")]
+    trunk = [("MSA module", "4 blocks · no triangle attention", "pair", "msa"),
+             ("PairMixer", "48 blocks · triangle mult. only\nz 256 ch · s not updated", "pair", "pairmixer")]
+    return cofold(f, dict(trunk_pre=trunk_pre, trunk=trunk, diffusion_fn=_bioemu2_denoiser,
+                          input="sequences + ligands", input_sub="MSA · start frame for propagation",
+                          recycle="× 4 passes", steps="× 200 steps · 425 M", conf=None,
+                          xhat=("structure x̂", "all atoms · S samples"),
+                          out=("ensemble or one structure", "η = 1 for ensembles, 1.5 for one"),
+                          absent=("what AF3 has here", ["template module", "triangle attention",
+                                                         "attention on the single track", "confidence head"]),
+                          diff={"input", "mode", "msa", "pairmixer", "cond", "ain", "tin", "aatt", "tok", "coup",
+                                "readout"},
+                          bus_label="c, cached once per target",
+                          step_label="x̂ → next x · Kabsch · η = 1 or 1.5"))
 
 
 def draw_rfdiffusion(mid):
@@ -1042,6 +1137,28 @@ MODELS = [
                 "Custom LayerNorm and triangle kernels in the trunk; denoiser attention through PyTorch SDPA; samples in chunks of 5.",
                 "10 recycling passes by default."],
          vs='AlphaFold 3', draw=draw_protenix),
+    dict(id="bioemu", name="BioEmu", year=2025, org="Microsoft Research AI for Science", domain="bio",
+         paper="Lewis, Hempel, Jiménez-Luna, Gastegger et al. · Science 2025",
+         url="https://doi.org/10.1126/science.adv9817",
+         space="backbone frames (Cα + orientation)", backbone="frozen AF2 Evoformer + 8-layer IPA score model",
+         params="31 M trainable", params_m=31.3,
+         conditioning="frozen AF2 single and pair embeddings: added to s, pair bias and pair values from z",
+         objective="score matching: VP-SDE (cosine) on Cα, IGSO(3) on orientations",
+         steps="49 (50 time points, DPM-Solver-2, 98 network calls)",
+         novelty="Samples equilibrium ensembles, not one structure: a small score model on frozen AlphaFold 2 "
+                 "embeddings, trained to be diverse.",
+         notes=["The sequence encoder is AlphaFold 2 itself (model 3, no templates, recycling disabled), frozen; "
+                "its single and pair embeddings are computed once per sequence and cached.",
+                "Score model: 8 IPA layers × 32 heads at width 512, pair width 256, GELU MLP of 1024; 31.3 M "
+                "parameters in the v1.1 checkpoint, 22 M of them in attention.",
+                "Backbone only: Cα positions diffuse under a variance-preserving SDE with a cosine schedule, "
+                "residue orientations under IGSO(3). Side chains are added afterwards by H-Packer.",
+                "Three training stages: AFDB clusters that map one sequence to several structures, then over "
+                "200 ms of MD reweighted toward equilibrium, then 502,442 sequences with measured folding stabilities "
+                "(MEGAscale) through property-prediction fine-tuning, with only layers 1 and 8 trained.",
+                "Diversity comes from the data: models pretrained on the PDB or on high-pLDDT AFDB instead were "
+                "'worse in their ability to sample diverse conformations' (Fig. S8)."],
+         vs=None, draw=draw_bioemu),
     dict(id="esmfold2", name="ESMFold2", year=2026, org="Biohub", domain="bio",
          paper="Candido et al. · bioRxiv 2026", url="https://doi.org/10.64898/2026.06.03.729735",
          space="all-atom coordinates", backbone="ESMC 6 B LM + looped pair stack + small denoiser",
@@ -1078,6 +1195,33 @@ MODELS = [
                 "scale raises motif adherence while lowering codesignability (Fig. 2D), and the step scale sets "
                 "the sampling temperature (fig. S1C)."],
          vs='AlphaFold 3', draw=draw_rfd3),
+    dict(id="bioemu2", name="BioEmu-2", year=2026, org="Microsoft Research AI for Science", domain="bio",
+         paper="bioemu2-preview · code and weights, October 2026 (no paper yet)",
+         url="https://github.com/microsoft/bioemu2",
+         space="all-atom coordinates", backbone="PairMixer trunk + dual-stream atom/token denoiser",
+         params="512 M (denoiser 425 M)", params_m=512,
+         conditioning="trunk s and z via AdaLN and pair bias; MD / non-MD mode token, contacts; "
+                      "start frame and lag Δt for propagation",
+         objective="x̂ (EDM), σ_data = 16 Å", steps="200; step scale 1.0 for ensembles, 1.5 for one structure",
+         novelty="An all-atom emulator whose weight sits in the denoiser: an 86 M pair-only trunk feeds a 425 M "
+                 "dual-stream diffusion module, five times its size.",
+         notes=["Trunk: 4 MSA blocks and 48 PairMixer blocks, triangle multiplication only, pair width 256. The "
+                "single representation is never updated inside the trunk; only z is.",
+                "Denoiser: 16 dual-stream layers. Windowed atom attention (128 channels, 32 × 128 windows) and "
+                "full token attention (768 channels, 16 heads, pair bias from z) run as parallel residual streams; "
+                "two coupling MLPs then exchange atom and token information through each token's centre atom. "
+                "No separate atom encoder or decoder.",
+                "Parameters, read from the checkpoint: token blocks 217 M, coupling 184 M, atom blocks 14 M, "
+                "trunk 86 M. The denoiser is five times the trunk; in OpenFold3 it is 1.3 times (203 M against about "
+                "150 M).",
+                "Ensemble or structure is set by two switches on the same weights: a method token in the trunk "
+                "input (MD for equilibrium sampling, non-MD for structure prediction) and the sampler's step "
+                "scale η, 1.0 or 1.5.",
+                "Propagation: a start structure and a lag time Δt (1 ns to 1 µs recommended) enter the denoiser; "
+                "the start coordinates are gated by a learned function that decays with Δt.",
+                "Training data (model card): 189,745 PDB systems, 7.2 M AFDB monomers, 775 k multi-conformation "
+                "AFDB dimers, Teddymer, and Microsoft MD of CATH domains, dimers and PDBbind complexes."],
+         vs='AlphaFold 3', draw=draw_bioemu2),
 ]
 
 

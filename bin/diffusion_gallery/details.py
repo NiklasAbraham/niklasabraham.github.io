@@ -65,6 +65,19 @@ R = dict(
     atomworks=("Corley, Mathis et al. 2025 · AtomWorks and RF3",
                "https://doi.org/10.1101/2025.08.14.670328"),
     mpnn=("Dauparas et al. 2022 · ProteinMPNN", "https://doi.org/10.1126/science.add2187"),
+    bioemu=("Lewis et al. 2025 · BioEmu", "https://doi.org/10.1126/science.adv9817"),
+    bioemu_code=("Code · microsoft/bioemu", "https://github.com/microsoft/bioemu"),
+    bioemu2=("BioEmu-2 code and model card · microsoft/bioemu2", "https://github.com/microsoft/bioemu2"),
+    dig=("Zheng et al. 2024 · Distributional Graphormer (DiG)", "https://arxiv.org/abs/2306.05445"),
+    colabfold=("Mirdita et al. 2022 · ColabFold", "https://doi.org/10.1038/s41592-022-01488-1"),
+    rsgm=("De Bortoli et al. 2022 · Riemannian score-based generative modelling", "https://arxiv.org/abs/2202.02763"),
+    dpmsolver=("Lu et al. 2022 · DPM-Solver", "https://arxiv.org/abs/2206.00927"),
+    hpacker=("Visani et al. · H-Packer", "https://arxiv.org/abs/2311.09312"),
+    pairmixer=("Ouyang-Zhang et al. 2025 · Triangle multiplication is all you need (PairMixer)",
+               "https://arxiv.org/abs/2510.18870"),
+    ito=("Schreiner, Winther & Olsson 2023 · Implicit transfer operator learning",
+         "https://arxiv.org/abs/2305.18046"),
+    fksteer=("Singhal et al. 2025 · FK steering of diffusion models", "https://proceedings.mlr.press/v267/singhal25b.html"),
 )
 
 
@@ -147,6 +160,21 @@ KEY_GLOSS = {
     "input": "What the user supplies. Everything downstream is a function of this plus the noise "
              "draw, so what can be asked of the model is set here.",
     "out": "What comes back, after any ranking or post-processing that is not part of the network.",
+    "ipa": "Invariant point attention, the layer AlphaFold 2's structure module is built from. Each residue "
+           "carries a rigid frame; besides ordinary query-key attention, every head places a few query and key "
+           "points in 3D using the residue's frame, and the distance between those points enters the attention "
+           "logit. Rotating the whole structure rotates the points with it, so the output does not change.",
+    "score": "The network's output for a score model: an estimate of the gradient of the log-density of the "
+             "noised data, here per residue and in that residue's own frame. A solver turns it into the next, "
+             "less noisy state; it is not a clean structure itself.",
+    "pairmixer": "A PairMixer block: triangle multiplication (outgoing, then incoming) and a transition on the "
+                 "pair representation, nothing else. No triangle attention and no attention on the single "
+                 "representation, which is what makes it cheaper than a Pairformer block.",
+    "coup": "A coupling step between two residual streams that run at different granularities. Token features "
+            "are broadcast to their atoms and mixed into the atom stream; the features of each token's centre "
+            "atom are mixed back into the token stream. Both mixes are MLPs gated by the conditioning.",
+    "readout": "The output layer: token and atom features are projected to a common width, added per atom, "
+               "normalised and mapped to a three-dimensional coordinate update.",
     "mid": "The middle of a U-Net, at the lowest resolution and the widest channels. Attention is "
            "affordable here, so this is where the most global reasoning happens.",
 }
@@ -868,3 +896,182 @@ DETAILS["rfd3"] = _cofold_details(
      ("downsample", "atoms → tokens, sparse + cross-attention"),
      ("token transformer", "sparse attention over tokens"),
      ("upsample", "→ Δx: N_{atom} × 3")])
+
+# ------------------------------------------------------------------------------------ BioEmu
+DETAILS["bioemu"] = _cofold_details(
+    {"input": P("one protein chain, 20 standard amino acids",
+                "No ligands, no nucleic acids, no complexes. The model returns a distribution over backbone "
+                "conformations of this one sequence, p_θ(x | S).", R["bioemu"]),
+     "msasearch": P("MMseqs2 through the ColabFold server, default parameters",
+                    "The MSA only feeds AlphaFold 2 below; BioEmu never sees it directly.",
+                    R["colabfold"], R["bioemu"]),
+     "evo": P("s: N_{res} × 384 · z: N_{res} × N_{res} × 128",
+              "The Evoformer of pretrained AlphaFold 2 (model 3), with templates excluded and recycling "
+              "disabled, run once with seed 0. Its weights are frozen throughout training; the single and pair "
+              "embeddings 'for all proteins used in training and inference are pre-computed once and stored'. "
+              "The supplement also trains an end-to-end replacement (4 MSA blocks and 48 Pairformer layers) and "
+              "finds 'no strong justification to replace the AlphaFold2 evoformer embeddings'.",
+              R["bioemu"], R["af2"]),
+     "c": P("s_i: N_{res} × 384 · z_{ij}: N_{res}² × 128, from AF2",
+            "The whole condition. Every diffusion step and every one of the typically 10⁴ samples reuse it, "
+            "which is why sampling is cheap.", R["bioemu"]),
+     "noise": P("N_{res} × (Cα ∈ ℝ³, Q ∈ SO(3)) at t = 1",
+                "Positions follow a variance-preserving SDE with the cosine schedule of improved DDPM (s = 0.008), "
+                "so the prior is a standard Gaussian. Orientations follow a geometric IGSO(3) schedule from "
+                "σ = 0.02 to 2.33; the prior is uniform on SO(3). The two are noised independently per residue.",
+                R["bioemu"], R["iddpm"], R["rsgm"], R["framediff"]),
+     "cond": P("s: LayerNorm → Linear 384 → 512, + sinusoidal(t) · z: LayerNorm → Linear 128 → 256, + embedding "
+               "of 64 relative-position buckets",
+               "Algorithm 1, lines 1–2. The time step is added to the single features, the only place it enters. "
+               "Relative positions use DiG's log-spaced buckets (exact within ±16, coarser out to 128), not AF2's "
+               "clipped one-hot.", R["bioemu"], R["dig"]),
+     "ipa": P("8 layers × 32 heads · width 512 · pair 256 · GELU MLP 512 → 1024 → 512",
+              "Each layer: h += Dropout(IPA(LayerNorm(h), z, r, Q)), then a GELU MLP, pre-norm with residuals. "
+              "The IPA follows AF2 Algorithm 22 with 4 query and 8 value points per head, plus a learned "
+              "projection of z for the pair values, which AF2 does not have. Unlike AF2's structure module the "
+              "frames are not updated between layers: all eight attend in the frames of the noisy input x_t. "
+              "Attention holds 22.1 M of the 31.3 M parameters.", R["bioemu"], R["af2"], R["dig"]),
+     "heads": P("two MLPs 512 → 512 → 3",
+                "One head returns a translation, one a rotation in axis-angle form, both in the residue's own "
+                "frame and therefore invariant to a global rotation. The translation is rotated back into the "
+                "global frame by Q_i.", R["bioemu"]),
+     "score": P("ŝ_r, ŝ_Q: N_{res} × 3 each",
+                "For positions the network is trained to output score × σ_t, so dividing by σ_t gives the score; "
+                "that is ε-prediction up to sign. The rotation output is scaled by the IGSO(3) score norm. "
+                "Sampling uses DPM-Solver-2 from t = 0.99 to 0.001: 50 time points, 49 steps of two evaluations "
+                "each, deterministic by default. The paper reports structures 'in as few as 30-50 denoising "
+                "steps'.", R["bioemu"], R["dpmsolver"]),
+     "out": P("10⁴ backbones per sequence, minutes to hours on one GPU",
+              "Backbone atoms come from idealised residue frames. Side chains are added afterwards by H-Packer and "
+              "can be relaxed with short MD. Samples with long bonds or clashes are filtered out by default.",
+              R["bioemu"], R["hpacker"])},
+    [("Paper · Science 2025", "https://doi.org/10.1126/science.adv9817"),
+     ("Code · microsoft/bioemu", "https://github.com/microsoft/bioemu"),
+     ("Preprint · bioRxiv 2024", "https://doi.org/10.1101/2024.12.05.626885"),
+     ("Benchmarks · microsoft/bioemu-benchmarks", "https://github.com/microsoft/bioemu-benchmarks")],
+    ["BioEmu is not a structure predictor but an emulator of equilibrium ensembles: for one protein chain it "
+     "draws thousands of independent backbone conformations, aiming at the distribution molecular dynamics "
+     "would visit, at a cost of minutes to hours on one GPU.",
+     "The architecture is Distributional Graphormer's: AlphaFold 2, frozen, encodes the sequence once, and a "
+     "31 M-parameter score model of eight invariant-point-attention layers denoises residue frames. Positions "
+     "diffuse under a cosine VP-SDE, orientations under IGSO(3). Next to AF3 the split is the same — an "
+     "expensive condition computed once, a cheap network called at every step — but nothing in the encoder is "
+     "trained.",
+     "What makes the samples diverse is the training data, not the network. Pretraining draws a sequence "
+     "cluster from AFDB and then a random structure from it, while always feeding the sequence of the "
+     "highest-pLDDT member, so one input maps to several structures. Models pretrained on the PDB or on "
+     "high-pLDDT AFDB instead sample markedly less diverse conformations (Fig. S8). Fine-tuning then adds over "
+     "200 ms of MD reweighted toward equilibrium, and 502,442 sequences with measured folding stabilities "
+     "(MEGAscale) through property-prediction fine-tuning, which backpropagates through an 8-step sampler and trains only layers 1 "
+     "and 8.",
+     "The paper reports relative free energies within about 1 kcal/mol of millisecond-scale MD and of "
+     "experimental stabilities. Checkpoints v1.0 (preprint), v1.1 (Science paper, default) and v1.2 (more MD "
+     "and stability data, plus residue-type embeddings in every layer) share the architecture."],
+    [("sequence", "N_{res} residues"),
+     ("AF2 Evoformer, frozen", "s: N_{res} × 384 · z: N_{res}² × 128"),
+     ("noise", "x_t: N_{res} × (Cα ∈ ℝ³, Q ∈ SO(3))"),
+     ("input projections", "h: N_{res} × 512 · z: N_{res}² × 256"),
+     ("8 IPA layers", "h: N_{res} × 512"),
+     ("score heads", "→ ŝ_r, ŝ_Q: N_{res} × 3 each")])
+
+DETAILS["bioemu2"] = _cofold_details(
+    {"input": P("proteins, nucleic acids, ligands; an MSA; optionally a start structure and contacts",
+                "BioEmu-2 widens BioEmu from one protein chain to all-atom complexes. The same weights serve "
+                "three tasks: structure prediction, equilibrium sampling, and propagation of a given structure "
+                "forward in time.", R["bioemu2"]),
+     "emb": P("s^{inputs}: N_{tok} × 455 = 384 atom-encoder features + 33 residue type + 33 MSA profile + 1 "
+              "deletion mean + 4 pocket classes",
+              "As AF3's input embedder: a 3-block atom transformer pools reference-conformer atoms into tokens.",
+              R["bioemu2"], R["af3"]),
+     "mode": P("method token → s (384) and z (256) · contacts: threshold in 4–20 Å, Fourier-embedded → z",
+               "The trunk is told what kind of data to imitate. Training labels each example by provenance "
+               "(X-ray, cryo-EM, NMR, MD, AFDB, …); at inference, equilibrium sampling sets the token to MD "
+               "and structure prediction to non-MD. Contact conditioning is Boltz-2's: a pair of tokens and a "
+               "maximum distance, encoded into the pair initialisation.", R["bioemu2"], R["boltz2"]),
+     "msa": P("4 blocks · MSA 128 ch · 8.6 M parameters",
+              "Outer-product mean, pair-weighted averaging and triangle multiplication, with the triangle "
+              "attention of AF3's MSA module removed.", R["bioemu2"], R["pairmixer"]),
+     "pairmixer": P("z: N_{tok}² × 256 · 48 blocks · 75.6 M parameters (1.6 M per block)",
+                    "Each block is triangle multiplication outgoing, then incoming, then a transition, all on z. "
+                    "The single representation passes through every block unchanged: s is the input projection "
+                    "plus its own recycled copy. Recycling runs 3 times at inference, so the trunk makes 4 "
+                    "passes. The pair width is twice AF3's 128.", R["pairmixer"], R["bioemu2"]),
+     "c": P("s: N_{tok} × 384 · z: N_{tok}² × 256, plus a 64-bin distogram head",
+            "Computed once per system and mode and cached, also to disk for reuse. There is no confidence head: "
+            "the only head on the trunk is a distogram.", R["bioemu2"]),
+     "noise": P("N_{atom} × 3, σ_{max} = 160 σ_{data} = 2560 Å",
+                "AF3's Karras schedule (ρ = 7, σ_{min} = 4 · 10^{−4} σ_{data}, σ_{data} = 16 Å) and AF3's EDM "
+                "preconditioning, c_{noise} = ¼ log(σ / σ_{data}).", R["edm"], R["bioemu2"]),
+     "cond": P("c: concat(s^{trunk}, s^{inputs}) → 768, + Fourier(σ) 256 → 768, + lag embedding · z: concat(z^{trunk}, "
+               "rel. pos.) → 256, 2 transitions",
+               "AF3's conditioning at width 768 instead of 384, plus the lag time Δt of a propagation step, "
+               "embedded with damped harmonics over 32 log-spaced timescales and switched off for ordinary "
+               "sampling. z and the atom-pair features are computed once per system; c is recomputed per step.",
+               R["bioemu2"], R["af3"], R["ito"]),
+     "ain": P("q: N_{atom} × 128 · atom pairs p: 16 ch in 32 × 128 windows",
+              "Reference-conformer features (charge, element, atom name) plus a linear map of the noisy "
+              "coordinates x_t. For propagation, a linear map of the start coordinates is added too, scaled by "
+              "a learned gate that decays with Δt, so a long lag forgets the start. Atom pairs get the "
+              "reference geometry and the trunk's z, as in AF3, but no atom-encoder layers run here.",
+              R["bioemu2"], R["ito"]),
+     "tin": P("a: N_{tok} × 768",
+              "LayerNorm and a linear map of the trunk single s, plus a linear map of the noisy position of each "
+              "token's centre atom. The token stream starts from the trunk, not from pooled atoms.",
+              R["bioemu2"]),
+     "aatt": P("4 heads · windows of 32 queries × 128 keys · atom-pair bias p · 0.87 M per layer",
+               "Windowed attention and a SwiGLU MLP on the atom stream, AdaLN-Zero conditioned on c "
+               "broadcast to atoms.", R["bioemu2"], R["af3"], R["dit"]),
+     "tok": P("N_{tok} × 768 · 16 heads · pair bias from z (256 → 16) · gated output",
+              "Full attention over tokens with AdaLN-Zero from c: x ← x + γ ⊙ op((1 + α) ⊙ LN(x) + β) around "
+              "both the attention and the MLP. 13.6 M parameters per layer, 217 M over 16.",
+              R["bioemu2"], R["dit"], R["af3"]),
+     "amlp": P("SwiGLU 128 → 512 → 128", "", R["bioemu2"]),
+     "tmlp": P("SwiGLU 768 → 3072 → 768 · 7.1 M per layer", "The largest single piece of each layer.",
+               R["bioemu2"]),
+     "coup": P("two SwiGLU MLPs on [token ‖ atom] = 896 ch, hidden 1792 · 11.5 M per layer, 184 M in total",
+               "After both streams have updated themselves, each atom receives its token's features and each "
+               "token receives the features of its centre atom; each mix is an AdaLN-gated MLP added as a "
+               "residual. Atoms and tokens therefore exchange information in both directions in each of the sixteen layers, instead of once on the way "
+               "in and once on the way out as in AF3.", R["bioemu2"]),
+     "readout": P("token 768 → 384 broadcast to atoms, + atom 128 → 384 → LayerNorm → 3",
+                  "The coordinate update F_θ. x̂ = c_{skip} x + c_{out} F_θ as in AF3.", R["bioemu2"],
+                  R["edm"]),
+     "xhat": P("N_{atom} × 3",
+               "The sampler is AF3's (adapted from Boltz): 200 steps, churn γ_0 = 0.8 above σ = 1 Å, noise "
+               "scale λ = 1.0, a random rotation and translation before every step, and the noisy structure "
+               "Kabsch-aligned onto x̂ before the update. The step scale η is 1.5 for structure prediction, "
+               "as in AF3, and 1.0 for equilibrium sampling, i.e. no sharpening. Optional Feynman–Kac steering "
+               "with physical potentials (clashes, bond geometry, chirality) reweights and resamples particles.",
+               R["bioemu2"], R["af3"], R["fksteer"]),
+     "out": P("independent samples; a trajectory only via repeated propagation",
+              "Equilibrium samples are i.i.d. draws, not a time series. Propagation draws endpoints at a lag Δt "
+              "from a start structure (1 ns to 1 µs recommended); chaining such steps builds a trajectory. "
+              "Physicality checks flag clashes and broken geometry per frame.", R["bioemu2"], R["ito"])},
+    [("Code · microsoft/bioemu2", "https://github.com/microsoft/bioemu2"),
+     ("Weights · Hugging Face", "https://huggingface.co/microsoft/bioemu2"),
+     ("PairMixer · arXiv 2025", "https://arxiv.org/abs/2510.18870"),
+     ("BioEmu · Science 2025", "https://doi.org/10.1126/science.adv9817")],
+    ["BioEmu-2 was released as code and weights (bioemu2-preview) in October 2026, before any paper; "
+     "everything on this card is read from the released code, config and checkpoint. It moves BioEmu from "
+     "backbone frames of one chain to all atoms of proteins, nucleic acids and ligands, and adopts AF3's "
+     "outer design: a trunk run once per target, an EDM denoiser over atom coordinates run 200 times.",
+     "The weight sits in the denoiser. The trunk is a pair-only PairMixer — 4 MSA blocks and 48 blocks of "
+     "triangle multiplication, 86 M parameters — while the denoiser has 425 M, five times as much; in OpenFold3 "
+     "the ratio is 1.3. It is not AF3's atom encoder, "
+     "token transformer and atom decoder in sequence: sixteen dual-stream layers carry an atom stream and a "
+     "token stream side by side, each with its own attention and MLP, and couple them after every layer.",
+     "One model, three tasks. A method token tells the trunk whether to imitate MD or experimental and "
+     "predicted structures, and the sampler's step scale η is 1.0 for ensembles and 1.5 for single "
+     "structures — the same η that AF3 uses to sharpen its samples. Propagation conditions the denoiser on "
+     "a start structure and a lag time Δt, an implicit-transfer-operator model inside the same network.",
+     "Training (model card): 189,745 PDB systems as preprocessed for Boltz-1, 7.2 M AFDB monomers, 775 k "
+     "multi-conformation AFDB dimers, 50,651 Teddymer complexes, and Microsoft MD of CATH domains, dimers, "
+     "heterodimers and PDBbind protein–ligand complexes. The card lists no confidence head and calls the "
+     "sampling frequencies uncalibrated: they 'must not be interpreted as a calibrated Boltzmann probability'."],
+    [("tokens", "N_{tok}; atoms N_{atom}"),
+     ("input embedder", "s^{inputs}: N_{tok} × 455"),
+     ("PairMixer trunk", "s: N_{tok} × 384 · z: N_{tok}² × 256"),
+     ("noise", "x: N_{atom} × 3"),
+     ("stream inputs", "q: N_{atom} × 128 · a: N_{tok} × 768"),
+     ("16 dual-stream layers", "q: N_{atom} × 128 · a: N_{tok} × 768"),
+     ("readout", "→ Δx: N_{atom} × 3")])

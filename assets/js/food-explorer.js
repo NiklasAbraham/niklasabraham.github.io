@@ -135,11 +135,51 @@
     io.observe(root);
   }
 
+  // ------------------------------------------------------------------ PNG download of a map
+  // The live SVG is styled by CSS classes, which an image does not carry: copy the computed paint onto a clone,
+  // draw it on a canvas under the figure's title and above its legend and caption, and save the canvas.
+  const PAINT = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-opacity', 'stroke-dasharray', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'paint-order', 'font-family', 'font-size', 'font-weight'];
+  window.fdSavePng = savePng;
+  function savePng(svg, fileName, figNo) {
+    const fig = svg.closest('figure'), clone = svg.cloneNode(true), live = [svg, ...svg.querySelectorAll('*')], copy = [clone, ...clone.querySelectorAll('*')];
+    live.forEach((el, i) => {
+      const cs = getComputedStyle(el), c = copy[i];
+      if (el.classList && el.classList.contains('fd-hit')) { c.remove(); return; }
+      for (const k of PAINT) c.style.setProperty(k, cs.getPropertyValue(k));
+      c.style.removeProperty('vector-effect');
+    });
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const vb = svg.viewBox.baseVal, MW = 2400, PAD = 72, mapW = MW - 2 * PAD, mapH = Math.round(mapW * vb.height / vb.width);
+    clone.setAttribute('width', mapW); clone.setAttribute('height', mapH);
+    const title = fig.querySelector('.concept-title').textContent, sub = (fig.querySelector('.fd-side h4') || {}).textContent || '';
+    const sw = [...fig.querySelectorAll('.bx-legend .fd-sw')].map((e) => ({ col: getComputedStyle(e.querySelector('i')).backgroundColor, op: getComputedStyle(e.querySelector('i')).opacity, t: e.textContent.trim() }));
+    const cap = (fig.querySelector('figcaption') || {}).textContent || '';
+    const font = (px, w) => `${w || 400} ${px}px Inter, system-ui, sans-serif`;
+    const probe = document.createElement('canvas').getContext('2d');
+    const wrap = (text, px, maxW) => { probe.font = font(px); const lines = []; let cur = ''; for (const w of text.split(/\s+/)) { const t = cur ? cur + ' ' + w : w; if (probe.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; } if (cur) lines.push(cur); return lines; };
+    const capLines = wrap(cap + '  niklas-abraham.de', 30, mapW), top = PAD + 70 + (sub ? 56 : 0) + 20, legY = top + mapH + 44;
+    const legH = sw.length ? 70 : 0, H = legY + legH + capLines.length * 42 + PAD;
+    const cv = document.createElement('canvas'); cv.width = MW; cv.height = H;
+    const ctx = cv.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, MW, H);
+    ctx.fillStyle = '#04204b'; ctx.textBaseline = 'alphabetic'; ctx.font = font(60, 700); ctx.fillText((figNo ? 'Figure ' + figNo + ' · ' : '') + title, PAD, PAD + 52);
+    if (sub) { ctx.fillStyle = '#6b7280'; ctx.font = font(38); ctx.fillText(sub, PAD, PAD + 52 + 56); }
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, PAD, top, mapW, mapH);
+      let x = PAD; ctx.font = font(30);
+      for (const e of sw) { ctx.globalAlpha = +e.op; ctx.fillStyle = e.col; ctx.fillRect(x, legY, 38, 26); ctx.globalAlpha = 1; ctx.strokeStyle = '#c9d0dc'; ctx.lineWidth = 1.5; ctx.strokeRect(x, legY, 38, 26); ctx.fillStyle = '#4a5a78'; ctx.fillText(e.t, x + 50, legY + 23); x += 50 + ctx.measureText(e.t).width + 36; if (x > MW - 300) break; }
+      ctx.fillStyle = '#8a93a6'; ctx.font = font(30); capLines.forEach((l, i) => ctx.fillText(l, PAD, legY + legH + 34 + i * 42));
+      cv.toBlob((b) => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fileName || ('world-food-' + (title + ' ' + sub).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png'); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }, 'image/png');
+    };
+    img.src = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml;charset=utf-8' }));
+  }
+
   // ------------------------------------------------------------------ the world map
   function worldMap(stage, opts) {
     const o = Object.assign({ hover: null, click: null, label: 'World map' }, opts);
     const svg = h('svg:svg', { class: 'bx-svg fd-map', viewBox: `0 0 ${W.w} ${W.h}`, role: 'img', 'aria-label': o.label });
-    svg.append(h('svg:rect', { x: 0, y: 0, width: W.w, height: W.h, fill: '#EEF2F8', rx: 8 }));
+    svg.append(W.o ? h('svg:path', { d: W.o, fill: '#EEF2F8' }) : h('svg:rect', { x: 0, y: 0, width: W.w, height: W.h, fill: '#EEF2F8', rx: 8 }));
+    const fig = stage.closest('.concept'); if (fig) fig.classList.add('fd-widefig');
     const land = h('svg:g', { class: 'fd-land' });
     const paths = {};
     for (const [m, c] of Object.entries(W.c)) {
@@ -228,7 +268,7 @@
       for (const [m, p] of Object.entries(map.paths)) p.classList.toggle('sel', m === st.sel);
       if (st.sel && map.paths[st.sel]) map.top.replaceChildren(map.paths[st.sel].cloneNode(false)), map.top.firstChild.setAttribute('class', 'fd-selp'), map.top.firstChild.setAttribute('fill', 'none');
       else map.top.replaceChildren();
-      legend.replaceChildren(th.length ? legendRow(th, RAMP, (v) => fmt(v).replace(/ t$/, ''), 'none reported') : h('span', { class: 'bx-hint' }, ''));
+      legend.replaceChildren(th.length ? legendRow(th, RAMP, (v) => (st.metric === 'share' && v < 1 ? v.toFixed(v < 0.1 ? 3 : 2) + ' %' : fmt(v).replace(/ t$/, '')), 'none reported') : h('span', { class: 'bx-hint' }, ''));
       // side: ranking
       const prod = F.prod[st.comm], tot = F.tot[st.comm], c = COMM[st.comm];
       const shares = Object.keys(prod).sort((a, b) => prod[b][0] - prod[a][0]);

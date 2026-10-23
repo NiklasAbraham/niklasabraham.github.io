@@ -1,0 +1,7 @@
+// Figure numbers (CSS counter, in document order) and the PNG button of assets/js/figure-tools.js.
+article.da { counter-reset: figno; }
+article.da figure.concept:not(.concept-formula), article.da figure.ee { counter-increment: figno;
+  > header::before { content: 'Figure ' counter(figno); flex: none; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.68rem; letter-spacing: 0.06em; font-weight: 700; color: #fff; background: #04204b; border-radius: 999px; padding: 0.12rem 0.6rem; align-self: center; white-space: nowrap; } }
+.fig-dl { flex: none; align-self: center; margin-left: auto; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.68rem; padding: 0.2rem 0.55rem; border-radius: 8px; border: 1px solid var(--global-card-border, #d5dbe6); background: transparent; color: #0b4fc0; cursor: pointer; transition: background 0.2s, border-color 0.2s;
+  &:hover { background: rgba(11, 79, 192, 0.08); border-color: #0b4fc0; } &:disabled { opacity: 0.6; cursor: progress; } }
+@media (max-width: 560px) { article.da figure.concept > header { flex-wrap: wrap; } .fig-dl { margin-left: 0; } }

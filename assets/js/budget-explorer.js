@@ -166,9 +166,97 @@
   }
   const srcLine = (iso, y) => {
     const c = C[iso], s = c.src[y];
-    return `${c.name} ${y} · ${s === 'Eurostat' ? 'Eurostat' : s === 'OECD' ? 'OECD' : 'IMF'}${c.sector[y] !== 'S13' ? ' · central government only' : ''}`;
+    return `${c.name} ${y} · ${s === 'Eurostat' ? 'Eurostat' : s === 'OECD' ? 'OECD' : 'IMF'} · ${c.sector[y] !== 'S13' ? 'central government only' : 'general government, all levels'}`;
   };
   function openDeep(iso) { document.dispatchEvent(new CustomEvent('bx:country', { detail: iso })); }
+
+
+  // ================================================================== absolute amounts, in dollars
+  // % of GDP x GDP in current US$ (market exchange rates), each country in its latest year of data.
+  const RCOL = { Europe: '#2a78d6', Americas: '#eb6834', 'Asia-Pacific': '#1baf7a', 'Middle East & Africa': '#e87ba4' };
+  const bn = (v) => (v == null ? '–' : v >= 1000 ? '$' + (v / 1000).toFixed(v >= 10000 ? 1 : 2) + ' trn' : v >= 10 ? '$' + Math.round(v).toLocaleString('en-US') + ' bn' : '$' + v.toFixed(1) + ' bn');
+  function absMeasures(level) {
+    const G = Object.fromEntries(GROUPS.map((g) => [g.id, g]));
+    const central = level === 'central';
+    // one source per level: general government (C[iso].cofog, latest year) or the IMF's central-government series (C[iso].central, from 2020 on)
+    const src = (iso) => { const c = C[iso].central; return central ? (c && c.y >= 2020 ? { y: c.y, sec: c.sec, get: (k) => c.cof[k] } : null) : (C[iso].ly ? { y: C[iso].ly, get: (k) => cof(iso, C[iso].ly, k) } : null); };
+    const fromCof = (fnList) => (iso) => { const o = src(iso); if (!o) return null; const g = fiscal(iso, 'gdp_usd', o.y); if (g == null) return null; return { y: o.y, sec: o.sec, v: (sum(fnList.map(o.get)) / 100) * g / 1e9 }; };
+    const fromFiscal = (key) => (iso) => { const f = C[iso].fiscal; for (let i = f.years.length - 1; i >= 0; i--) if (f[key][i] != null && f.gdp_usd[i] != null && f.years[i] <= 2024) return { y: f.years[i], v: (f[key][i] / 100) * f.gdp_usd[i] / 1e9 }; return null; };
+    // interest from the economic-type table (statement of operations), all levels; COFOG's debt-transactions division is not interest
+    const interest = (iso) => { const e = C[iso].econ, ys = Object.keys(e || {}).map(Number).filter((y) => e[y] && e[y].int != null && y <= 2024).sort((a, b) => a - b); if (!ys.length) return null; const y = ys[ys.length - 1], g = fiscal(iso, 'gdp_usd', y); return g == null ? null : { y, v: (e[y].int / 100) * g / 1e9 }; };
+    return [
+      ['total', central ? 'All central-government spending' : 'All government spending (all levels)', fromCof(L1)],
+      ['rev', 'Government revenue (IMF WEO headline)', fromFiscal('rev')],
+      ['debt', 'Gross government debt (IMF WEO headline)', fromFiscal('debt')],
+      ['gdp', 'GDP (for scale)', (iso) => { const f = C[iso].fiscal; for (let i = f.years.length - 1; i >= 0; i--) if (f.gdp_usd[i] != null && f.years[i] <= 2024) return { y: f.years[i], v: f.gdp_usd[i] / 1e9 }; return null; }],
+      ['soc', 'Social protection (pensions, benefits)', fromCof(G.soc.fn)],
+      ['hea', 'Health', fromCof(G.hea.fn)],
+      ['edu', 'Education', fromCof(G.edu.fn)],
+      ['def', 'Defence (COFOG)', fromCof(G.def.fn)],
+      ['mil', 'Military (SIPRI, national total)', (iso) => { const m = C[iso].mil; const ys = Object.keys(m || {}).map(Number).filter((y) => y <= 2024 && m[y] && m[y].mil_usd != null).sort((a, b) => a - b); return ys.length ? { y: ys[ys.length - 1], v: m[ys[ys.length - 1]].mil_usd / 1e9 } : null; }],
+      ['ord', 'Public order and safety', fromCof(G.ord.fn)],
+      ['eco', 'Economic affairs (transport, energy, industry)', fromCof(G.eco.fn)],
+      ['int', 'Interest on public debt (all levels)', interest],
+    ];
+  }
+  function absWidget(root) {
+    const LV = {}, label = {};
+    for (const level of ['all', 'central']) {
+      const M = absMeasures(level), MV = {}; M.forEach(([k, n, fn]) => { MV[k] = {}; (label[level] = label[level] || {})[k] = n; ISOS.forEach((iso) => { const r = fn(iso); if (r && r.v > 0) MV[k][iso] = r; }); });
+      LV[level] = MV;
+    }
+    const M = absMeasures('all'), lab = (k) => label[st.level][k];
+    const st = { m: pick(root, 'metric', 'total'), level: pick(root, 'view', 'all'), a: ['USA', 'def'], b: ['CAN', 'total'] };
+    const MVc = () => LV[st.level];
+    const { ctrl, stage, legend } = frame(root, 'dollars');
+    const sel = h('select', { class: 'bx-select', 'aria-label': 'what to show' }, M.map(([k, n]) => h('option', { value: k }, n)));
+    sel.value = st.m; sel.addEventListener('change', () => { st.m = sel.value; draw(); });
+    const lvSeg = seg([['all', 'All levels of government'], ['central', 'Central government only']], st.level, (v) => { st.level = v; draw(); });
+    lvSeg.classList.add('ab-level');
+    ctrl.append(h('span', { class: 'bx-lbl' }, 'whose budget'), lvSeg, h('span', { class: 'bx-lbl' }, 'show'), sel);
+    const relabel = () => { [...sel.options].forEach((o) => { o.textContent = lab(o.value); }); };
+    const bars = h('div', { class: 'ab-bars' }), weigh = h('div', { class: 'ab-weigh' });
+    stage.append(bars, weigh);
+    legend.innerHTML = '';
+    legend.append(...Object.entries(RCOL).map(([r, c]) => h('span', { class: 'bx-chip static' }, h('i', { style: 'background:' + c }), r)), h('span', { class: 'bx-hint' }, 'Current US dollars at market exchange rates, so a strong currency inflates a country and a weak one shrinks it. Each country in its latest year of data (shown after the name, mostly 2024). "Central government" is the IMF\'s own central-government sector, and it is not the same thing everywhere: for most countries it is the budgetary central government without the social-insurance funds (Germany, France, Spain), for the United States the IMF only reports a version that includes the social-security funds, and for China and Switzerland it leaves out most public spending. The view needs data from 2020 on and is therefore missing for Canada, India, Saudi Arabia, Mexico and South Korea; for revenue, debt, GDP, SIPRI military spending and interest it shows the same bars as the all-levels view. Revenue and debt are the IMF World Economic Outlook headline series, which for some countries (Saudi Arabia, South Africa) appears narrower than all levels; SIPRI military spending is a national total counted differently from COFOG defence; interest comes from the economic-type table. Years after 2024 are not shown.'));
+    const CENTRAL_ONLY = new Set(['total', 'soc', 'hea', 'edu', 'def', 'ord', 'eco']);
+    const secTxt = (r) => (st.level === 'central' && r.sec ? ' · IMF sector ' + r.sec + (r.sec === 'S1321' ? ' (incl. social-security funds)' : ' (excl. social-security funds)') : '');
+    const titleEl = root.querySelector('.concept-title'), baseTitle = titleEl.textContent;
+    function draw() {
+      relabel();
+      titleEl.textContent = baseTitle + (st.level === 'central' ? (CENTRAL_ONLY.has(st.m) ? ' – central government only' : ' – this measure is the same in both views') : ' – all levels of government');
+      const rows = Object.entries(MVc()[st.m]).map(([iso, r]) => ({ iso, ...r })).sort((a, b) => b.v - a.v);
+      const mx = rows[0].v;
+      bars.replaceChildren(...rows.map((r) => h('div', { class: 'ab-row', onmousemove: (ev) => showTip(ev, `<b>${C[r.iso].name}</b> <span>${r.y}${secTxt(r)}</span><br>${lab(st.m)}: ${bn(r.v)}`), onmouseleave: hideTip, onclick: () => { st.a = [r.iso, st.m]; drawWeigh(); weigh.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } },
+        h('span', { class: 'ab-n' }, C[r.iso].name, h('small', {}, ' ' + r.y)), h('span', { class: 'ab-t' }, h('i', { style: `width:${Math.max(0.4, (r.v / mx) * 100)}%;background:${RCOL[C[r.iso].region] || '#999'}` })), h('span', { class: 'ab-v' }, bn(r.v)))));
+      drawWeigh();
+    }
+    const cSel = (cur, set) => { const s = h('select', { class: 'bx-select', 'aria-label': 'country' }, Object.keys(C).sort((a, b) => C[a].name.localeCompare(C[b].name)).map((i) => h('option', { value: i }, C[i].name))); s.value = cur; s.addEventListener('change', () => { set(s.value); drawWeigh(); }); return s; };
+    const mSel = (cur, set) => { const s = h('select', { class: 'bx-select', 'aria-label': 'measure' }, M.map(([k, n]) => h('option', { value: k }, n))); s.value = cur; s.addEventListener('change', () => { set(s.value); drawWeigh(); }); return s; };
+    const PRESETS = [['US defence vs Germany, central government', ['USA', 'def'], ['DEU', 'total'], 'central'], ['US defence vs Canada, all levels', ['USA', 'def'], ['CAN', 'total']], ['US health vs Germany, all levels', ['USA', 'hea'], ['DEU', 'total']], ['China education vs France, all levels', ['CHN', 'edu'], ['FRA', 'total']], ['US defence vs China defence', ['USA', 'def'], ['CHN', 'def']], ['Germany defence vs Germany interest', ['DEU', 'def'], ['DEU', 'int']], ['UK interest vs UK defence', ['GBR', 'int'], ['GBR', 'def']]];
+    function drawWeigh() {
+      const A = MVc()[st.a[1]][st.a[0]], B = MVc()[st.b[1]][st.b[0]];
+      const poss = (n) => (/s$/.test(n) ? n + "'" : n + "'s"), name = (p) => `${poss(C[p[0]].name)} ${p[1] === 'total' ? (st.level === 'central' ? 'central-government spending' : 'spending at all levels of government') : label[st.level][p[1]].replace(/ \(.*\)/, '').toLowerCase()}`;
+      let verdict = 'No figure for this pair (the country does not report that item).';
+      const miss = [[st.a, A], [st.b, B]].filter(([, r]) => !r).map(([p]) => C[p[0]].name);
+      const fix = st.level === 'central' && miss.length ? h('button', { type: 'button', class: 'bx-chip', onclick: () => { st.level = 'all'; [...lvSeg.children].forEach((x) => x.classList.toggle('on', x.dataset.v === 'all')); draw(); } }, 'Show all levels of government') : null;
+      if (miss.length) verdict = `${miss.join(' and ')} ${miss.length > 1 ? 'have' : 'has'} no figure for this item in the ${st.level === 'central' ? 'central-government view (the IMF reports no central series, or none from 2020 on)' : 'data'}.`;
+      let big = null;
+      if (A && B) {
+        const r = A.v / B.v, hi = r >= 1 ? [A, st.a] : [B, st.b], lo = r >= 1 ? [B, st.b] : [A, st.a], x = Math.max(r, 1 / r);
+        verdict = `${name(hi[1])} (${bn(hi[0].v)}) is ${x < 1.05 ? 'about as large as' : x.toFixed(x < 10 ? 2 : 1) + ' times'} ${name(lo[1])} (${bn(lo[0].v)}).`;
+        if (x < 1.05) verdict = `${name(A === hi[0] ? st.a : st.b)} (${bn(A.v)}) is about as large as ${name(st.b)} (${bn(B.v)}).`;
+        big = Math.max(A.v, B.v);
+      }
+      const line = (p, R, col) => h('div', { class: 'ab-pair' }, h('span', { class: 'ab-n' }, name(p)), h('span', { class: 'ab-t' }, R ? h('i', { style: `width:${(R.v / big) * 100}%;background:${col}` }) : null), h('span', { class: 'ab-v' }, R ? bn(R.v) : 'n/a'));
+      weigh.replaceChildren(
+        h('h4', {}, 'Weigh one against another'),
+        h('div', { class: 'ab-pre' }, PRESETS.map(([t, a, b, lv]) => h('button', { type: 'button', class: 'bx-chip', onclick: () => { st.a = a.slice(); st.b = b.slice(); st.level = lv || 'all'; [...lvSeg.children].forEach((x) => x.classList.toggle('on', x.dataset.v === st.level)); draw(); } }, t))),
+        h('div', { class: 'ab-pick' }, cSel(st.a[0], (v) => { st.a[0] = v; }), mSel(st.a[1], (v) => { st.a[1] = v; }), h('span', { class: 'ab-vs' }, 'against'), cSel(st.b[0], (v) => { st.b[0] = v; }), mSel(st.b[1], (v) => { st.b[1] = v; })),
+        line(st.a, A, '#2a78d6'), line(st.b, B, '#eb6834'), h('p', { class: 'ab-verdict' }, verdict, fix ? ' ' : null, fix));
+    }
+    draw();
+  }
 
   // ================================================================== stacked comparison bars
   function stackWidget(root) {
@@ -612,7 +700,7 @@
   // ================================================================== fiscal scatter
   function scatterWidget(root) {
     const AX = {
-      rev: ['Revenue', '% of GDP'], exp: ['Expenditure', '% of GDP'], bal: ['Net lending (+) / borrowing (−)', '% of GDP'], pbal: ['Primary balance', '% of GDP'],
+      rev: ['Revenue (IMF WEO headline)', '% of GDP'], exp: ['Expenditure (IMF WEO headline)', '% of GDP'], bal: ['Net lending (+) / borrowing (−)', '% of GDP'], pbal: ['Primary balance', '% of GDP'],
       debt: ['Gross debt', '% of GDP'], pc_ppp: ['GDP per person', 'PPP $, log scale'], gdp_usd: ['GDP', 'US$, log scale'], mil: ['Military expenditure', '% of GDP'],
     };
     const st = { x: root.dataset.x || 'rev', y: root.dataset.y || 'exp', year: 2024, play: false, sel: null };
@@ -682,7 +770,7 @@
   }
 
   // ------------------------------------------------------------------ boot
-  const WIDGETS = { stack: stackWidget, flow: sankeyWidget, tree: treeWidget, compare: compareWidget, lines: linesWidget, scatter: scatterWidget };
+  const WIDGETS = { dollars: absWidget, stack: stackWidget, flow: sankeyWidget, tree: treeWidget, compare: compareWidget, lines: linesWidget, scatter: scatterWidget };
   fetch(BASE + 'budget.json').then((r) => r.json()).then((raw) => {
     prep(raw);
     for (const el of roots) { const w = WIDGETS[el.dataset.bx]; if (w) { try { w(el); } catch (e) { console.error(e); el.append(h('p', { class: 'bx-err' }, 'This figure failed to load: ' + e.message)); } } }

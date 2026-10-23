@@ -1,0 +1,6 @@
+<ol class="bd-refs">
+{%- assign rs = site.data.budget_article.refs | sort: "key" -%}
+{%- for r in rs %}
+<li id="rb-{{ r.key }}"><span class="k">[{{ r.short }}]</span> {{ r.pub }}, <a href="{{ r.url }}" rel="noopener">{{ r.title }}</a>, {{ r.date }}.<span class="st {{ r.status }}">{{ r.status }}</span></li>
+{%- endfor %}
+</ol>

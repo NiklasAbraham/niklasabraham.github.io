@@ -1,0 +1,17 @@
+// Blog index: a card grid with one thumbnail per post (assets/blog-thumbs/, built by bin/thumbs/build.py).
+.bl-grid { list-style: none; margin: 0 0 2.4rem; padding: 0; display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.bl-card { list-style: none; margin: 0; padding: 0; border: 0;
+  &.bl-first { grid-column: 1 / -1; .bl-link { flex-direction: row; } .bl-thumb { flex: 0 0 58%; aspect-ratio: 3 / 2; } .bl-body { padding: 1.8rem 2rem; justify-content: center; } .bl-title { font-size: 1.9rem; } .bl-desc { -webkit-line-clamp: 5; font-size: 1rem; } } }
+.bl-link { display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid var(--global-card-border, #e3e8f0); border-radius: 14px; background: var(--global-card-bg-color, #fff); color: var(--global-text-color); text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  &:hover { color: var(--global-text-color); transform: translateY(-3px); border-color: #b9c6dd; box-shadow: 0 14px 30px -14px rgba(4, 32, 75, 0.35); .bl-thumb img { transform: scale(1.04); } .bl-title { color: var(--global-theme-color); } } }
+.bl-thumb { display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #e8edf5;
+  img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; } }
+.bl-body { display: flex; flex-direction: column; gap: 0.45rem; padding: 1.1rem 1.2rem 1.2rem; flex: 1; }
+.bl-kicker { display: flex; gap: 0.4rem; flex-wrap: wrap; span { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: #138374; background: rgba(19, 131, 116, 0.1); border-radius: 999px; padding: 0.12rem 0.55rem; } }
+.bl-title { font-size: 1.18rem; line-height: 1.28; font-weight: 700; letter-spacing: -0.01em; transition: color 0.2s; }
+.bl-desc { font-size: 0.88rem; line-height: 1.55; color: var(--global-text-color-light); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.bl-meta { margin-top: auto; padding-top: 0.3rem; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.7rem; color: #8a93a6; }
+@media (max-width: 760px) { .bl-card.bl-first .bl-link { flex-direction: column; } .bl-card.bl-first .bl-thumb { flex: none; } .bl-card.bl-first .bl-body { padding: 1.1rem 1.2rem 1.2rem; } .bl-card.bl-first .bl-title { font-size: 1.3rem; } }
+// The index is wider than the 880 px article column: centred on the page, up to 1180 px.
+.bl-wide { width: min(1180px, calc(100vw - 48px)); position: relative; left: 50%; transform: translateX(-50%); }

@@ -1,6 +1,6 @@
 // Fold a protein — the walkthrough engine (/projects/diffusion-architectures/walkthrough/).
 //
-// CONTRACT (other files register chapters; load order: fw-core.js, fw-bio.js, fw-model.js, fw-live.js):
+// CONTRACT (other files register chapters; load order: fw-core.js, fw-bio.js, fw-model.js, fw-film.js):
 //   FW.chapter({ id, title, kicker })                       declare a chapter (order = call order)
 //   FW.step({ chapter, id, title, caption, points: [html], principle: html, duration: ms, live: bool,
 //             render(el, ctx) -> optional cleanup() })      add a step; steps play in registration order
@@ -19,7 +19,8 @@
 //   FW.go(i | id), FW.pause(), FW.playing()   drive the walkthrough from outside
 //
 // The engine owns: the intro screen (start with the biology / skip to the model, with a small folding preview),
-// the chapter tabs in the masthead, the step list on the right (chapters as groups, current step expanded),
+// the chapter tabs in the masthead, the notes under the stage (the current step's title, points and principle; the
+// step list #fwSteps is kept in the DOM, hidden, as the click target the model strip and deep links use),
 // the player (play / pause, segmented per-step timer, restart), the chapter title cards, the narration line,
 // keyboard (space, ← →), deep links (#step-<id>), crossfades between steps.
 (function () {
@@ -153,6 +154,12 @@
     if ($('fwFigChap')) $('fwFigChap').textContent = c.kicker || c.title || '';
     if ($('fwCount')) $('fwCount').innerHTML = `${pad(i + 1)}<span> / ${pad(steps.length)}</span>`;
     if ($('fwPrin')) $('fwPrin').innerHTML = S.principle ? `<div class="lbl">The principle</div><div class="fw-prin-t">${S.principle}</div>` : '';
+    const notes = $('fwNotes');
+    if (notes) {
+      notes.innerHTML = `<div class="fw-notes-l"><h3><span class="mono">${pad(i + 1)}</span>${esc(S.title)}${S.live ? ' <em class="fw-livetag">try it</em>' : ''}</h3>${S.points.length ? `<ul>${S.points.map((p) => `<li>${p}</li>`).join('')}</ul>` : ''}</div>`
+        + (S.principle ? `<div class="fw-prin"><div class="lbl">The principle</div><div class="fw-prin-t">${S.principle}</div></div>` : '');
+      notes.classList.remove('in'); void notes.offsetWidth; notes.classList.add('in');
+    }
     const narr = $('fwNarr');
     if (narr) { narr.classList.remove('in'); narr.innerHTML = S.narration || S.points[0] || esc(capOf(S)); void narr.offsetWidth; narr.classList.add('in'); }
     $('fwPrev').disabled = i === 0; $('fwNext').disabled = i === steps.length - 1;

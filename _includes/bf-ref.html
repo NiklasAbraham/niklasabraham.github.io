@@ -1,0 +1,2 @@
+{%- comment -%} A source tag: {% include bf-ref.html k="wiki-flight" %} (entries in _data/butterfly_article/refs.yml). {%- endcomment -%}
+{%- assign r = site.data.butterfly_article.refs | where: "key", include.k | first -%}<sup class="ai-ref"><a href="#r-{{ include.k }}" title="{{ r.title | escape }}">[{{ r.short | default: include.k }}]</a></sup>

@@ -36,8 +36,6 @@ CAVEAT = {
     "IRL": " <em>Irish GDP is inflated by multinationals' profits, which makes every ratio to GDP look small.</em>",
     "CHE": " <em>Compulsory health insurance is private in Switzerland and so is not counted as government health spending.</em>",
     "USA": " <em>The IMF series has no detail below social protection for the US and reports no separate environment spending.</em>",
-    "SGP": " <em>COFOG covers 25.2 % of GDP; the IMF's headline expenditure for Singapore is 14.2 %.</em>",
-    "CAN": " <em>COFOG covers 40.0 % of GDP; the IMF's headline expenditure for Canada is 44.3 %.</em>",
     "RUS": " <em>Pre-invasion data: the budget has changed since.</em>",
     "UKR": " <em>Wartime year; foreign grants finance part of the deficit.</em>",
     "ARE": " <em>Only one year of functional data (2024).</em>",
@@ -64,7 +62,7 @@ def card(i):
     f = c["fiscal"]; fyi = f["years"].index(int(y)) if int(y) in f["years"] else None
     pcv = f["pc_ppp"][fyi] if fyi is not None else None
     bar = "".join(f'<i style="width:{sum(v(i, k) for k in g[2]) / t * 100:.2f}%;background:{GCOL[n]}" title="{g[1]}"></i>' for n, g in enumerate(GROUPS))
-    head = f'In {y} the government of {c["name"]} spent <b>{t:.1f} %</b> of GDP (<b>{ordinal(rk_t)}</b> of {len(FULL)}'
+    head = f'In {y} the general government of {c["name"]} (all levels) spent <b>{t:.1f} %</b> of GDP (<b>{ordinal(rk_t)}</b> of {len(FULL)}'
     head += f'; ${t / 100 * pcv:,.0f} per person at PPP)' if pcv else ')'
     top = ", ".join(f'{SHORT[k]} {s:.0f} %' for s, k in shares[:3])
     notes = []
@@ -76,10 +74,13 @@ def card(i):
     rev, bal, debt = (f[k][fyi] if fyi is not None else None for k in ("rev", "bal", "debt"))
     fiscal = ""
     if rev is not None:
-        fiscal = f' IMF: revenue {rev:.1f} % of GDP, {"deficit" if bal < 0 else "surplus"} {abs(bal):.1f} %, gross debt {debt:.1f} %.'
+        fiscal = f' IMF World Economic Outlook headline (its coverage can differ from the spending above): revenue {rev:.1f} % of GDP, {"deficit" if bal < 0 else "surplus"} {abs(bal):.1f} %, gross debt {debt:.1f} %.'
     cav = CAVEAT.get(i, "")
     if int(y) < 2023: cav = f' <em>Latest year with a functional breakdown is {y}.</em>'
     if c["sector"][y] != "S13": cav += " <em>Central government only.</em>"
+    exp = f["exp"][fyi] if fyi is not None else None
+    if exp is not None and abs(t - exp) >= 1.9:  # spending by purpose and the IMF headline expenditure are not on the same footing
+        cav += f" <em>Spending by purpose covers {t:.1f} % of GDP, the IMF headline expenditure {exp:.1f} %: the revenue, balance and debt quoted here are not on the same footing as the spending.</em>"
     notes_s = (" Stands out: " + "; ".join(notes[:3]) + ".") if notes else ""
     return (f'<div class="bx-prof" data-iso="{i}"><h4>{c["name"]}<small>{y}</small></h4><div class="bx-pbar">{bar}</div>'
             f'<p>{head}. Biggest purposes: {top}.{notes_s}{fiscal}{cav}</p></div>')
