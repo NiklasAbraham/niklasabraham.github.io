@@ -11,7 +11,7 @@ sitemap: false
 ### 1. Verantwortlicher
 
 Niklas Abraham, Hegelstraße 10, 71155 Altdorf, Deutschland<br>
-E-Mail: [nikseb57@gmail.com](mailto:nikseb57@gmail.com)
+E-Mail: [niklas.abraham@folaint.de](mailto:niklas.abraham@folaint.de)
 
 ### 2. Hosting
 

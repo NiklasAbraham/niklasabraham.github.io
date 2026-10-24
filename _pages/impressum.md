@@ -17,7 +17,7 @@ Deutschland
 
 ### Kontakt
 
-E-Mail: [nikseb57@gmail.com](mailto:nikseb57@gmail.com)
+E-Mail: [niklas.abraham@folaint.de](mailto:niklas.abraham@folaint.de)
 
 ### Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
 
