@@ -120,7 +120,7 @@ const cursorSvg = (() => {
 })();
 // label plate
 {
-  const plan = { x: PLATE.x + PLATE.w - 40, y: PLATE.y + PLATE.d - 22, w: 28, d: 14, r: 1.2 };
+  const plan = { x: PLATE.x + 10, y: PLATE.y + PLATE.d - 24, w: 28, d: 14, r: 1.2 };
   back.push(S(k.slabOf(plan, 0, 0.8, P, 4), { tone: "lo" }));
   back.push(Ln(k.planOutline(k.insetPlan(plan, 1.6), 0.8, P, 3), { tone: "faint" }));
   back.push(Ln([0, 1, 2].map((i) => k.lineOnTop([plan.x + 4, plan.y + 4 + i * 3], [plan.x + 4 + [18, 12, 15][i], plan.y + 4 + i * 3], 0.8, P)).join(""), { tone: "lo", free: true }));
@@ -144,8 +144,17 @@ const bermRing = (a0, a1) => {
   const outer = pts.map((a) => [BERM.out * Math.cos(a * D2R), BERM.out * Math.sin(a * D2R)]).reverse();
   return [...inner, ...outer];
 };
-put("berm.back", pol(BERM.crestIn, VA + 180, BERM.h / 2), bermBack, [A.extruded(bermRing(VA + 90, VA + 270), 0, BERM.h, { name: "berm.back" })]);
-put("berm.front", pol(BERM.crestIn, VA, BERM.h / 2), bermFront, [A.extruded(bermRing(VA - 90, VA + 90), 0, BERM.h, { name: "berm.front" })]);
+// recorded as three stacked rings that follow the slopes
+const bermLayers = (a0, a1, name) => [0, 1, 2].map((i) => {
+  const z0 = (BERM.h * i) / 3;
+  const z1 = (BERM.h * (i + 1)) / 3;
+  const rin = BERM.in + ((BERM.crestIn - BERM.in) * z1) / BERM.h;
+  const rout = BERM.out - ((BERM.out - BERM.crestOut) * z1) / BERM.h;
+  const pts = Mh.span(a0, a1, 3);
+  return A.extruded([...pts.map((a) => [rin * Math.cos(a * D2R), rin * Math.sin(a * D2R)]), ...pts.map((a) => [rout * Math.cos(a * D2R), rout * Math.sin(a * D2R)]).reverse()], z0, z1 - z0, { name: `${name}#${i}`, owner: name });
+});
+put("berm.back", pol(BERM.crestIn, VA + 180, BERM.h / 2), bermBack, bermLayers(VA + 90, VA + 270, "berm.back"));
+put("berm.front", pol(BERM.crestIn, VA, BERM.h / 2), bermFront, bermLayers(VA - 90, VA + 90, "berm.front"));
 record(A.extruded(bermRing(0, 360), -0.01, 0.01, { name: "stand.yard", ground: true }));
 
 // ---------- the tank: one composite item, painted inside out ----------
@@ -373,7 +382,6 @@ function pipe(name, control, r, { bend = 2.6, tone = "mid", collars = [], extraG
   const line = G.fillet(control, Math.max(r * bend, 3), 12, { P, tube: r });
   const total = G.pathLength(line);
   const gaps = [...(typeof extraGaps === "function" ? extraGaps(line, total) : extraGaps)];
-  if (process.env.CT_DEBUG) console.log(name, total.toFixed(1), JSON.stringify(gaps.map((g) => g.map((v) => +v.toFixed(1)))));
   for (const c of collars) {
     const along = c.at < 0 ? total + c.at : c.at;
     const from = Math.max(0, along - c.thick / 2);
@@ -424,10 +432,12 @@ function gateValve(name, line, along, r, { tone = "mid", up = 1 } = {}) {
   const nutF = G.frameAlong(G.add3(centre, [0, 0, 0]), [0, 0, 1]);
   turned(`${name}.nut`, nutF, [[yt, r * 0.95], [yt + 0.9, r * 0.95]], { tone: "mid" }, { owner: line.owner, bias: 0.3 });
   // stem (rising stem: shows how open the valve is) and handwheel
-  turned(`${name}.stem`, nutF, [[yt + 0.9, 0.35], [yt + 4.2, 0.35]], { tone: "hi" }, { owner: line.owner, bias: 0.35 });
+  const hw0 = yt + 2.6;
+  turned(`${name}.stem`, nutF, [[yt + 0.9, 0.35], [hw0 - 0.5, 0.35]], { tone: "hi" }, { owner: line.owner, bias: 0.35 });
+  turned(`${name}.stemtop`, nutF, [[hw0 + 0.5, 0.35], [yt + 4.2, 0.35]], { tone: "hi" }, { owner: line.owner, bias: 0.45 });
   const hw = yt + 2.6;
   const rw = r * 1.9;
-  const wheel = G.ringBand(hw - 0.35, hw + 0.35, rw - 0.55, rw, nutF, P, { steps: 40 });
+  const wheel = G.ringBand(hw - 0.35, hw + 0.35, rw - 0.55, rw, nutF, P, { steps: 40, hole: [hw + 0.35, rw - 0.55] });
   const hub = [[hw - 0.5, 0.75], [hw + 0.5, 0.75]];
   const spokes = [0, 1, 2, 3, 4].map((i) => {
     const a = (i / 5) * Math.PI * 2 + 0.3;
@@ -438,7 +448,7 @@ function gateValve(name, line, along, r, { tone = "mid", up = 1 } = {}) {
     const SF = G.frameAlong(G.add3(nutF.o, [0, 0, hw]), [Math.cos(a), Math.sin(a), 0]);
     return record(A.disc(SF, 0.6, rw - 0.45, 0.18, { name: `${name}.spoke${i}`, owner: line.owner }));
   });
-  put(`${name}.wheel`, G.add3(nutF.o, [0, 0, hw]), Ln(spokes, { tone: "mid" }) + S(wheel, { tone: "mid" }) + S(G.solidOf(hub, nutF, P), { tone: "mid" }), [record(A.ring(nutF, hw - 0.35, hw + 0.35, rw - 0.55, rw, { name: `${name}.wheel`, owner: line.owner })), record(A.disc(nutF, hw - 0.5, hw + 0.5, 0.75, { name: `${name}.hub`, owner: line.owner })), ...spokeShapes], { bias: 0.4 });
+  put(`${name}.wheel`, G.add3(nutF.o, [0, 0, hw]), S(wheel, { tone: "mid" }) + Ln(spokes, { tone: "mid" }) + S(G.solidOf(hub, nutF, P), { tone: "mid" }), [record(A.ring(nutF, hw - 0.35, hw + 0.35, rw - 0.55, rw, { name: `${name}.wheel`, owner: line.owner })), record(A.disc(nutF, hw - 0.5, hw + 0.5, 0.75, { name: `${name}.hub`, owner: line.owner })), ...spokeShapes], { bias: 0.4 });
   return { centre, half };
 }
 
@@ -467,7 +477,7 @@ const STR_R = R + 4.75;
 }
 // handrail: posts on the treads, knuckle balls on the posts, rail segments between the knuckles
 const RAIL_R = R + 3.7;
-const POSTS = [2, 5, 8, 11, 13];
+const POSTS = [2, 5, 8, 11];
 const knuckles = POSTS.map((i) => {
   const z = ((H + 0.4) * i) / STAIR.n;
   const a = stairA(z);
@@ -526,7 +536,19 @@ const zOfMbbl = (m) => M.Z_HIGH - (m / (M.WORKING_KB / 1000)) * (M.Z_HIGH - M.Z_
 }
 const TAPE_U = 1.2;
 const tapeAt = (z) => G.add3(G.mul3(GF.a, GB.s1 + 0.05), G.add3(G.mul3(GF.u, TAPE_U), [0, 0, z]));
-const TARGET0 = M.Z_HIGH; // target index at the "0 m bbl" mark when the roof is on its legs
+// the target rides on the board face; its index edge reads the board (0 m bbl at the top, 76 at the bottom):
+// index z = Z_HIGH + Z_LOW - level (the tape runs over the sheave, so the target falls as the roof rises)
+const targetZ = (level) => M.Z_HIGH + M.Z_LOW - level;
+const TZ0 = targetZ(L0);
+{
+  const TF = GF;
+  const svgT = S(G.prismOf(TF, rect(-GB.w - 0.4, TAPE_U + 0.9, TZ0 - 0.7, TZ0 + 0.7), GB.s1, GB.s1 + 0.7, P), { tone: "hi", lit: true }) +
+    Ln(path3([G.add3(G.mul3(TF.a, GB.s1 + 0.7), G.add3(G.mul3(TF.u, -GB.w - 0.4), [0, 0, TZ0])), G.add3(G.mul3(TF.a, GB.s1 + 0.7), G.add3(G.mul3(TF.u, TAPE_U - 0.6), [0, 0, TZ0]))]), { tone: "lit" });
+  const sh = record(A.prism(TF, rect(-GB.w - 0.4, TAPE_U + 0.9, TZ0 - 0.7, TZ0 + 0.7), GB.s1, GB.s1 + 0.7, { name: "gauge.target" }));
+  put("gauge.target", G.add3(G.mul3(GF.a, GB.s1 + 0.4), [0, 0, TZ0]), `<g data-part="target">${svgT}</g>`, [sh], { bias: 0.2 });
+  // the tape from the target up to the gauge head
+  put("gauge.tape", G.add3(G.mul3(GF.a, GB.s1 + 0.1), [0, 0, (TZ0 + M.Z_HIGH) / 2]), `<path class="iso-line" data-tone="hi" data-part="tape" d="${path3([tapeAt(TZ0 + 0.7), tapeAt(M.Z_HIGH + 0.6)])}"/>`, [A.tube([tapeAt(TZ0 + 0.7), tapeAt(M.Z_HIGH + 0.6)], 0.2, { name: "gauge.tape", limp: true })], { bias: 0.1 });
+}
 {
   const conduit = [G.add3(G.mul3(GF.a, GB.s0 + 1.6), [0, 0, M.Z_HIGH + 3]), G.add3(G.mul3(GF.a, GB.s0 + 1.6), [0, 0, H + 2.4]), G.add3(G.mul3(GF.a, R + 1.4), [0, 0, H + 2.4])];
   tubeItems("gauge.conduit", G.fillet(conduit, 1.2, 8, { P, tube: 0.45 }), 0.45, { tone: "mid", maxLength: 6 });
@@ -534,7 +556,7 @@ const TARGET0 = M.Z_HIGH; // target index at the "0 m bbl" mark when the roof is
 
 // ---------- shell manway ----------
 {
-  const a = -27;
+  const a = 10;
   const F = G.frameAlong(pol(R - 0.05, a, 3.6), Mh.radial(a));
   discItem("manway.pad", F, 0, 0.5, 3.6, { tone: "mid" });
   discItem("manway.cover", F, 0.5, 1.3, 3.0, { tone: "mid" }, { extra: Dots(G.dotsOf(F, 1.3, 2.5, 12, P, { all: true }), { size: 0.4 }) });
@@ -546,7 +568,7 @@ const PR = 2.4; // pipe radius
 const RUN_Z = 16; // pipe-rack height (pipe centreline)
 const HEADER_X = 112;
 const TEE_R = 3.6;
-const TANK_LINES = [-12, 4];
+const TANK_LINES = [-22, -6];
 const teeEnd = HEADER_X - Math.sqrt(TEE_R ** 2 - PR ** 2);
 const valves = [];
 TANK_LINES.forEach((a, i) => {
@@ -570,9 +592,9 @@ for (const x of [95]) {
 
 // ---------- pipe rack and manifold ----------
 const BEAM_TOP = RUN_Z - PR;
-for (const y of [-32, 14, 50]) {
-  box(`rack.beam${y}`, [HEADER_X - 8, y - 1, BEAM_TOP - 1], [HEADER_X + 28, y + 1, BEAM_TOP], { tone: "mid" });
-  for (const x of [HEADER_X - 6, HEADER_X + 25]) box(`rack.post${y}.${x}`, [x - 0.8, y - 0.8, 0], [x + 0.8, y + 0.8, BEAM_TOP - 1], { tone: "mid" });
+for (const y of [-18, 22, 47]) {
+  box(`rack.beam${y}`, [HEADER_X - 8, y - 1, BEAM_TOP - 1], [HEADER_X + 26, y + 1, BEAM_TOP], { tone: "mid" });
+  for (const x of [HEADER_X - 6, HEADER_X + 23]) box(`rack.post${y}.${x}`, [x - 0.8, y - 0.8, 0], [x + 0.8, y + 0.8, BEAM_TOP - 1], { tone: "mid" });
 }
 // header + meter run (south) + kicker (north) as one line, from the meter riser to the launcher barrel
 const BARREL = { x: HEADER_X + 38, y0: 40, y1: 68, r: 4.2 };
@@ -674,6 +696,24 @@ let POT;
   gateValve("valve.main", main, MV, PR);
 }
 
+// ---------- fire-water monitor outside the berm (foam/water cannon aimed at the tank) ----------
+{
+  const base = [-58, 74];
+  const F = G.frameAlong([base[0], base[1], 0], [0, 0, 1]);
+  turned("monitor.flange", F, [[0, 2.6], [0.7, 2.6]], { tone: "lo" }, { extra: Dots(G.dotsOf(F, 0.7, 2.0, 6, P, { all: true }), { size: 0.4 }) });
+  turned("monitor.riser", F, [[0.7, 1.2], [8.2, 1.2], [8.2, 1.7], [9.0, 1.7]], { tone: "mid" }, { inner: Ln(G.arcOf(F, 4.2, 1.2, P), { tone: "faint" }) });
+  const ball = [base[0], base[1], 9.0 + 1.6];
+  ballItem("monitor.swivel", ball, 1.9, { tone: "mid" });
+  const dir = G.unit3([-base[0], -base[1], Math.hypot(base[0], base[1]) * 0.36]);
+  const NF = G.frameAlong(ball, dir);
+  const r0 = 1.0;
+  const s0 = Math.sqrt(1.9 ** 2 - r0 ** 2);
+  turned("monitor.barrel", NF, [[s0, r0], [s0 + 4.5, 0.85, 1], [s0 + 7.5, 0.6, 1], [s0 + 7.5, 0.8], [s0 + 8.6, 0.8]], { tone: "mid" });
+  // the aiming lever
+  const LF = G.frameAlong(ball, G.unit3([-dir[0], -dir[1], -0.2]));
+  turned("monitor.lever", LF, [[1.75, 0.3], [5.2, 0.3]], { tone: "mid" });
+}
+
 // ---------- order, page ----------
 A.settle(R_, P);
 R_.items.sort((a, b) => a.key - b.key);
@@ -695,6 +735,9 @@ const DATA = {
   stops: [M.NEGATIVE_WEEK, M.PEAK_2020, M.LOW_2026, M.LATEST],
   latest: M.LATEST,
   hinge: HINGE,
+  tz0: TZ0,
+  tapeFoot: tapeAt(0),
+  tapeTop: tapeAt(M.Z_HIGH + 0.6),
   inward: INWARD,
   across: ACROSS,
   ladderLen: LADDER_LEN,
@@ -704,15 +747,16 @@ const DATA = {
 };
 const LIVE = readFileSync(join(HERE, "live.js"), "utf8").replace("__DATA__", JSON.stringify(DATA));
 const body = `<style>${CSS}</style>` + k.plateHtml({
-  fig: "Fig",
-  title: "Cushing tank",
-  hint: "Drag or ← → to move through the weeks",
+  fig: "Fig · Cushing, Oklahoma",
+  title: "Crude storage tank",
+  hint: "Drag or ← → through the weeks",
   readout: M.readout(M.LATEST),
   keys: [
-    { mark: "lit", label: "Floating roof: rides on the crude, height = Cushing stocks" },
-    { mark: "raised", label: "Shell, berm, stair, valves and manifold" },
+    { mark: "lit", label: "Floating roof and gauge target: their height is Cushing crude stocks" },
+    { mark: "raised", label: "Shell cut away to show the crude (orange)" },
+    { mark: "red", label: "Time rule: week WTI futures went negative" },
   ],
-  caption: "",
+  caption: "Schematic: one tank stands for the whole hub. Capacities approximate (EIA storage-capacity report); stocks EIA weekly, 2004 to 16 Oct 2026.",
   body: `<div class="iso-stage ct-stage" tabindex="0" role="slider" aria-label="Cushing crude stocks by week; left and right arrows step one week, Page Up and Page Down one year" aria-valuemin="0" aria-valuemax="${M.WEEKS.length - 1}" aria-valuenow="${M.LATEST}" aria-valuetext="${M.readout(M.LATEST)}">${svgFig}</div>`,
 });
 const page = k.pageHtml({ title: "Cushing tank", theme: THEME, body, script: kitScript() + LIVE, width: 720 });
@@ -720,4 +764,4 @@ mkdirSync(OUT, { recursive: true });
 const name = THEME === "light" ? "cushing-tank-light.html" : "cushing-tank.html";
 writeFileSync(join(OUT, name), page);
 console.log("wrote", name, `${(page.length / 1024).toFixed(0)} KB`, `${R_.items.length} items`, `scale ${KS.toFixed(3)}`);
-A.auditOrExit(R_, P, {});
+A.auditOrExit(R_, P, { crowd: [["gauge.conduit", "gauge.board"]] });

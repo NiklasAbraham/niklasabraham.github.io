@@ -92,6 +92,31 @@ def ai():
     save(fig, "ai-money")
 
 
-for fn in (energy, food, budget, ai):
+def oil():
+    """Blueprint paper: the 3-2-1 crack since 2006 as a red ridge over the Brent line, an orange barrel split by a crack."""
+    o = json.load(open(A / "oil-article/oil.json"))["monthly"]
+    t = [i for i, d in enumerate(o["t"]) if d >= "2006-07" and o["crack321_nyw"][i] is not None]
+    c = np.array([o["crack321_nyw"][i] for i in t]); b = np.array([o["brent"][i] for i in t])
+    fig, ax = canvas("#0b1424")
+    for x in range(0, W, 40): ax.plot([x, x], [0, H], color="#1a2a44", lw=0.6 if x % 160 else 1.1)
+    for y in range(0, H, 40): ax.plot([0, W], [y, y], color="#1a2a44", lw=0.6 if y % 160 else 1.1)
+    x = np.linspace(80, W - 80, len(t))
+    yb = H - 90 - b / 160 * (H - 400); yc = H - 90 - np.clip(c, 0, None) / 82 * (H - 420)
+    ax.plot(x, yb, color="#8fb0f5", lw=2, alpha=0.55)
+    ax.fill_between(x, H - 90, yc, color="#e5533d", alpha=0.22, lw=0); ax.plot(x, yc, color="#e5533d", lw=3)
+    ax.plot([80, W - 80], [H - 90, H - 90], color="#dfe6f1", lw=1.6)
+    cx, top, bw, bh = 600, 60, 130, 210  # barrel with a zigzag crack
+    zig = [(cx + dx, top + dy) for dx, dy in [(0, 0), (12, 30), (-8, 60), (14, 95), (-6, 130), (12, 165), (-10, 200), (6, 230), (0, bh)]]
+    for side in (-1, 1):
+        off = side * 14
+        xs = [cx - bw / 2 + off, cx - bw / 2 + off] if side < 0 else [cx + bw / 2 + off, cx + bw / 2 + off]
+        poly = [(xs[0], top), *[(p[0] + off, p[1]) for p in zig], (xs[0], top + bh)] if side < 0 else [(xs[0], top), *[(p[0] + off, p[1]) for p in zig], (xs[0], top + bh)]
+        ax.add_patch(Polygon(poly, closed=True, fc="#13223a", ec="#dfe6f1", lw=2, zorder=5))
+        for yy in (top + bh / 3, top + 2 * bh / 3): ax.plot([xs[0], zig[2][0] + off], [yy, yy], color="#dfe6f1", lw=1, alpha=0.5, zorder=6)
+        ax.plot([p[0] + off for p in zig], [p[1] for p in zig], color="#e8913a", lw=3, zorder=7)
+    save(fig, "oil-market")
+
+
+for fn in (energy, food, budget, ai, oil):
     fn()
 print(sorted(p.name for p in OUT.iterdir()))

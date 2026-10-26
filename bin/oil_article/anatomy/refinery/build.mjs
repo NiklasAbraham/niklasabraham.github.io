@@ -11,7 +11,8 @@ import * as k from "/home/niklas/.claude/skills/anatomy/kit/iso-kit.mjs";
 import * as G from "/home/niklas/.claude/skills/anatomy/kit/lathe.mjs";
 import { tubePieces, tubeSvg } from "/home/niklas/.claude/skills/anatomy/kit/tube.mjs";
 import * as A from "/home/niklas/.claude/skills/anatomy/kit/audit.mjs";
-import { kitScript } from "/home/niklas/.claude/skills/anatomy/scripts/inline-kit.mjs";
+import { kitScript, glScript } from "/home/niklas/.claude/skills/anatomy/scripts/inline-kit.mjs";
+import { glCamera } from "/home/niklas/.claude/skills/anatomy/kit/gl.mjs";
 import { CRUDES, CUTS, SCALE_MAX, FURNACE, COLUMN, readout } from "./model.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -118,7 +119,7 @@ function flangeAt(name, centre, axis, r, thick, { bolts = 0, tone = "mid", owner
   put(name, centre, S(G.disc(-thick / 2, thick / 2, r, F, P), { tone }) + face, [record(A.disc(F, -thick / 2, thick / 2, r, { name, owner }))], { bias, attrs });
 }
 // a pipe: control points -> filleted route, flanges at its ends, optional bands, bellows and blind ends
-function pipe(name, control, r, { valve = null, bend = 2.6, tone = "mid", flanges = [true, true], flangeR = 1.6, bands = [], bellows = null, ends = [true, true], flow = "", touch, maxLength = 16, bias = 0, blind = [false, false] } = {}) {
+function pipe(name, control, r, { valve = null, bend = 2.6, tone = "mid", flanges = [true, true], flangeR = 1.6, bands = [], bellows = null, ends = [true, true], flow = "", touch, maxLength = 30, bias = 0, blind = [false, false] } = {}) {
   const line = G.fillet(control, Math.max(r * bend, 3), 10, { P, tube: r });
   const total = G.pathLength(line);
   const collars = [];
@@ -143,7 +144,7 @@ function pipe(name, control, r, { valve = null, bend = 2.6, tone = "mid", flange
   }
   R.route(name, line, r, { owner: name, gaps, ends, touch, rims: [0, 1].map((i) => (flanges[i] || blind[i] ? r * flangeR : r)), piece: "cdu" });
   const attrs = flow ? ` data-flow="${flow}"` : "";
-  tubePieces(line, r, P, { maxLength, spacing: Math.max(0.8, Math.min(2.2, r * 0.4)), gaps }).forEach((piece, index) =>
+  tubePieces(line, r, P, { maxLength, spacing: Math.max(1.2, Math.min(4, r * 1.3)), gaps }).forEach((piece, index) =>
     put(`${name}:${index}`, piece.mid, tubeSvg(piece, { tone: "hi" }), [A.tube(piece.points, piece.radii)], { bias, route: name, chunk: index, attrs }),
   );
   collars.forEach(({ kind, centre, tangent, radius, thick }, index) =>
@@ -248,7 +249,7 @@ BURNERS.forEach((x) => {
   cyl("burner", x, -40, 3, 11, FUR.leg, { tone: "mid" }, { steps: 24, inner: Ln(k.sideArc(x, -40, 3, 14, P, 16), { tone: "faint" }) });
 });
 // radiant box with a cut-away window on the front face
-const WIN = { x0: -104, x1: -78, z0: 28, z1: 72, y: FY1, t: 3 };
+const WIN = { x0: -100, x1: -60, z0: 28, z1: 72, y: FY1, t: 3 };
 const coalTones = (n) => n;
 void coalTones;
 let furnaceWindow = "";
@@ -281,15 +282,28 @@ let furnaceWindow = "";
     return k.pathOf([L(t0), L(t1)]);
   };
   parts.push(Ln([32, 40, 48, 56, 64].map((z) => clipSeg(at([WIN.x0 - 40, FUR.y + 2, z]), at([WIN.x1 + 40, FUR.y + 2, z]))).filter(Boolean).join(""), { tone: "faint", className: "rf-brick" }));
+  // the hearth: refractory floor with a burner tile round each burner throat
+  const hearth = [[FUR.x + 2, FUR.y + 2, FUR.floor], [FX1 - 2, FUR.y + 2, FUR.floor], [FX1 - 2, FY1 - 2, FUR.floor], [FUR.x + 2, FY1 - 2, FUR.floor]];
+  parts.push(`<path class="rf-hearth" d="${path3(hearth, true)}"/>`);
+  BURNERS.forEach((x) => {
+    const tile = Array.from({ length: 33 }, (_, i) => { const t = (i / 32) * Math.PI * 2; return [x + 4.2 * Math.cos(t), -40 + 4.2 * Math.sin(t), FUR.floor]; });
+    const throat = Array.from({ length: 25 }, (_, i) => { const t = (i / 24) * Math.PI * 2; return [x + 2.2 * Math.cos(t), -40 + 2.2 * Math.sin(t), FUR.floor]; });
+    parts.push(`<path class="rf-tile" d="${path3(tile, true)}"/>` + Ln(path3(tile, true), { tone: "lo", className: "rf-brick" }) + `<path class="rf-throat" d="${path3(throat, true)}"/>`);
+  });
+  // firelight on the back wall, behind the coil
+  {
+    const c = at([-80, FUR.y + 2, 40]);
+    parts.push(`<ellipse class="rf-glow" cx="${f2(c[0])}" cy="${f2(c[1])}" rx="${f2(34 * KS)}" ry="${f2(26 * KS)}"/>`);
+  }
   // radiant coil: vertical tubes along the back wall
-  for (let x = FUR.x + 5; x < FX1 - 3; x += 4.4) parts.push(S(k.cylinder(x, FUR.y + 4.5, 1.4, FUR.floor, FUR.roof - FUR.floor, P, 12), { tone: "lo", crease: "none" }));
+  for (let x = FUR.x + 5; x < FX1 - 3; x += 4.4) parts.push(S(k.cylinder(x, FUR.y + 4.5, 1.4, FUR.floor, 110 - FUR.floor, P, 12), { tone: "mid", crease: "none", className: "rf-coil" }));
   // flames: one per burner, rising from the floor (drawn in world space, flickered by the page)
   BURNERS.forEach((x, i) => {
     const base = at([x, -40, FUR.floor]);
     const tip = at([x, -40, FUR.floor + 26]);
     const w = 3.4 * KS;
     const h = base[1] - tip[1];
-    const d = `M${f2(base[0] - w)} ${f2(base[1])}C${f2(base[0] - w)} ${f2(base[1] - h * 0.45)} ${f2(base[0] - w * 0.25)} ${f2(base[1] - h * 0.7)} ${f2(tip[0])} ${f2(tip[1])}C${f2(base[0] + w * 0.25)} ${f2(base[1] - h * 0.7)} ${f2(base[0] + w)} ${f2(base[1] - h * 0.45)} ${f2(base[0] + w)} ${f2(base[1])}Z`;
+    const d = `M${f2(base[0] - w)} ${f2(base[1])}C${f2(base[0] - w)} ${f2(base[1] - h * 0.45)} ${f2(base[0] - w * 0.25)} ${f2(base[1] - h * 0.7)} ${f2(tip[0])} ${f2(tip[1])}C${f2(base[0] + w * 0.25)} ${f2(base[1] - h * 0.7)} ${f2(base[0] + w)} ${f2(base[1] - h * 0.45)} ${f2(base[0] + w)} ${f2(base[1])}C${f2(base[0] + w)} ${f2(base[1] + w * 0.45)} ${f2(base[0] - w)} ${f2(base[1] + w * 0.45)} ${f2(base[0] - w)} ${f2(base[1])}Z`;
     parts.push(`<path class="rf-flame" data-flame="${i}" style="transform-origin:${f2(base[0])}px ${f2(base[1])}px" d="${d}"/>`);
   });
   // jambs: the cut through the wall (left side and sill face the viewer)
@@ -304,7 +318,7 @@ let furnaceWindow = "";
 }
 {
   const seams = [41, 61].map((z) => Ln(k.sideSeam({ x: FUR.x, y: FUR.y, w: FUR.w, d: FUR.d, r: 0.6 }, z, P, 2), { tone: "faint" })).join("");
-  const stiff = Ln([-48, -32].map((y) => path3([[FX1, y, FUR.floor], [FX1, y, FUR.roof]])).join("") + path3([[-66, FY1, FUR.floor], [-66, FY1, FUR.roof]]), { tone: "faint" });
+  const stiff = Ln([-48, -32].map((y) => path3([[FX1, y, FUR.floor], [FX1, y, FUR.roof]])).join("") + path3([[-104, FY1, FUR.floor], [-104, FY1, FUR.roof]]), { tone: "faint" });
   box("fur.radiant", [FUR.x, FUR.y, FUR.floor], [FX1, FY1, FUR.roof], { tone: "mid" }, { r: 0.6, bevel: 0.6, inner: seams + stiff, extra: furnaceWindow });
 }
 // peep doors on the outlet face
@@ -438,6 +452,29 @@ for (const [z, ang] of [[104, towardA + 0.35], [252, towardA + 0.5]]) {
   const F = G.frameAlong(face, n);
   disc("col.manway.flange", F, 0, 1.2, 6.6, { tone: "mid" }, {});
   disc("col.manway.cover", F, 1.2, 2.4, 6.6, { tone: "hi" }, { extra: Dots(G.dotsOf(F, 2.4, 5.6, 12, P, { all: true }), { size: 0.4, tone: "lo" }) });
+}
+// instruments: a pressure gauge near the top (needle at the middle of the 1-2 barg range on a 0-4 bar dial)
+// and thermowells at the flash zone and the two draw trays
+{
+  const ang = towardA + 1.0;
+  const n = [Math.cos(ang), Math.sin(ang), 0];
+  const face = nozzleOn("col.pi.pad", 262, ang, 1.6, 1.2);
+  const SF = G.frameAlong(face, n);
+  disc("col.pi.stem", SF, 0, 2.4, 0.8, { tone: "mid" }, {});
+  const GF = G.frameOf(G.add3(face, G.mul3(n, 2.4)), n, [0, 0, -1], G.cross3(n, [0, 0, -1]));
+  const from = Math.PI / 4;
+  const to = (Math.PI * 7) / 4;
+  const share = (COLUMN.barg[0] + COLUMN.barg[1]) / 2 / 4;
+  const t = from + (to - from) * share;
+  const needle = k.pathOf([G.pointOf(GF, 1.7, 0, 0), G.pointOf(GF, 1.7, 2.3, t)].map(at));
+  const dial = Ln(G.circleOf(GF, 1.7, 3, P, 40), { tone: "lo" }) + Ln(G.spokesOf(GF, 1.7, 2.3, 3, 8, P, { from, to: to + (to - from) / 7 }), { tone: "lo" }) + Ln(needle, { tone: "hi", free: "end" }) + Dots([at(G.pointOf(GF, 1.7, 0, 0))], { size: 0.45, tone: "hi" });
+  disc("col.pi", GF, 0, 1.7, 3.6, { tone: "hi" }, { extra: dial });
+  for (const z of [72, 136, 181]) {
+    const f = nozzleOn("col.ti.pad", z, ang, 1.2, 0.9);
+    const TF = G.frameAlong(f, n);
+    disc("col.ti.well", TF, 0, 2.2, 0.6, { tone: "mid" }, {});
+    disc("col.ti.head", TF, 2.2, 3.8, 1.3, { tone: "mid" }, {});
+  }
 }
 const bottomsFace = pad("col.bottoms", skirt, [COL.x, COL.y + COL.r, LOW], [0, 1, 0], 3, 2.4);
 
@@ -631,7 +668,8 @@ const svg = k.figureSvg({ width: W, height: H, label: LABEL, body: [...back, `<g
 const CSS = `
 .rf-stage{--crude:#E8913A;--c-lpg:#9DB0C6;--c-naphtha:#A6C94A;--c-kero:#E9ECEF;--c-diesel:#4FA8E0;--c-resid:#A07E5C;--c-vr:#4E3626;--c-hot:#E8913A;touch-action:pan-y;outline:none}
 .iso[data-theme="light"] .rf-stage{--c-lpg:#7F93AB;--c-kero:#C9CED6;--c-resid:#9A7652;--c-vr:#3F2A1C}
-.rf-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:6px}
+.rf-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:2px}
+.it[data-pick][data-on] .iso-edge{stroke:var(--anatomy-lit)}
 .rf-cavity{fill:#07080a}
 .iso[data-theme="light"] .rf-cavity{fill:#3a3631}
 .rf-tray{fill:#1a1b1e}
@@ -654,16 +692,27 @@ const CSS = `
 .it[data-flow="hot"]{--c:var(--c-hot)}.it[data-flow="vapour"]{--c:var(--c-lpg)}.it[data-flow="lpg"]{--c:var(--c-lpg)}.it[data-flow="naphtha"]{--c:var(--c-naphtha)}.it[data-flow="kero"]{--c:var(--c-kero)}.it[data-flow="diesel"]{--c:var(--c-diesel)}.it[data-flow="resid"]{--c:var(--c-resid)}
 .it[data-flow="resid"] .iso-fill{fill:color-mix(in srgb,var(--c) 55%,var(--anatomy-paper))}
 .rf-flame{fill:url(#rf-fire);mix-blend-mode:screen;opacity:.9}
+.rf-glow{fill:url(#rf-glow)}
+.rf-hearth{fill:#16130f}.rf-tile{fill:#1d1813}.rf-throat{fill:#2a1608}
+.iso[data-theme="light"] .rf-hearth{fill:#4a433b}.iso[data-theme="light"] .rf-tile{fill:#554c42}.iso[data-theme="light"] .rf-throat{fill:#3a2414}
+.iso[data-theme="light"] .rf-brick{stroke:#6b625a}
+.rf-coil .iso-fill,.rf-coil .iso-shade,.rf-coil .iso-top{fill:#0b0b0c}
+.iso[data-theme="light"] .rf-coil .iso-fill,.iso[data-theme="light"] .rf-coil .iso-shade,.iso[data-theme="light"] .rf-coil .iso-top{fill:#2b2723}
+.rf-coil .iso-edge{stroke:#5a4636}
 .iso[data-theme="light"] .rf-flame{mix-blend-mode:normal}
 .rf-hit{fill:transparent;cursor:pointer}
+.rf-art{position:relative}.rf-art svg{display:block;width:100%;height:auto}
+.rf-gl{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen}
+.iso[data-theme="light"] .rf-gl{mix-blend-mode:normal}
+.rf-stage[data-gl] .rf-flame{display:none}
 .iso-page{width:100%!important;max-width:720px;margin:0 auto!important}
 body{margin:0}
 .iso-plate-corner[data-corner="hint"]{top:17px;bottom:auto!important}
 .iso-plate-corner[data-corner="readout"]{left:0;white-space:normal;text-align:right;line-height:1.45}
-@media (max-width:560px){.iso-plate{padding-bottom:64px!important}}
+@media (max-width:560px){.iso-plate{padding-bottom:64px!important}.rf-stage{overflow:hidden}.rf-art{width:112%;margin:0 0 0 -6%}}
 .rf-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 `;
-const GRAD = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rf-fire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff2c4"/><stop offset=".35" stop-color="#ffb347"/><stop offset=".75" stop-color="#e8613a" stop-opacity=".75"/><stop offset="1" stop-color="#c0392b" stop-opacity="0"/></linearGradient></defs></svg>`;
+const GRAD = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rf-fire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff2c4"/><stop offset=".35" stop-color="#ffb347"/><stop offset=".75" stop-color="#e8613a" stop-opacity=".75"/><stop offset="1" stop-color="#c0392b" stop-opacity="0"/></linearGradient><radialGradient id="rf-glow"><stop offset="0" stop-color="#e8913a" stop-opacity=".55"/><stop offset=".6" stop-color="#b8502a" stop-opacity=".18"/><stop offset="1" stop-color="#b8502a" stop-opacity="0"/></radialGradient></defs></svg>`;
 
 const DATA = {
   P,
@@ -674,6 +723,11 @@ const DATA = {
   glasses: GLASSES,
   valves: VALVES,
   furnace: FURNACE,
+  W,
+  H,
+  camera: glCamera(P),
+  // the burner flames the shader draws, in the same world numbers as the SVG
+  fire: { face: FY1, wall: WIN.t, win: [WIN.x0, WIN.x1, WIN.z0, WIN.z1], y: -40, floor: FUR.floor, height: 26, width: 3.4, xs: BURNERS, seam: 0.3 / KS, perp: k.towardViewer(P) },
 };
 const LIVE = readFileSync(join(HERE, "live.js"), "utf8").replace("__DATA__", JSON.stringify(DATA)).replace("__READOUT__", readout.toString());
 
@@ -691,10 +745,10 @@ const body =
       { mark: "edge", label: "Glasses, left to right: residue (vacuum residue dark below), diesel blue, jet pale, naphtha green, LPG grey" },
     ],
     caption: `A crude distillation unit as a bench model (schematic). The charge pump sends crude through the furnace, which heats it to about ${FURNACE.outletC[0]}–${FURNACE.outletC[1]} °C (hotter and it starts to crack); in the column, at about ${COLUMN.barg[0]}–${COLUMN.barg[1]} bar gauge over ${COLUMN.trays[0]}–${COLUMN.trays[1]} trays, the vapour separates by boiling range: LPG, naphtha ${CUTS[1].tbp[0]}–${CUTS[1].tbp[1]} °C, jet ${CUTS[2].tbp[0]}–${CUTS[2].tbp[1]}, gasoil/diesel ${CUTS[3].tbp[0]}–${CUTS[3].tbp[1]} °C, and the residue above ${CUTS[4].tbp[0]} °C leaves through the skirt toward a vacuum unit and cracker. Pick a crude: each glass fills to its straight-run yield in weight % (TotalEnergies assays). Straight-run gasoil is 23–29 % for almost every grade, so most of a refinery's diesel has to be made by cracking the vacuum gasoil and residue, which is why heavy crude needs cracking units and why crude is priced by the diesel that can be got out of it.`,
-    body: `<div class="iso-stage rf-stage" tabindex="0" role="group" aria-label="Crude distillation unit. Click a barrel, or use the left and right arrow keys, to choose Brent, Oman or Canadian heavy Synbit; the sight glasses show its straight-run yields.">${svg}<span class="rf-sr" role="status" aria-live="polite" data-status></span></div>`,
+    body: `<div class="iso-stage rf-stage" tabindex="0" role="group" aria-label="Crude distillation unit. Click a barrel, or use the left and right arrow keys, to choose Brent, Oman or Canadian heavy Synbit; the sight glasses show its straight-run yields."><div class="rf-art">${svg}<canvas class="rf-gl" aria-hidden="true"></canvas></div><span class="rf-sr" role="status" aria-live="polite" data-status></span></div>`,
   });
 
-const page = k.pageHtml({ title: "Crude distillation unit", theme: THEME, body, script: kitScript() + LIVE, width: 720 });
+const page = k.pageHtml({ title: "Crude distillation unit", theme: THEME, body, script: kitScript() + glScript() + LIVE, width: 720 });
 mkdirSync(OUT, { recursive: true });
 const name = THEME === "light" ? "refinery-light.html" : "refinery.html";
 writeFileSync(join(OUT, name), page);

@@ -653,7 +653,7 @@
   // ---- crude grades: what each one yields in the first distillation
   FIG.assay = function (root) {
     const A = DATA.curated.assays;
-    const { stage, legend } = sheet(root, { eyebrow: 'Straight-run yields by boiling range, weight %', short: 'Crude assays', source: 'TotalEnergies crude assays' });
+    const { stage, legend } = sheet(root, { eyebrow: 'Straight-run yields by boiling range, weight %', short: 'Crude assays', source: 'TotalEnergies crude assays', date: 'assays 2006–21' });
     const CUTS = [['Gas and LPG', C.gold], ['Naphtha, 15–150 °C', C.gas], ['Kerosene, 150–230 °C', C.jet], ['Gasoil, 230–375 °C', C.diesel], ['Vacuum gasoil, 375–550 °C', '#b58a5e'], ['Vacuum residue, above 550 °C', '#5d4a3a']];
     const W = 760, LW = 200, rh = 44, H = A.length * rh + 30;
     const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Straight-run yields of six crude oils' });
@@ -731,7 +731,7 @@
   // ---- cost of a barrel: breakevens against the price
   FIG.cost = function (root) {
     const cu = DATA.curated;
-    const { stage, ctrl } = sheet(root, { eyebrow: 'Breakeven prices, $ per barrel', short: 'What a barrel costs', source: 'Rystad 2024 · Dallas Fed 2026 · IMF 2025' });
+    const { stage, ctrl } = sheet(root, { eyebrow: 'Breakeven prices, $ per barrel', short: 'What a barrel costs', source: 'Rystad 2024 · Dallas Fed 2026 · IMF 2025', date: '2024–2026' });
     const st = { v: root.dataset.view || 'supply', price: 69 };
     const read = h('div', { class: 'os-read' });
     const sl = slider('Oil price', 20, 170, 1, st.price, (v) => { st.price = v; mark(); }, (v) => '$' + v);
@@ -760,7 +760,7 @@
   // ---- spare capacity before the war, and what was shut in
   FIG.spare = function (root) {
     const cu = DATA.curated;
-    const { stage, ctrl } = sheet(root, { eyebrow: 'OPEC+ effective spare capacity, February 2026, mb/d', short: 'Spare capacity', source: 'IEA OMR Mar 2026 · EIA STEO Oct 2026' });
+    const { stage, ctrl } = sheet(root, { eyebrow: 'OPEC+ effective spare capacity, February 2026, mb/d', short: 'Spare capacity', source: 'IEA OMR Mar 2026 · EIA STEO Oct 2026', date: 'Feb–Sep 2026' });
     const st = { v: root.dataset.view || 'spare' };
     ctrl.append(seg([['spare', 'Spare capacity, Feb 2026'], ['shut', 'Shut in by the war']], st.v, (v) => { st.v = v; draw(); }));
     function draw() {
@@ -805,7 +805,7 @@
   // ---- the futures curve: contango and backwardation from the cost of carry
   FIG.curve = function (root) {
     const cu = DATA.curated;
-    const { stage, ctrl } = sheet(root, { eyebrow: 'Futures price by delivery month, $ per barrel', short: 'The curve', source: 'cost-of-carry model · market points from the text' });
+    const { stage, ctrl } = sheet(root, { eyebrow: 'Futures price by delivery month, $ per barrel', short: 'The curve', source: 'cost-of-carry model · market points from the text', date: 'Oct 2026' });
     const st = { S: 100, r: 4, u: 6, y: 30, preset: 'oct2026' };
     const W = 760, H = 330, M = { l: 54, r: 20, t: 20, b: 34 };
     const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Futures curve from the cost of carry' });

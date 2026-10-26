@@ -41,6 +41,14 @@ export const NEGATIVE_WEEK = WEEKS.findIndex((t) => t >= "2020-04-20"); // the w
 const y2026 = WEEKS.findIndex((t) => t >= "2026-01-01");
 export const LOW_2026 = argmin(y2026, WEEKS.length - 1);
 export const LATEST = WEEKS.length - 1;
+// NYMEX WTI May 2020 contract settlement on 20 Apr 2020, $/bbl (CME Group settlement; EIA "Today in Energy", 21 Apr 2020).
+// Not in the post's pipeline (its daily series starts in 2025), so it is a cited constant.
+export const NEGATIVE_SETTLE = -37.63;
+const mbbl = (i) => (STOCKS[i] / 1000).toFixed(1);
+export const caption = () =>
+  `A floating-roof crude tank at Cushing, Oklahoma, the delivery point of the NYMEX WTI contract. The roof floats on the oil; here its height stands for total crude stocks at Cushing (EIA, weekly) against about ${WORKING_KB / 1000} million barrels of working capacity (about ${SHELL_KB / 1000} million shell capacity; both approximate, from EIA's storage-capacity report), and the gauge board on the shell reads millions of barrels. ` +
+  `Stocks peaked at ${mbbl(ALL_TIME_HIGH)} m bbl in ${dateText(WEEKS[ALL_TIME_HIGH]).slice(-8)}, stood at ${mbbl(NEGATIVE_WEEK)} m bbl in the week the May 2020 WTI future settled at −$${Math.abs(NEGATIVE_SETTLE).toFixed(2)} (20 Apr 2020) and ${mbbl(PEAK_2020)} m bbl a week later, fell to ${mbbl(LOW_2026)} m bbl on ${dateText(WEEKS[LOW_2026])} and were ${mbbl(LATEST)} m bbl on ${dateText(WEEKS[LATEST])}. ` +
+  `Thin stocks at Cushing mean a tight prompt WTI market and backwardation; tanks near full mean contango, and in April 2020 a delivered barrel had nowhere to go. One tank stands for the whole hub; its proportions and the split of the spare volume between tank bottoms and headroom are schematic.`;
 export const ALL_TIME_HIGH = argmax(0, WEEKS.length - 1);
 
 // Tank geometry used to turn stocks into a roof height (schematic: one tank stands for the hub).

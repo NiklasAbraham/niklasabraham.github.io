@@ -21,3 +21,4 @@ body{margin:0}
 .iso[data-theme="light"] .ct-oil{--anatomy-paper:#e8913a;--anatomy-shade-0:#d27a2c;--anatomy-shade-1:#df8733;--anatomy-shade-2:#e8913a;--anatomy-shade-3:#efa25a;--anatomy-top:#efa25a;--anatomy-mid:#b8692a}
 .ct-key-oil{display:inline-block;width:16px;height:8px;background:#e8913a;border-radius:1px}
 .ct-wheel{fill:var(--anatomy-paper);stroke:var(--anatomy-hi);stroke-width:.6}
+@media (max-width:560px){.iso-plate{overflow:hidden}.iso-plate .ct-stage .iso-svg{width:124%;max-width:none;margin:0 0 0 -12%}}

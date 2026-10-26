@@ -42,8 +42,9 @@ function draw() {
   roof.setAttribute("transform", move);
   oilClip.setAttribute("transform", move);
   if (poleClip) poleClip.setAttribute("transform", move);
-  if (target) target.setAttribute("transform", translateAlong(D.P, [0, 0, D.zLow - level + (D.zHigh - D.zLow)]));
-  if (tape && D.tape) tape.setAttribute("d", seg([D.tape[0], D.tape[1], D.zLow - level + D.zHigh + D.tape[3]], [D.tape[0], D.tape[1], D.tape[2]]));
+  const tz = D.zHigh + D.zLow - level;
+  if (target) target.setAttribute("transform", translateAlong(D.P, [0, 0, tz - D.tz0]));
+  if (tape) tape.setAttribute("d", seg([D.tapeFoot[0], D.tapeFoot[1], tz + 0.7], D.tapeTop));
   if (cursor) {
     const i0 = clamp(Math.floor(pos), 0, N - 1), i1 = Math.min(N - 1, i0 + 1), u = pos - i0;
     const yr = yearOf(D.weeks[i0]) * (1 - u) + yearOf(D.weeks[i1]) * u;

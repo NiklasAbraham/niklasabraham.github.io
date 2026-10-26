@@ -1,18 +1,19 @@
 ---
 layout: default
 title: The crack writes the story. How the world oil market works, from the well to the pump, in the year of the Hormuz war
-description: The whole oil market in one long read, told the way an engineer would draw it. What crude is and what a refinery does with it, why the crack spread matters more than the price, who pumps and who burns, how oil moves through eight chokepoints, what a supertanker costs per barrel, how Brent and WTI are set and why the gap between them is the price of a voyage, the futures curve, and the 2026 Iran war that closed the Strait of Hormuz. Eighteen blueprint figures, maps with moving tankers, four isometric drawings, EIA data to 20 October 2026, and a source for every claim.
+description: The whole oil market in one long read, told the way an engineer would draw it. What crude is and what a refinery does with it, why the crack spread matters more than the price, who pumps and who burns, how oil moves through eight chokepoints, what a supertanker costs per barrel, sanctions and the dark fleet, how Brent and WTI are set and why the gap between them is the price of a voyage, the futures curve, and the 2026 Iran war that closed the Strait of Hormuz. Nineteen blueprint figures, maps with moving tankers, four isometric drawings, EIA data to 20 October 2026, and a source for every claim.
 date: 2026-10-26
 tags: [oil, energy, markets, geopolitics, data, engineering]
+image: /assets/blog-thumbs/oil-market.webp
 categories: [long-read]
 read_time: 55 # the word count does not include the interactive figures
 ---
 <article class="da oil" markdown="1" data-stations="off" data-brand="The oil market" data-brand-sub="crude, cracks and conflict · a long read" data-contact="https://www.linkedin.com/in/niklas-abraham-05983b247">
 
-<p class="da-eyebrow">Blog · Long read · 18 blueprint figures, 4 isometric drawings · every claim sourced</p>
+<p class="da-eyebrow">Blog · Long read · 19 blueprint figures, 4 isometric drawings · every claim sourced</p>
 <h1 class="da-title">The crack writes the story</h1>
-<p class="da-lede">In September 2026 a refinery on the US East Coast that bought three barrels of crude and sold two barrels of gasoline and one of diesel earned $68 a barrel of crude, more than in any month since the series began twenty years ago. In February, the week before the war, it had earned $29. The price of oil makes the headlines; the gap between what crude costs and what fuels sell for decides what refineries run, where tankers sail and what a litre costs at the pump. This is the whole oil market, from the molecule to the pump, drawn the way an engineer would draw it and told through the year the Strait of Hormuz closed.</p>
-<p class="da-meta">Written by an AI, published by Niklas Abraham · 26 October 2026 · about 55 minutes · price data to 20 October 2026, news to 26 October · 18 interactive figures and 4 drawings</p>
+<p class="da-lede">In September 2026, buying three barrels of American crude and selling two barrels of gasoline and one of diesel in New York Harbor earned $68 per barrel of crude, more than in any month since the price series began twenty years ago. In the week before the war, in February, the same trade earned $29. The price of oil makes the headlines; the gap between what crude costs and what fuels sell for decides what refineries run, where tankers sail and what a litre costs at the pump. This is the whole oil market, from the molecule to the pump, drawn the way an engineer would draw it and told through the year the Strait of Hormuz closed.</p>
+<p class="da-meta">Written by an AI, published by Niklas Abraham · 26 October 2026 · about 55 minutes · price data to 20 October 2026, news to 26 October · 19 interactive figures and 4 drawings</p>
 
 <div class="da-note ai-note" markdown="1">
 **This article was written by an AI.** I saw a short video by *Crude & Conflict* {% include oil-ref.html k="reel" %} that explained the crack spread with engineering drawings of barrels, a distillation column and tankers, and I wanted to understand the entire oil market in that way. So I asked Claude (an AI model from Anthropic) to research, write and code this article to help me learn more. The price, stock and production series are downloaded from the US Energy Information Administration and plotted by script; every other number is quoted from an agency report, a company document or a news report and carries a tag such as {% include oil-ref.html k="iea-mar" %} that leads to the [reference list](#sources). Many 2026 numbers come from paywalled or blocked pages (Reuters, Bloomberg, Argus, the IEA's October report); where only a search summary was seen the list says "snippet", and the number is "as reported". Different trackers disagree about 2026 tanker flows by several million barrels a day, and the text says so where it matters. The drawings are schematic. The prose may contain mistakes, so check what you rely on at its source. If you find an error, [message me on LinkedIn](https://www.linkedin.com/in/niklas-abraham-05983b247). Nothing here is investment or trading advice.
@@ -24,7 +25,7 @@ The article has five parts, and every figure in it can be played with.
 
 1. **The molecule and the machine.** What crude is, what a refinery does to it, and the crack spread.
 2. **Pumps and burners.** Who produces oil, who uses it, what a barrel costs to produce, and the spare capacity that was meant to protect the market.
-3. **Moving it.** Sea lanes and chokepoints, supertankers and the price of a voyage, pipelines and the tank farm in Oklahoma that sets the American price.
+3. **Moving it.** Sea lanes and chokepoints, supertankers and the price of a voyage, the sanctioned dark fleet, and the tank farm in Oklahoma that sets the American price.
 4. **The price.** The benchmarks, the futures curve, and why Brent minus WTI is the price of crossing the Atlantic.
 5. **2026.** The Hormuz war month by month, the diesel crisis it caused, the stocks that were drawn, and what a litre costs.
 
@@ -41,6 +42,7 @@ The article has five parts, and every figure in it can be played with.
 <li><a href="#opec">OPEC+ and the spare barrels</a></li>
 <li><a href="#lanes">Sea lanes and chokepoints</a></li>
 <li><a href="#tanker">The tanker and the price of a voyage</a></li>
+<li><a href="#sanctions">Sanctions and the dark fleet</a></li>
 <li><a href="#cushing">Pipes, hubs and the tank in Oklahoma</a></li>
 <li><a href="#benchmarks">Brent, WTI and Dubai</a></li>
 <li><a href="#curve">The curve: contango and backwardation</a></li>
@@ -200,7 +202,7 @@ The tankers pass eight narrow places, which the EIA calls chokepoints {% include
 Hormuz is the one without an alternative. About 20 million barrels a day passed through it in 2024, a fifth of world consumption, 84 per cent of it bound for Asia {% include oil-ref.html k="eia-hormuz" %}. Only two pipelines bypass it: Saudi Arabia's East–West line from Abqaiq to Yanbu on the Red Sea, rated 5 million barrels a day and convertible to 7, and the UAE's line from Habshan to Fujairah, 1.5 to 1.8. Together they can move about 4.7 million barrels a day out of the Gulf, roughly a third of the crude that normally goes through the strait {% include oil-ref.html k="eia-choke" %}. Kuwait and Iraq's southern fields, Qatar and Bahrain have no bypass at all.
 
 {: .da-bridge}
-What carries all of this is a fleet of about 6,300 tankers, and in 2026 their price became the story.
+What carries all of this is a fleet of about 6,300 tankers above 25,000 tonnes {% include oil-ref.html k="safety4sea" %}, and in 2026 their price became the story.
 
 <h2 id="tanker"><span class="num">10</span>The tanker and the price of a voyage</h2>
 
@@ -214,14 +216,25 @@ The drawing turns a day rate into dollars per barrel:
 
 $$\text{freight per barrel} \approx \frac{\text{day rate} \times \text{days of hire}}{\text{barrels carried}} = \frac{\$1.3\text{ m} \times 50}{2\text{ m}} \approx \$32.5.$$
 
-The agencies' own numbers bracket it. Poten put the rate at about $30,000 a day in January and $1.3 million in October, about $33 a barrel or 27 per cent of the delivered cost of the crude {% include oil-ref.html k="gulfnews-tanker" %}; the IEA put Gulf–Asia freight above $37 a barrel in mid-October, five times the pre-war level, and a VLCC cargo at $74 million against under $15 million {% include oil-ref.html k="iea-freight" %}. Two cautions. The index is partly notional: while Ras Tanura was shut, the Baltic panel priced TD3C off cargoes from Yanbu, and physical fixtures in September earned $530,000 to $603,000 a day while the index printed over $1 million {% include oil-ref.html k="fairway" %} {% include oil-ref.html k="xinde" %}. And war-risk insurance came on top: about 0.25 per cent of the hull's value per transit before the war, 1 per cent from early March, and 6 to 10 per cent per voyage in early October, up to $20 million for one VLCC trip, or roughly $4 a barrel {% include oil-ref.html k="caixin" %} {% include oil-ref.html k="warrisk-oct" %}.
+The agencies' own numbers bracket it. Poten put the rate at about $30,000 a day in January and $1.3 million in October, about $33 a barrel or 27 per cent of the delivered cost of the crude {% include oil-ref.html k="gulfnews-tanker" %}; the IEA put Gulf–Asia freight above $37 a barrel in mid-October, five times the pre-war level, and a VLCC cargo at $74 million against under $15 million {% include oil-ref.html k="iea-freight" %}. Two cautions. The index is partly notional: while Ras Tanura was shut, the Baltic panel priced TD3C off cargoes from Yanbu, and physical fixtures in September earned $530,000 to $603,000 a day while the index printed over $1 million {% include oil-ref.html k="fairway" %} {% include oil-ref.html k="xinde" %}. And war-risk insurance came on top: about 0.25 per cent of the hull's value per transit before the war, 1 per cent from early March, 3 to 10 per cent in July {% include oil-ref.html k="national-wr" %}, and 6 to 10 per cent per voyage in early October, up to $20 million for one VLCC trip, or roughly $4 a barrel {% include oil-ref.html k="caixin" %} {% include oil-ref.html k="warrisk-oct" %}.
 
 Freight rose everywhere, not just in the Gulf, because the fleet is one pool. Ships stranded in the Gulf, ships sailing around Africa instead of through the Red Sea and ships carrying US crude to Asia instead of Gulf crude all take tonnage out of the pool. On the route from the US Gulf to Europe (TD25) an Aframax earned $23,600 a day in July 2025 and $308,200 in mid-October 2026 {% include oil-ref.html k="cyprus-vlcc" %}. Valero, the largest US refiner, said on 22 October that shipping a cargo of US crude to Asia now cost $30 to $35 a barrel against about $5 in 2025, and Asian buyers halved their orders for November loading {% include oil-ref.html k="oilprice-valero" %}.
 
 {: .da-bridge}
+Not every tanker on the sea sails in the open market. Some carry oil that the West has sanctioned.
+
+<h2 id="sanctions"><span class="num">11</span>Sanctions and the dark fleet</h2>
+
+Part of the world's oil moves outside the rules of the rest. Since December 2022 the G7 and the EU have allowed Western shipping and insurance to carry Russian crude only if it is sold below a price cap. The EU and the UK lowered the cap to $47.60 in September 2025 and, under a rule that resets it every six months to 15 per cent below the average Urals price, to **$44.10** from 1 February 2026 {% include oil-ref.html k="ec-cap" %}; when the war lifted Urals, the EU froze the cap at that level in July (logistics research note, snippet). Russia's answer is a fleet of older tankers with opaque owners and insurers: in August 2026 Urals sold at about $66 a barrel, far above the cap, Russia exported 4.9 million barrels a day by sea, India took 2.0 million barrels a day and China 1.65, and 168 loaded shadow-fleet tankers left Russian ports, 92 per cent of them older than fifteen years {% include oil-ref.html k="kse" %}. S&P counts about 980 such tankers, close to a fifth of the world's tanker fleet (logistics research note, snippet).
+
+Iran ran its own version. Its exports, almost all to independent refiners in China, reached 2.16 million barrels a day in February 2026, the most since 2018; after the US blockade returned in July no new Iranian cargo crossed the blockade line, and exports fell to 220,000 to 255,000 barrels a day in August {% include oil-ref.html k="iranintl" %}. Iran also sold its own compulsory "Hormuz insurance", paid in cryptocurrency, until the US Treasury designated the two firms behind it on 29 July {% include oil-ref.html k="treasury-hormuz" %}.
+
+Sanctioned oil matters to everyone else for two reasons. It is cheaper, so the refiners that can buy it (in India, China and Turkey) have an edge over those that cannot. And it uses tankers: every ship in the dark fleet is a ship missing from the ordinary market, which is one more reason freight rose so far in 2026.
+
+{: .da-bridge}
 On land, oil moves by pipe, and one place in the American pipe network matters to the whole world.
 
-<h2 id="cushing"><span class="num">11</span>Pipes, hubs and the tank in Oklahoma</h2>
+<h2 id="cushing"><span class="num">12</span>Pipes, hubs and the tank in Oklahoma</h2>
 
 Cushing, a small town in Oklahoma, is the delivery point of the NYMEX WTI futures contract: whoever holds a contract at expiry must take or deliver crude into a tank there. Pipelines from the Permian Basin in Texas, from the Midcontinent and from Canada meet at Cushing, and others run from it to the refineries and export docks of the Gulf Coast. Working storage at the hub is about 76 to 78 million barrels, out of a shell capacity of about 98 (EIA estimates, as summarised in the research note).
 
@@ -234,7 +247,7 @@ That tie, coast to coast and ocean to ocean, is how the benchmarks are built.
 
 <p class="da-part">Part IV<strong>The price</strong></p>
 
-<h2 id="benchmarks"><span class="num">12</span>Brent, WTI and Dubai</h2>
+<h2 id="benchmarks"><span class="num">13</span>Brent, WTI and Dubai</h2>
 
 Almost every barrel in the world is sold at a **differential** to one of three benchmarks: Brent for the Atlantic Basin, Africa and much of Asia; WTI for the Americas; Dubai and Oman for Middle East crude going to Asia. The benchmarks themselves are assessed by price reporting agencies, Platts and Argus, from the trades made in a short window at the end of each day, or settled on an exchange.
 
@@ -242,14 +255,14 @@ Almost every barrel in the world is sold at a **differential** to one of three b
 
 {% include oil.html kind="northsea" title="What <em>Brent</em> is" caption="The five North Sea grades of the Dated Brent basket with their September 2026 loading programmes and terminals, and the US crude that joined the basket in 2023 (WTI Midland, assessed delivered to Rotterdam). Positions approximate; loadings from Reuters loading programmes (snippet) and S&P Commodities at Sea." %}
 
-**ICE Brent futures** are the paper layer on top: contracts for 1,000 barrels, cash-settled against an index or exchanged for physical cargoes, expiring at the end of the second month before delivery {% include oil-ref.html k="ice-brent" %}. "The oil price" in news reports is usually the front-month future, and in 2026 it and the physical price came apart. On 7 April Dated Brent reached an all-time high of $144.68 (Argus) while futures were near $109, a physical premium of $35.41, a record {% include oil-ref.html k="iea-may" %}. The EIA's own Brent spot series, which this article plots, peaked at $138.21 that day {% include oil-ref.html k="eia-spot" %}. Whenever this article says "Brent spot" it means the EIA series.
+**ICE Brent futures** are the paper layer on top: contracts for 1,000 barrels, cash-settled against an index or exchanged for physical cargoes, expiring at the end of the second month before delivery {% include oil-ref.html k="ice-brent" %}. "The oil price" in news reports is usually the front-month future, and in 2026 it and the physical price came apart. On 7 April Dated Brent reached an all-time high of $144.68 (Argus) while futures were near $109, a physical premium of $35.41, a record {% include oil-ref.html k="iea-may" %} {% include oil-ref.html k="fxnx" %}. The EIA's own Brent spot series, which this article plots, peaked at $138.21 that day {% include oil-ref.html k="eia-spot" %}. Whenever this article says "Brent spot" it means the EIA series.
 
 **WTI** is the NYMEX contract delivered at Cushing. **Dubai** is a Platts assessment of Gulf crude for Asia, and in March 2026, when Asia lost its supply first, Dubai averaged $128.20, far above Dated Brent at $103.84 {% include oil-ref.html k="iea-apr" %}. Abu Dhabi announced that from 1 November 2026 all its grades will price off Platts Dubai rather than its own Murban futures contract (research note on benchmarks, snippet).
 
 {: .da-bridge}
 A benchmark is not one price but a line of prices, one for each delivery month. Its shape tells you whether the market has too much oil or too little.
 
-<h2 id="curve"><span class="num">13</span>The curve: contango and backwardation</h2>
+<h2 id="curve"><span class="num">14</span>The curve: contango and backwardation</h2>
 
 The futures curve is the set of prices for delivery one, two, three and more months ahead. Whether it slopes up or down follows from an arbitrage. Someone who buys a barrel today at spot price $$S$$, stores it and sells it forward pays interest $$r$$ and storage $$u$$; someone who holds a barrel also has the "convenience" $$y$$ of having it when it is needed, which is large when oil is scarce. In equilibrium
 
@@ -264,24 +277,24 @@ The Brent curve has been in backwardation since the war began on 28 February, wi
 {: .da-bridge}
 The curve explains the price of time. The spread between the two big benchmarks explains the price of distance.
 
-<h2 id="gap"><span class="num">14</span>Brent minus WTI is a voyage</h2>
+<h2 id="gap"><span class="num">15</span>Brent minus WTI is a voyage</h2>
 
 For most of its history WTI traded within a few dollars of Brent. The two diverged when one of them could not reach the other. In 2011 to 2013 the shale boom filled Cushing before pipelines to the coast existed, and Brent spot traded up to $29.59 above WTI (23 September 2011); the gap closed as pipelines were built and the export ban was lifted in 2015 {% include oil-ref.html k="eia-spot" %}.
 
 {% include oil.html kind="gap" title="Brent <em>over WTI</em>" caption="Brent minus WTI, spot, weekly means to 2024 and daily since 2025, with the usual $3–5 range shaded. Data: EIA via FRED." %}
 
-Since US crude can be exported and Midland is part of the Brent basket, the gap has a simple floor and ceiling: a barrel at Cushing plus the cost of getting it to Rotterdam must be worth about what a North Sea barrel is worth there. Pipeline from Cushing or Midland to Houston costs about a dollar, the dock and losses a little more, and the rest is freight. In February 2026 that was about $4 a barrel for a Suezmax from the US Gulf to Europe and the spot gap was $6.38 {% include oil-ref.html k="iea-apr" %} {% include oil-ref.html k="eia-spot" %}. In mid-October freight was about $24 a barrel and the spot gap averaged **$24.99** for 1 to 20 October ({% include oil-ref.html k="iea-freight" %}, {% include oil-ref.html k="eia-spot" %}; the fit is my arithmetic, not a cited claim).
+Since US crude can be exported and Midland is part of the Brent basket, the gap has a simple floor and ceiling: a barrel at Cushing plus the cost of getting it to Rotterdam must be worth about what a North Sea barrel is worth there. Pipeline from Cushing or Midland to Houston costs about a dollar, the dock and losses a little more {% include oil-ref.html k="est-route" %}, and the rest is freight. In February 2026 that was about $4 a barrel for a Suezmax from the US Gulf to Europe and the spot gap was $6.38 {% include oil-ref.html k="iea-apr" %} {% include oil-ref.html k="eia-spot" %}. In mid-October freight was about $24 a barrel and the spot gap averaged **$24.99** for 1 to 20 October ({% include oil-ref.html k="iea-freight" %}, {% include oil-ref.html k="eia-spot" %}; the fit is my arithmetic, not a cited claim).
 
 {% include oil.html kind="route" title="The gap is <em>the journey</em>" caption="Midland and Cushing to Houston by pipeline, Houston to Rotterdam by tanker. The stack adds pipeline, dock and freight to the WTI price; drag the freight to see the gap it implies. The dashed lines are the observed EIA spot gaps. Pipeline and dock costs are round estimates." wide=1 %}
 
-The reel's number, a futures gap near $14 on 6 October, is smaller than the spot gap: December Brent at $106.30 against December WTI at $92.45, $13.85 {% include oil-ref.html k="benzinga" %}. Futures for December price a voyage in December, when the market expected freight to have eased. Pipelines were not the bottleneck this time: traded spreads between Midland and Houston stayed under a dollar (benchmarks research note, snippet). What separated the two prices was the ocean.
+The reel's number, a futures gap near $14 on 6 October, is smaller than the spot gap: December Brent at $106.30 against December WTI at $92.45, $13.85 {% include oil-ref.html k="benzinga" %} {% include oil-ref.html k="vantage" %}. Futures for December price a voyage in December, when the market expected freight to have eased. Pipelines were not the bottleneck this time: traded spreads between Midland and Houston stayed under a dollar (benchmarks research note, snippet). What separated the two prices was the ocean.
 
 The same arithmetic split the world's refiners. An American refinery bought WTI and sold diesel at Gulf Coast or New York prices; a European refinery bought crude at Brent plus freight. On 19 October the reel's "same diesel, two cracks" read about $100 against WTI and about $90 against Brent {% include oil-ref.html k="reel" %}. In Europe the freight-adjusted diesel crack fell from about $100 in early September to $57 in the first week of October {% include oil-ref.html k="iru" %}, and a standard Rotterdam refining margin was −$10.95 a barrel on 5 October {% include oil-ref.html k="indexbox" %}.
 
 {: .da-bridge}
 With the machinery in place, the long history of the price reads differently.
 
-<h2 id="history"><span class="num">15</span>Forty years of the price</h2>
+<h2 id="history"><span class="num">16</span>Forty years of the price</h2>
 
 {% include oil.html kind="prices" title="Forty years <em>of oil</em>" caption="Brent and WTI spot prices, weekly means 1986–2024 and daily since 2025, in dollars of the day (not adjusted for inflation). The lettered markers are explained on hover; the 2025–2026 view shows the war year in daily detail. Data: EIA via FRED." range="all" %}
 
@@ -292,7 +305,7 @@ Here is that year, month by month.
 
 <p class="da-part">Part V<strong>2026</strong></p>
 
-<h2 id="war"><span class="num">16</span>2026: the strait closes</h2>
+<h2 id="war"><span class="num">17</span>2026: the strait closes</h2>
 
 The year began with too much oil. In February the IEA expected supply to grow by 2.4 million barrels a day in 2026 and demand by only 0.85, and global stocks stood at 8.2 billion barrels, the highest since 2021 {% include oil-ref.html k="iea-feb" %}. Brent futures closed at $72.48 on 27 February {% include oil-ref.html k="wiki-chron" %}.
 
@@ -302,12 +315,12 @@ On **28 February** the United States and Israel struck Iran; Iran's supreme lead
 
 The numbers through the year, mostly from the IEA's monthly reports:
 
-- **March.** World supply fell by 10.1 million barrels a day in one month, to 97 million; OPEC+ spare capacity fell to 0.32 million, a record low {% include oil-ref.html k="iea-apr" %}. Saudi Arabia pushed the East–West line to its full 7 million barrels a day, of which about 5 could be exported from Yanbu {% include oil-ref.html k="fortune-ew" %}.
+- **March.** World supply fell by 10.1 million barrels a day in one month, to 97 million; OPEC+ spare capacity fell to 0.32 million, a record low {% include oil-ref.html k="iea-apr" %}. Saudi Arabia pushed the East–West line to its full 7 million barrels a day, of which about 5 could be exported from Yanbu, most of it south through Bab el-Mandeb to Asia and some north to the SUMED pipeline to the Mediterranean {% include oil-ref.html k="fortune-ew" %} {% include oil-ref.html k="kpler-yanbu" %}.
 - **April.** Oil through Hormuz was 2.7 million barrels a day, bypass exports 7.8 million, total Gulf exports 10.5 million, 14 million below February; Gulf output was 45 per cent below its pre-war level {% include oil-ref.html k="iea-may" %}. On 7 April Dated Brent set its all-time high of $144.68; that evening a two-week ceasefire was announced and on 8 April futures fell about $20. The United States blockaded Iranian ports from 13 April {% include oil-ref.html k="wiki-blockade" %}.
 - **May–June.** Crude shut in peaked at 10.9 million barrels a day in May {% include oil-ref.html k="eia-steo" %}. The Islamabad Memorandum was signed on 17 June and both blockades were lifted {% include oil-ref.html k="wiki-blockade" %}; Gulf exports recovered to 16.1 million barrels a day in June and Brent spot fell to $68.53 on 2 July, below its pre-war level {% include oil-ref.html k="iea-jul" %} {% include oil-ref.html k="eia-spot" %}.
 - **July–August.** The memorandum collapsed on 7–8 July after attacks on ships, the US blockade returned on 14 July and the Houthis declared a blockade of the Red Sea, the outlet of the Saudi bypass. Flows through Hormuz were 7.6 million barrels a day in August {% include oil-ref.html k="wiki-war" %} {% include oil-ref.html k="national-flows" %}.
 - **September.** Drones struck the East–West pipeline on 10–11 September and Yanbu loadings stopped until a partial restart on 22 September {% include oil-ref.html k="wiki-ew" %} {% include oil-ref.html k="eia-steo" %}. Brent spot reached $130.80 on 15 September.
-- **October.** Kpler counted 11.6 million barrels a day leaving through Hormuz in the week to 13 October, about 14 million including ship-to-ship transfers in the Gulf of Oman, while IMF PortWatch counted only a handful of transits a day: most tankers sailed with their transponders off {% include oil-ref.html k="aj-control" %} {% include oil-ref.html k="gcaptain-flows" %}. Non-Iranian Middle East exports were back at their pre-war level of about 24.5 million barrels a day, through the bypasses {% include oil-ref.html k="national-exports" %}. Brent futures settled at $116.72 on 23 October.
+- **October.** Kpler counted 11.6 million barrels a day leaving through Hormuz in the week to 13 October, about 14 million including ship-to-ship transfers in the Gulf of Oman, while IMF PortWatch counted only a handful of transits a day, against about a hundred before the war {% include oil-ref.html k="aj-95" %}: most tankers sailed with their transponders off {% include oil-ref.html k="aj-control" %} {% include oil-ref.html k="gcaptain-flows" %}. Non-Iranian Middle East exports were back at their pre-war level of about 24.5 million barrels a day, through the bypasses {% include oil-ref.html k="national-exports" %}. Brent futures settled at $116.72 on 23 October.
 
 {% include oil.html kind="war" title="The war year, <em>day by day</em>" caption="Daily spot prices of crude and products in 2026, dollars per barrel, to 20 October, with the numbered events of the text. The second view shows the gaps: diesel and gasoline cracks and Brent minus WTI. Data: EIA via FRED." view="all" %}
 
@@ -316,7 +329,7 @@ One thing the chart makes plain is that the crude price did not stay high. Brent
 {: .da-bridge}
 Why diesel, of all the products, ran away from crude is the subject of the next section.
 
-<h2 id="diesel"><span class="num">17</span>The diesel crisis</h2>
+<h2 id="diesel"><span class="num">18</span>The diesel crisis</h2>
 
 Four things removed diesel from the market at once.
 
@@ -332,7 +345,7 @@ Diesel futures in New York crossed $100 a barrel over WTI for the first time on 
 {: .da-bridge}
 A shortage shows up first in the tanks, and the tanks were drawn harder in 2026 than ever before.
 
-<h2 id="stocks"><span class="num">18</span>The tanks run down</h2>
+<h2 id="stocks"><span class="num">19</span>The tanks run down</h2>
 
 Between the end of February and the end of September the world drew about 509 million barrels from its observed stocks {% include oil-ref.html k="iea-oct" %}. Governments released about 330 of the 426 million barrels pledged in March by mid-October, and on 2 October the G7 agreed to release up to 100 million more, diesel first {% include oil-ref.html k="globaloilshock" %} {% include oil-ref.html k="npr-g7" %}. The US Strategic Petroleum Reserve, which held 415 million barrels at the end of February, held 282.7 million on 16 October, its lowest level since 1982 {% include oil-ref.html k="eia-wpsr" %}. China, which had added about 111 million barrels to its crude stocks in 2025, drew 162 million barrels from its May peak by 19 October, acting as a second, uncoordinated strategic reserve {% include oil-ref.html k="boe-china" %}.
 
@@ -343,7 +356,7 @@ US distillate stocks fell to 100.8 million barrels on 22 May and stood at 104.3 
 {: .da-bridge}
 All of this arrives, in the end, at a pump.
 
-<h2 id="litre"><span class="num">19</span>What a litre costs</h2>
+<h2 id="litre"><span class="num">20</span>What a litre costs</h2>
 
 German diesel set an all-time record of €2.453 a litre on 16 September 2026, according to the ADAC daily average {% include oil-ref.html k="zdf-diesel" %}. On 1 October a temporary tax cut of 14.04 cents a litre on both fuels took effect until the end of the year, bringing the diesel energy tax down to the EU minimum of 33.00 cents {% include oil-ref.html k="kpmg-tax" %}. On 21 October diesel cost €2.255 and E10 €2.110 {% include oil-ref.html k="adac" %}.
 
@@ -354,7 +367,7 @@ Taken apart, the German litre is about 36 cents of VAT, 33 of energy tax, 17 of 
 {: .da-bridge}
 That is the chain from the well to the pump. What the figures and numbers above cannot show deserves a list of its own.
 
-<h2 id="limits"><span class="num">20</span>What this article cannot tell you</h2>
+<h2 id="limits"><span class="num">21</span>What this article cannot tell you</h2>
 
 - **Two Brents.** The EIA's Brent spot series, plotted here, is a physical price close to Dated Brent; news reports usually quote ICE futures. They differed by up to $35 in 2026. Every Brent–WTI number in the text says which it is.
 - **Flows in 2026 are uncertain.** Most tankers around the Gulf sailed dark from March, and Kpler and Vortexa disagreed by up to 6 million barrels a day of Gulf crude in a single week in October {% include oil-ref.html k="gcaptain-flows" %}. The Hormuz figure gives one tracker per month.
@@ -366,7 +379,7 @@ That is the chain from the well to the pump. What the figures and numbers above 
 {: .da-bridge}
 The sources behind every statement follow, with how much of each I saw.
 
-<h2 id="sources"><span class="num">21</span>Sources</h2>
+<h2 id="sources"><span class="num">22</span>Sources</h2>
 
 <div class="da-note" markdown="1">
 **Data and software.** Spot prices are the EIA's, republished by the Federal Reserve Bank of St. Louis (FRED); weekly stocks, production, exports and retail prices are from the EIA's Weekly Petroleum Status Report; both are public domain. Country borders are Natural Earth (public domain). The figures are plain SVG computed in the browser (`assets/js/oil-explorer.js`); the isometric drawings are standalone pages made with the *anatomy* figure kit. The headline font is Barlow Condensed (SIL Open Font License), self-hosted like everything else on this site. The pipeline that builds the data is in `bin/oil_article/` in the site's repository. The look of the figures follows the reel by Crude & Conflict that prompted this article {% include oil-ref.html k="reel" %}.
