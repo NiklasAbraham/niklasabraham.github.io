@@ -747,7 +747,7 @@ const DATA = {
 };
 const LIVE = readFileSync(join(HERE, "live.js"), "utf8").replace("__DATA__", JSON.stringify(DATA));
 const body = `<style>${CSS}</style>` + k.plateHtml({
-  fig: "Fig · Cushing, Oklahoma",
+  fig: "Drawing D · Cushing, Oklahoma",
   title: "Crude storage tank",
   hint: "Drag or ← → through the weeks",
   readout: M.readout(M.LATEST),
