@@ -1,6 +1,5 @@
-// Interactive figures of the oil-market long read (/blog/2026/oil-market/), drawn as blueprint sheets in the look of the
-// "Crude & Conflict" reels: navy paper, a faint grid, white line work, orange crude, green gasoline, blue diesel, red margin,
-// and an engineering title block under every figure. Data: assets/oil-article/oil.json (EIA spot prices and weekly
+// Interactive figures of the oil-market long read (/blog/2026/oil-market/), in the site's figure card (.concept.bx, as in
+// the food and AI posts): white stage, ink line work, warm crude, blue Brent, teal gasoline, violet diesel. Data: assets/oil-article/oil.json (EIA spot prices and weekly
 // stocks, made by bin/oil_article/build.py, plus the curated facts of curated.py) and geo.json (Natural Earth, geo.py).
 // Every figure is a <figure data-oil="kind"> filled when it scrolls into view; animations pause off screen and stay
 // still under prefers-reduced-motion. Vanilla SVG, nothing is loaded from outside this site.
@@ -10,9 +9,9 @@
   if (!roots.length) return;
   const NS = 'http://www.w3.org/2000/svg';
   const C = {
-    paper: '#0b1424', grid: 'rgba(130,165,220,0.08)', line: '#dfe6f1', muted: '#8c9bb5', faint: 'rgba(223,230,241,0.18)',
-    crude: '#e8913a', wti: '#e8913a', brent: '#8fb0f5', gas: '#a6c94a', diesel: '#4fa8e0', jet: '#e9edf4', resid: '#9b8670',
-    red: '#e5533d', gold: '#f2c14e', teal: '#43c0a8', violet: '#b190f0', grey: '#5d6b85',
+    paper: '#ffffff', grid: 'rgba(4,32,75,0.06)', line: '#04204b', muted: '#6b7280', faint: 'rgba(4,32,75,0.14)',
+    crude: '#b4552f', wti: '#b4552f', brent: '#0b4fc0', gas: '#138374', diesel: '#6a47c2', jet: '#8a93a6', resid: '#7a5c45',
+    red: '#c0392b', gold: '#c99a1e', teal: '#138374', violet: '#8e4fb3', grey: '#a3acbd',
   };
   const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const BASE = roots[0].dataset.base;
@@ -35,6 +34,8 @@
     return e;
   }
   const S = (tag, attrs, ...kids) => h('svg:' + tag, attrs, ...kids);
+  // label colour on a filled segment: white on dark fills, ink on light ones
+  const onFill = (c) => { const m = /^#([0-9a-f]{6})$/i.exec(c || ''); if (!m) return '#04204b'; const n = parseInt(m[1], 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; return 0.299 * r + 0.587 * g + 0.114 * b < 150 ? '#ffffff' : '#04204b'; };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -76,28 +77,20 @@
   }
   const hideTip = () => { tip.style.display = 'none'; };
 
-  // ------------------------------------------------------------------ the sheet: header, stage, controls, title block
+  // ------------------------------------------------------------------ the frame: the site's figure card (.concept.bx)
+  // header with the figure number and title, the unit line, controls, stage, legend, caption below the card
   function sheet(root, o) {
-    const i = roots.indexOf(root) + 1;
-    root.classList.add('oil-sheet');
-    const head = h('div', { class: 'os-head' },
-      o.eyebrow ? h('div', { class: 'os-eyebrow' }, o.eyebrow) : null,
-      h('div', { class: 'os-title', html: root.dataset.title || o.title || '' }),
-      o.sub ? h('div', { class: 'os-sub' }, o.sub) : null);
+    const MAPS = ['flows', 'hormuz', 'northsea', 'route', 'producers'];
+    root.classList.add('concept', 'bx', 'oil-fig');
+    const head = h('header', {}, h('span', { class: 'concept-kind' }, MAPS.includes(root.dataset.oil) ? 'Map' : 'Chart'), h('span', { class: 'concept-title', html: root.dataset.title || o.title || '' }));
+    const unit = h('div', { class: 'os-unit' }, o.eyebrow || '', o.sub ? ' · ' + o.sub : '');
     const stage = h('div', { class: 'os-stage' + (o.stageClass ? ' ' + o.stageClass : '') });
-    const ctrl = h('div', { class: 'os-ctrl' });
+    const ctrl = h('div', { class: 'os-ctrl bx-ctrl' });
     const legend = h('div', { class: 'os-legend' });
-    const no = 'OIL-' + String(i).padStart(2, '0');
-    const block = h('div', { class: 'os-block', 'aria-hidden': 'true' },
-      h('div', { class: 'c a' }, h('i', {}, 'Drawing No.'), h('b', { class: 'no' }, no)),
-      h('div', { class: 'c t' }, h('i', {}, 'Title'), h('b', {}, (o.short || (root.dataset.title || '').replace(/<[^>]+>/g, '')).toUpperCase())),
-      h('div', { class: 'c s' }, h('i', {}, 'Sheet'), h('b', {}, String(i).padStart(2, '0') + ' / ' + String(TOTAL).padStart(2, '0'))),
-      h('div', { class: 'c d' }, h('i', {}, 'Data to'), h('b', {}, o.date || '20.10.2026')),
-      h('div', { class: 'c src' }, h('i', {}, 'Source'), h('b', {}, o.source || '')));
+    const body = h('div', { class: 'bx-stage os-body' }, unit, stage, legend);
     const cap = root.dataset.caption ? h('figcaption', { html: root.dataset.caption }) : null;
-    const inner = h('div', { class: 'os-paper' }, head, ctrl, stage, legend, block);
-    root.replaceChildren(inner, cap || '');
-    return { stage, ctrl, legend, head, inner };
+    root.replaceChildren(head, ctrl, body, cap || '');
+    return { stage, ctrl, legend, head, inner: root };
   }
   const chip = (label, color) => h('span', { class: 'os-key' }, h('i', { style: 'background:' + color }), label);
   function seg(options, value, on) {
@@ -261,21 +254,33 @@
     };
     const left = half(-1), right = half(1);
     const glow = S('path', { d: crack, class: 'os-crackglow' });
-    // the product stack on the right
-    const sx = 410, sw = 140, unit = 5.1; // px per gallon
+    // the product stack on the right: solid boxes at the barrel's scale (bh = 42 gallons), drawn bottom to top
+    const sx = 380, fw = 100, dx = 40, dy = 14, unit = bh / 42, y0 = by + bh + ry; // px per gallon; base level with the barrel's front rim
     const total = Y.items.reduce((a, b) => a + b.gal, 0);
+    const tint = (hex, k) => { const n = parseInt(hex.slice(1), 16), m = (v) => Math.round(255 - (255 - v) * k); return `rgb(${m(n >> 16)},${m((n >> 8) & 255)},${m(n & 255)})`; };
     const stack = S('g', {});
-    let yy = 330;
-    const slabs = Y.items.map((it) => {
-      const hgt = it.gal * unit; yy -= hgt;
+    // the 42-gallon line: where the barrel's volume ends (drawn over the stack, see below)
+    const in42 = y0 - 42 * unit;
+    const mark42 = S('g', { class: 'os-slab', opacity: 0 },
+      S('path', { d: `M${sx - 8},${in42}h${fw + 8}l${dx},${-dy}`, class: 'os-rib', stroke: '#04204b', 'stroke-dasharray': '4 3' }),
+      S('text', { x: sx + 6, y: in42 + 18, class: 'os-small' }, '42 gallons'));
+    // labels: centred on their slab, pushed apart so thin slabs do not collide
+    let yy = y0;
+    const rows = Y.items.map((it) => { const y1 = yy - it.gal * unit; const r = { it, y0: yy, y1, mid: (yy + y1) / 2 - dy / 2 }; yy = y1; return r; });
+    let last = Infinity;
+    rows.forEach((r) => { r.ly = Math.min(r.mid, last - 15); last = r.ly; });
+    const lx = sx + fw + dx + 22;
+    const slabs = rows.map(({ it, y0: a, y1: b, mid, ly }) => {
       const g = S('g', { class: 'os-slab', opacity: 0 },
-        S('path', { d: `M${sx},${yy + 6}l${sw * 0.62},-8l${sw * 0.38},8l-${sw * 0.62},8z`, fill: it.c, 'fill-opacity': 0.35, stroke: it.c }),
-        S('rect', { x: sx, y: yy + 6, width: sw * 0.62, height: hgt, fill: it.c, 'fill-opacity': 0.22, stroke: it.c, transform: `skewY(0)` }),
-        S('path', { d: `M${sx + sw * 0.62},${yy + 14 - 8 + 8}l${sw * 0.38},-8l0,${hgt}l-${sw * 0.38},8z`, fill: it.c, 'fill-opacity': 0.12, stroke: it.c }),
-        S('text', { x: sx + sw + 14, y: yy + 6 + hgt / 2 + 4, class: 'os-lab', fill: it.c }, `${it.name} · ${it.gal.toFixed(1)} gal`));
+        S('rect', { x: sx, y: b, width: fw, height: a - b, fill: tint(it.c, 0.32), stroke: it.c }),
+        S('path', { d: `M${sx + fw},${b}l${dx},${-dy}V${a - dy}l${-dx},${dy}Z`, fill: tint(it.c, 0.2), stroke: it.c }),
+        S('path', { d: `M${sx},${b}h${fw}l${dx},${-dy}h${-fw}Z`, fill: tint(it.c, 0.5), stroke: it.c }),
+        S('path', { d: `M${sx + fw + dx + 4},${mid}L${lx - 12},${mid}L${lx - 4},${ly}`, class: 'os-rib' }),
+        S('text', { x: lx, y: ly + 4, class: 'os-lab' }, `${it.name} · ${it.gal.toFixed(1)} gal`));
       stack.append(g);
       return g;
     });
+    stack.append(mark42); slabs.push(mark42);
     const cap = S('text', { x: sx, y: 352, class: 'os-small' }, `${total.toFixed(1)} gallons out of 42 in: the processing gain`);
     const head = S('text', { x: bx + bw / 2, y: 345, 'text-anchor': 'middle', class: 'os-small' }, '1 barrel = 42 US gallons = 159 litres');
     svg.append(left, right, glow, stack, cap, head);
@@ -327,7 +332,7 @@
     function draw() {
       const ser = st.view === '321'
         ? [{ name: 'NY Harbor products vs WTI', c: C.red, ...g('crack321_nyw'), w: 2.1, area: 0.1 }, { name: 'Gulf Coast products vs WTI', c: C.gold, ...g('crack321_usg'), w: 1.2 }, { name: 'NY Harbor products vs Brent', c: C.brent, ...g('crack321_nyh'), w: 1.2 }]
-        : [{ name: 'Diesel − WTI', c: C.diesel, ...g('diesel_wti'), w: 2, area: 0.08 }, { name: 'Diesel − Brent', c: '#9fd0f0', ...g('diesel_brent'), w: 1.2 }, { name: 'Gasoline − Brent', c: C.gas, ...g('gasoline_brent'), w: 1.6 }];
+        : [{ name: 'Diesel − WTI', c: C.diesel, ...g('diesel_wti'), w: 2, area: 0.08 }, { name: 'Diesel − Brent', c: '#a58fd8', ...g('diesel_brent'), w: 1.2 }, { name: 'Gasoline − Brent', c: C.gas, ...g('gasoline_brent'), w: 1.6 }];
       legend.replaceChildren(...ser.map((x) => chip(x.name, x.c)));
       timeChart(stage, {
         w: 760, x0: Date.UTC(2006, 5, 1), x1: Date.UTC(2026, 10, 1), xticks: yearTicks(2006, 2026, 2),
@@ -367,7 +372,7 @@
   FIG.gap = function (root) {
     const { stage, legend } = sheet(root, { eyebrow: 'Brent minus WTI, spot, $ per barrel', short: 'The gap', source: 'EIA spot prices via FRED' });
     const s = joined('brent_wti');
-    legend.append(chip('Brent − WTI (weekly mean to 2024, daily since 2025)', C.violet), chip('the usual range, $3 to $5', 'rgba(143,176,245,0.35)'));
+    legend.append(chip('Brent − WTI (weekly mean to 2024, daily since 2025)', C.violet), chip('the usual range, $3 to $5', 'rgba(11,79,192,0.25)'));
     timeChart(stage, {
       w: 760, x0: Date.UTC(2000, 0, 1), x1: Date.UTC(2026, 10, 1), xticks: yearTicks(2000, 2026, 2),
       events: (DATA.curated.gapEvents || []).map((e) => [ts(e.d), e.n, e.t]),
@@ -378,7 +383,7 @@
     // shade the usual band
     const tc = svg; const ys = [3, 5];
     const yScale = (v) => { const top = 10 + 34, hgt = 260; return top + hgt - ((v + 15) / 50) * hgt; };
-    tc.insertBefore(S('rect', { x: 50, width: 694, y: yScale(ys[1]), height: yScale(ys[0]) - yScale(ys[1]), fill: 'rgba(143,176,245,0.16)' }), tc.firstChild);
+    tc.insertBefore(S('rect', { x: 50, width: 694, y: yScale(ys[1]), height: yScale(ys[0]) - yScale(ys[1]), fill: 'rgba(11,79,192,0.08)' }), tc.firstChild);
   };
 
   // ---- US weekly stocks: distillate, Cushing, SPR
@@ -403,13 +408,13 @@
       const all = Object.values(byYear).flat().filter((p) => p).map((p) => p[1]);
       const lo = Math.floor(Math.min(...all.slice(-600)) * 0.9 / 10) * 10, hi = Math.ceil(Math.max(...all.slice(-600)) * 1.08 / 10) * 10;
       for (const y of [2022, 2025, 2026]) if (byYear[y]) lines.push({ name: String(y), c: y === 2026 ? col : y === 2025 ? C.muted : C.grey, x: byYear[y].map((p) => p[0]), y: byYear[y].map((p) => p[1]), w: y === 2026 ? 2.4 : 1.2, dash: y === 2022 ? '4 3' : null, fmt: (v) => f1(v) + ' m bbl' });
-      lines.push({ name: '2015–24 low', c: 'rgba(223,230,241,0.35)', x: band.map((b) => b[0]), y: band.map((b) => b[1]), w: 0.8, fmt: (v) => f1(v) + ' m bbl' });
-      lines.push({ name: '2015–24 high', c: 'rgba(223,230,241,0.35)', x: band.map((b) => b[0]), y: band.map((b) => b[2]), w: 0.8, fmt: (v) => f1(v) + ' m bbl' });
-      legend.replaceChildren(chip(name + ', 2026', col), chip('2025', C.muted), chip('2022', C.grey), chip('range of 2015–2024', 'rgba(223,230,241,0.3)'));
+      lines.push({ name: '2015–24 low', c: 'rgba(4,32,75,0.3)', x: band.map((b) => b[0]), y: band.map((b) => b[1]), w: 0.8, fmt: (v) => f1(v) + ' m bbl' });
+      lines.push({ name: '2015–24 high', c: 'rgba(4,32,75,0.3)', x: band.map((b) => b[0]), y: band.map((b) => b[2]), w: 0.8, fmt: (v) => f1(v) + ' m bbl' });
+      legend.replaceChildren(chip(name + ', 2026', col), chip('2025', C.muted), chip('2022', C.grey), chip('range of 2015–2024', 'rgba(4,32,75,0.18)'));
       const r = timeChart(stage, { w: 760, x0: Date.UTC(2026, 0, 1), x1: Date.UTC(2026, 11, 31), xticks: MON.map((m, i) => [Date.UTC(2026, i, 1), m]), panels: [{ h: 260, ymin: lo, ymax: hi, yfmt: (v) => v + ' m', series: lines }], hover: (x) => { const d = new Date(x); return d.getUTCDate() + ' ' + MON[d.getUTCMonth()]; }, aria: name + ' by week of the year' });
       const g = r.geo[0];
       const poly = band.map((b) => `${r.X(b[0]).toFixed(1)},${g.Y(b[2]).toFixed(1)}`).concat(band.slice().reverse().map((b) => `${r.X(b[0]).toFixed(1)},${g.Y(b[1]).toFixed(1)}`));
-      r.svg.insertBefore(S('polygon', { points: poly.join(' '), fill: 'rgba(223,230,241,0.08)' }), r.svg.querySelector('g'));
+      r.svg.insertBefore(S('polygon', { points: poly.join(' '), fill: 'rgba(4,32,75,0.07)' }), r.svg.querySelector('g'));
     }
     draw();
   };
@@ -479,7 +484,7 @@
     }
     return d;
   }
-  const FLOWC = () => ({ crude: C.crude, wti: '#f2b36b', urals: C.violet });
+  const FLOWC = () => ({ crude: C.crude, wti: '#d98a52', urals: C.violet });
 
   // ---- the world's oil on the move: 2025 crude flows on their sea lanes, the chokepoints, and October 2026
   FIG.flows = function (root) {
@@ -517,7 +522,7 @@
       return { c, ring, pulse };
     });
     ctrl.append(seg([['normal', '2025: a normal year'], ['war', 'October 2026: Hormuz and the Red Sea']], st.mode, (v) => { st.mode = v; restyle(); }));
-    legend.append(chip('Gulf, Africa, Brazil crude', C.crude), chip('US and Canadian crude', '#f2b36b'), chip('Russian and Caspian crude', C.violet), chip('chokepoint, ring area ∝ flow', C.line));
+    legend.append(chip('Gulf, Africa, Brazil crude', C.crude), chip('US and Canadian crude', '#d98a52'), chip('Russian and Caspian crude', C.violet), chip('chokepoint, ring area ∝ flow', C.line));
     const read = h('div', { class: 'os-read' });
     stage.append(svg, read);
     function restyle() {
@@ -562,26 +567,37 @@
     const ad = S('path', { d: smoothD([at('Habshan'), P([54.8, 24.3]), P([55.8, 24.9]), at('Fujairah')]), class: 'os-pipe' });
     const gj = S('path', { d: smoothD([P([50.6, 29.9]), P([53.5, 28.6]), P([56.0, 27.2]), at('Jask')]), class: 'os-pipe thin' });
     pipes.append(ew, ad, gj);
-    // shipping lane through the strait (traffic separation scheme, schematic)
-    const laneIn = lanePath(P, [[50.6, 27.6], [52.5, 26.95], [54.6, 26.55], [56.2, 26.62], [56.65, 26.35], [57.2, 25.75], [58.2, 24.9], [60.5, 23.5]]);
-    const lane = S('path', { d: smoothD(laneIn), class: 'os-lane' });
+    // shipping lane through the strait (traffic separation scheme, schematic): its width is the day's flow
+    const laneIn = lanePath(P, [[49.2, 29.25], [50.3, 28.3], [51.4, 27.5], [52.5, 26.95], [54.6, 26.55], [56.2, 26.62], [56.65, 26.35], [57.2, 25.75], [58.2, 24.9], [60.5, 23.5]]);
+    const laneD = smoothD(laneIn);
+    const band = S('path', { d: laneD, class: 'os-hzband' });
+    const lane = S('path', { d: laneD, class: 'os-hzsep' });
     const laneLen = () => lane.getTotalLength();
     const ships = S('g', {});
-    svg.append(pipes, lane, ships);
+    // the closure: a bar across the narrows
+    const [hx, hy] = P([56.45, 26.55]);
+    const shut = S('g', { class: 'os-hzshut', transform: `translate(${hx},${hy}) rotate(-62)` },
+      S('line', { x1: -30, x2: 30, y1: 0, y2: 0 }));
+    const shutLab = S('text', { x: hx - 22, y: hy + 34, 'text-anchor': 'end', class: 'os-hzshut' }, 'CLOSED');
+    svg.append(pipes, band, lane, ships, shut, shutLab);
     // terminals
     const marks = S('g', {});
-    for (const n of ['Ras Tanura', 'Abqaiq', 'Kharg Island', 'Basra (ABOT)', 'Mina al-Ahmadi', 'Habshan', 'Fujairah', 'Jask', 'Ras Laffan']) {
-      const [x, y] = at(n), p = place(n);
-      marks.append(S('g', { tabindex: 0, onpointermove: (ev) => showTip(ev, `<b>${n}</b><br>${p.role}`), onpointerleave: hideTip }, S('rect', { x: x - 3.5, y: y - 3.5, width: 7, height: 7, class: 'os-term' })));
-      const right = ['Kharg Island', 'Fujairah', 'Jask', 'Habshan', 'Ras Laffan'].includes(n);
-      marks.append(S('text', { x: x + (right ? 9 : -9), y: y + 4, 'text-anchor': right ? 'start' : 'end', class: 'os-place sm' }, n));
+    const lab = { 'Ras Tanura': 'l', Abqaiq: 'l', 'Kharg Island': 'r', 'Basra (ABOT)': 'r', 'Mina al-Ahmadi': 'b', Habshan: 'b', Fujairah: 'r', Jask: 'r', 'Ras Laffan': 'r' };
+    for (const n of Object.keys(lab)) {
+      const [x, y] = at(n), p = place(n), sd = lab[n];
+      marks.append(S('g', { tabindex: 0, onpointermove: (ev) => showTip(ev, `<b>${n}</b><br>${p.role}`), onpointerleave: hideTip }, S('rect', { x: x - 4, y: y - 4, width: 8, height: 8, class: 'os-term' })));
+      marks.append(S('text', { x: x + (sd === 'r' ? 10 : sd === 'l' ? -10 : 0), y: y + (sd === 'b' ? 20 : 4), 'text-anchor': sd === 'r' ? 'start' : sd === 'l' ? 'end' : 'middle', class: 'os-place sm' }, n));
     }
-    const [hx, hy] = P([56.45, 26.55]);
-    marks.append(S('text', { x: hx + 14, y: hy - 26, class: 'os-place' }, 'Strait of Hormuz'));
-    marks.append(S('text', { x: P([46.1, 25.3])[0], y: P([46.1, 25.3])[1] - 8, class: 'os-place sm' }, '← East–West line to Yanbu, Red Sea, 1,200 km'));
-    marks.append(S('text', { x: P([54.0, 23.4])[0], y: P([54.0, 23.4])[1] + 22, class: 'os-place sm' }, 'Habshan–Fujairah line'));
-    marks.append(S('text', { x: P([52.6, 28.4])[0] + 6, y: P([52.6, 28.4])[1] - 6, class: 'os-place sm' }, 'Goreh–Jask'));
-    for (const [n, lon, lat] of [['IRAN', 53.5, 30.2], ['SAUDI ARABIA', 47.6, 23.0], ['UAE', 54.4, 23.1], ['OMAN', 57.6, 22.4], ['QATAR', 51.15, 25.0], ['IRAQ', 46.6, 30.6], ['KUWAIT', 47.3, 29.35]]) {
+    marks.append(S('text', { x: hx + 18, y: hy - 30, class: 'os-place' }, 'Strait of Hormuz'));
+    const flowLab = S('text', { x: P([59.4, 25.6])[0], y: P([59.4, 25.6])[1], 'text-anchor': 'middle', class: 'os-hzflow os-desk' });
+    const flowSub = S('text', { x: P([59.4, 25.6])[0], y: P([59.4, 25.6])[1] + 18, 'text-anchor': 'middle', class: 'os-num os-desk' }, 'through the strait');
+    marks.append(flowLab, flowSub);
+    const [ewx, ewy] = P([46.6, 25.05]);
+    marks.append(S('text', { x: ewx - 14, y: ewy - 12, class: 'os-place sm' }, '← to Yanbu, Red Sea'), S('text', { x: ewx - 14, y: ewy + 4, class: 'os-num os-desk' }, 'East–West line, 5–7 mb/d'));
+    const [adx, ady] = P([55.1, 24.75]);
+    marks.append(S('text', { x: adx, y: ady, 'text-anchor': 'end', class: 'os-num os-desk' }, 'Habshan–Fujairah, 1.5–1.8 mb/d'));
+    marks.append(S('text', { x: P([53.0, 28.4])[0] + 6, y: P([53.0, 28.4])[1] - 8, class: 'os-place sm' }, 'Goreh–Jask'));
+    for (const [n, lon, lat] of [['IRAN', 53.5, 30.1], ['SAUDI ARABIA', 48.8, 23.0], ['UAE', 53.2, 23.1], ['OMAN', 57.8, 22.6], ['QATAR', 51.2, 25.25], ['IRAQ', 47.2, 30.3], ['KUWAIT', 47.5, 29.45]]) {
       const [x, y] = P([lon, lat]); marks.append(S('text', { x, y, 'text-anchor': 'middle', class: 'os-country' }, n));
     }
     svg.append(marks);
@@ -592,8 +608,8 @@
     tl.append(...btns);
     ctrl.append(tl);
     stage.append(svg, panel);
-    legend.append(chip('pipeline', C.gold), chip('tanker in the shipping lane', C.crude), chip('export terminal', C.line));
-    let flow = cu.hormuz[0].hormuz, ships0 = cu.hormuz[0].ships, t0 = 0;
+    legend.append(chip('bypass pipeline', C.gold), chip('laden tanker, outbound', C.crude), chip('shipping lane: width is the flow', 'rgba(180,85,47,0.3)'), chip('export terminal', C.line));
+    let ships0 = 100, flowT = 20, flowW = 20;
     function go(i) {
       st.i = i; btns.forEach((b, j) => b.classList.toggle('on', j === i));
       const s = cu.hormuz[i];
@@ -601,25 +617,46 @@
       panel.innerHTML = `<div class="g"><i>Oil through the strait</i><b>${s.hormuz == null ? 'n/a' : s.hormuz + ' mb/d'}</b>${bar(s.hormuz)}</div>
         <div class="g"><i>Gulf exports, all routes</i><b>${s.exports == null ? 'n/a' : s.exports + ' mb/d'}</b>${bar(s.exports)}</div><div class="g"><i>Ships a day</i><b class="sm">${s.ships}</b></div><div class="g"><i>East–West line</i><b class="sm">${s.ew}</b></div><p>${s.text}</p>`;
       ew.classList.toggle('on', i > 0); ad.classList.toggle('on', i > 0); gj.classList.toggle('on', i > 0 && i < 3);
-      ships0 = { prewar: 100, mar: 4, apr: 4, jun: 35, aug: 5, oct: 8 }[s.k];
+      ships0 = { prewar: 100, mar: 4, apr: 9, jun: 16, aug: 6, oct: 5 }[s.k]; // PortWatch transits relative to February (78 a day)
+      flowT = s.hormuz == null ? 9 : s.hormuz;
+      flowLab.textContent = s.hormuz == null ? 'n/a' : s.hormuz + ' mb/d';
+      shut.classList.toggle('on', ['mar', 'apr'].includes(s.k)); shutLab.classList.toggle('on', shut.classList.contains('on'));
+      ships.classList.toggle('dark', s.k === 'oct');
+      // in October most of the 11.6 mb/d sailed dark: draw the counted ships plus faint ghosts
+      ships0 = s.k === 'oct' ? 45 : ships0;
     }
     go(0);
-    // ships: dots spaced by the day's traffic
-    const N = 40, dots = [];
-    for (let i = 0; i < N; i++) { const c = S('g', {}, S('rect', { x: -5, y: -2, width: 10, height: 4, rx: 2, fill: '#f6d2a8', stroke: C.crude, 'stroke-width': 0.8 })); ships.append(c); dots.push(c); }
-    let L = 0, ph = 0, auto = 0, density = 1;
-    whenSeen(svg, () => { L = laneLen(); });
-    looper(svg, (dt) => {
-      if (!L) L = laneLen();
-      if (st.auto) { auto += dt; if (auto > 5.5) { auto = 0; go((st.i + 1) % cu.hormuz.length); } }
+    // ships: two streams (laden outbound south of the separation line, empty inbound north), unevenly spaced
+    const N = 30, dots = [];
+    const jit = Array.from({ length: N }, (_, i) => ((i * 0.6180339) % 1) * 0.5 / N);
+    for (let i = 0; i < N; i++) {
+      const out = i % 2 === 0;
+      const c = S('g', { class: out ? 'os-ship out' : 'os-ship in' }, S('path', { d: 'M-6,-2.2h9l3,2.2l-3,2.2h-9z' }));
+      ships.append(c); dots.push({ c, out, u0: i / N + jit[i] });
+    }
+    let L = 0, ph = 0, auto = 0, density = 1, uS = 0.7;
+    const measure = () => { L = laneLen(); let best = 1e9; for (let k = 0; k <= 200; k++) { const p = lane.getPointAtLength((k / 200) * L), d = Math.hypot(p.x - hx, p.y - hy); if (d < best) { best = d; uS = k / 200; } } };
+    whenSeen(svg, measure);
+    const draw = (dt) => {
+      if (!L) measure();
+      const closed = shut.classList.contains('on');
       density += ((ships0 / 100) - density) * (1 - Math.exp(-dt / 0.8));
-      ph = (ph + dt * 0.012) % 1;
-      dots.forEach((c, i) => {
-        const u = (ph + i / N) % 1, p = lane.getPointAtLength(u * L), q = lane.getPointAtLength(Math.min(L, u * L + 2));
-        const show = (i / N) < density;
-        c.setAttribute('transform', `translate(${p.x.toFixed(1)},${p.y.toFixed(1)}) rotate(${(Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI).toFixed(0)})`);
-        c.setAttribute('opacity', show ? 0.95 : 0);
+      flowW += (flowT - flowW) * (1 - Math.exp(-dt / 0.5));
+      band.style.strokeWidth = (3 + flowW * 1.1).toFixed(1);
+      const off = 2 + flowW * 0.3;
+      ph = (ph + dt * 0.01) % 1;
+      dots.forEach(({ c, out, u0 }, i) => {
+        let u = (u0 + ph) % 1; if (!out) u = 1 - u;
+        const p = lane.getPointAtLength(u * L), q = lane.getPointAtLength(Math.min(L, u * L + 2)), r = lane.getPointAtLength(Math.max(0, u * L - 2));
+        const ang = Math.atan2(q.y - r.y, q.x - r.x), nx = -Math.sin(ang), ny = Math.cos(ang), o = out ? off : -off;
+        c.setAttribute('transform', `translate(${(p.x + nx * o).toFixed(1)},${(p.y + ny * o).toFixed(1)}) rotate(${((ang * 180) / Math.PI + (out ? 0 : 180)).toFixed(0)})`);
+        c.setAttribute('opacity', (i / N) < density && !(closed && u > uS - 0.02) ? 1 : 0);
       });
+    };
+    draw(1);
+    looper(svg, (dt) => {
+      if (st.auto) { auto += dt; if (auto > 5.5) { auto = 0; go((st.i + 1) % cu.hormuz.length); } }
+      draw(dt);
     });
   };
 
@@ -654,7 +691,7 @@
   FIG.assay = function (root) {
     const A = DATA.curated.assays;
     const { stage, legend } = sheet(root, { eyebrow: 'Straight-run yields by boiling range, weight %', short: 'Crude assays', source: 'TotalEnergies crude assays', date: 'assays 2006–21' });
-    const CUTS = [['Gas and LPG', C.gold], ['Naphtha, 15–150 °C', C.gas], ['Kerosene, 150–230 °C', C.jet], ['Gasoil, 230–375 °C', C.diesel], ['Vacuum gasoil, 375–550 °C', '#b58a5e'], ['Vacuum residue, above 550 °C', '#5d4a3a']];
+    const CUTS = [['Gas and LPG', C.gold], ['Naphtha, 15–150 °C', C.gas], ['Kerosene, 150–230 °C', C.jet], ['Gasoil, 230–375 °C', C.diesel], ['Vacuum gasoil, 375–550 °C', '#b58a5e'], ['Vacuum residue, above 550 °C', '#4e3b2c']];
     const W = 760, LW = 200, rh = 44, H = A.length * rh + 30;
     const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Straight-run yields of six crude oils' });
     const X = (v) => LW + (v / 100) * (W - LW - 20);
@@ -670,7 +707,7 @@
           onpointermove: (ev) => showTip(ev, `<b>${a.n}</b><br>${CUTS[k][0]}: ${v.toFixed(1)} %`), onpointerleave: hideTip });
         if (!REDUCED) { r.style.transformOrigin = `${X(0)}px 0`; r.style.transform = 'scaleX(0)'; r.style.transition = `transform 900ms cubic-bezier(.3,.6,.2,1) ${i * 90}ms`; }
         svg.append(r); segs.push(r);
-        if (v >= 7) svg.append(S('text', { x: X(acc + v / 2), y: y + 21, 'text-anchor': 'middle', class: 'os-segv', fill: k >= 4 ? '#f3f6fb' : '#0b1424' }, Math.round(v)));
+        if (v >= 7) svg.append(S('text', { x: X(acc + v / 2), y: y + 21, 'text-anchor': 'middle', class: 'os-segv', fill: onFill(CUTS[k][1]) }, Math.round(v)));
         acc += v;
       });
     });
@@ -777,7 +814,7 @@
   FIG.northsea = function (root) {
     const m = GEO.northsea, cu = DATA.curated;
     const { stage } = sheet(root, { eyebrow: 'The Dated Brent basket, loadings in thousand barrels a day', short: 'What Brent is', source: 'Platts methodology · Reuters loading programmes · S&P', date: 'Sep 2026' });
-    const { svg, P } = baseMap(m, { vb: [80, 200, 900, 860], aria: 'Map of the North Sea fields in the Brent basket', grat: true });
+    const { svg, P } = baseMap(m, { vb: [60, 110, 900, 1060], aria: 'Map of the North Sea fields in the Brent basket', grat: true });
     svg.classList.add('os-zoom');
     const g = S('g', {}); svg.append(g);
     const R = (k) => 6 + Math.sqrt(k) * 2.2;
@@ -787,15 +824,18 @@
       g.append(S('rect', { x: tx - 4, y: ty - 4, width: 8, height: 8, class: 'os-term' }), S('text', { x: tx + (tx > x ? 8 : -8), y: ty + 4, 'text-anchor': tx > x ? 'start' : 'end', class: 'os-place sm' }, f.term));
       g.append(S('g', { tabindex: 0, onpointermove: (ev) => showTip(ev, `<b>${f.n}</b><br>about ${f.kbd} kb/d loading (Sep 2026 programme${f.n === 'Brent' ? '; Brent field 2026 average' : ''})`), onpointerleave: hideTip },
         S('circle', { cx: x, cy: y, r: R(f.kbd), fill: C.brent, 'fill-opacity': 0.25, stroke: C.brent, 'stroke-width': 1.5 })));
-      const left = f.n === 'Oseberg', lx = left ? x - R(f.kbd) - 6 : x + R(f.kbd) + 6, an = left ? 'end' : 'start', dy = f.n === 'Troll' ? -10 : 0;
-      g.append(S('text', { x: lx, y: y - 2 + dy, 'text-anchor': an, class: 'os-place' }, f.n), S('text', { x: lx, y: y + 14 + dy, 'text-anchor': an, class: 'os-num' }, f.kbd + ' kb/d'));
+      // label side per field: the northern fields sit close together, so Brent and Oseberg go left, Troll on top
+      const side = { Brent: 'l', Oseberg: 'l', Troll: 't' }[f.n] || 'r', r = R(f.kbd);
+      const lx = side === 'l' ? x - r - 6 : side === 't' ? x : x + r + 6, an = side === 'l' ? 'end' : side === 't' ? 'middle' : 'start', ly = side === 't' ? y - r - 22 : y;
+      g.append(S('text', { x: lx, y: ly - 2, 'text-anchor': an, class: 'os-place' }, f.n, S('tspan', { x: lx, dy: '1.3em', class: 'os-num' }, f.kbd + ' kb/d')));
     }
     // the Midland barrel arriving at Rotterdam
     const [rx, ry] = P([4.14, 51.94]);
-    const arc = S('path', { d: `M${P([-8, 50.6])[0]},${P([-8, 50.6])[1]}C${P([-3, 50.2])[0]},${P([-3, 50.2])[1]} ${P([1, 51.4])[0]},${P([1, 51.4])[1]} ${rx},${ry}`, class: 'os-route', stroke: C.wti, 'stroke-width': 9, 'stroke-opacity': 0.35 });
+    const a0 = P([-6.6, 50.2]), a1 = P([-2, 50.0]), a2 = P([1.6, 51.1]);
+    const arc = S('path', { d: `M${a0[0]},${a0[1]}C${a1[0]},${a1[1]} ${a2[0]},${a2[1]} ${rx},${ry}`, class: 'os-route', stroke: C.wti, 'stroke-width': 9, 'stroke-opacity': 0.35 });
     g.append(arc, S('rect', { x: rx - 5, y: ry - 5, width: 10, height: 10, class: 'os-term' }), S('text', { x: rx + 9, y: ry + 5, class: 'os-place' }, 'Rotterdam'),
-      S('text', { x: P([-7.8, 50.9])[0], y: P([-7.8, 50.9])[1] - 12, class: 'os-place', fill: C.wti }, 'WTI Midland from Texas'), S('text', { x: P([-7.8, 50.9])[0], y: P([-7.8, 50.9])[1] + 6, class: 'os-num' }, `${cu.midlandNL} kb/d of US crude into the Netherlands`));
-    const ship = S('g', {}, S('rect', { x: -7, y: -2.6, width: 14, height: 5.2, rx: 2.6, fill: '#f6d2a8', stroke: C.wti }));
+      S('text', { x: a0[0] + 4, y: a0[1] - 30, class: 'os-place', fill: C.wti }, 'WTI Midland from Texas'), S('text', { x: a0[0] + 4, y: a0[1] - 14, class: 'os-num' }, `${cu.midlandNL} kb/d of US crude into the Netherlands`));
+    const ship = S('g', {}, S('rect', { x: -7, y: -2.6, width: 14, height: 5.2, rx: 2.6, fill: '#ffffff', stroke: C.wti }));
     g.append(ship);
     stage.append(svg, h('div', { class: 'os-read', html: 'Five North Sea grades load about <b>470 kb/d</b>; the Brent field itself about 23 kb/d. One Texan grade landed in Rotterdam can set the price of all of them.' }));
     let L = 0, u = 0;
@@ -806,42 +846,77 @@
   FIG.curve = function (root) {
     const cu = DATA.curated;
     const { stage, ctrl } = sheet(root, { eyebrow: 'Futures price by delivery month, $ per barrel', short: 'The curve', source: 'cost-of-carry model · market points from the text', date: 'Oct 2026' });
-    const st = { S: 100, r: 4, u: 6, y: 30, preset: 'oct2026' };
-    const W = 760, H = 330, M = { l: 54, r: 20, t: 20, b: 34 };
+    const presets = { oct2026: { S: 106, r: 4, u: 4, y: 30 }, apr2020: { S: 18, r: 1, u: 120, y: 0 }, calm: { S: 70, r: 4, u: 6, y: 8 } };
+    const st = { ...presets.oct2026, preset: 'oct2026' }, tg = { ...presets.oct2026 };
+    const W = 760, H = 360, M = { l: 54, r: 150, t: 58, b: 34 };
     const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Futures curve from the cost of carry' });
-    const X = (mo) => M.l + (mo / 12) * (W - M.l - M.r), Y = (v) => H - M.b - ((v - 0) / 160) * (H - M.t - M.b);
-    for (const t of [0, 40, 80, 120, 160]) svg.append(S('line', { x1: M.l, x2: W - M.r, y1: Y(t), y2: Y(t), class: 'os-gridh' }), S('text', { x: M.l - 7, y: Y(t) + 3.5, 'text-anchor': 'end', class: 'os-ax' }, '$' + t));
+    const X = (mo) => M.l + (mo / 12) * (W - M.l - M.r);
+    let lo = 0, hi = 160;
+    const Y = (v) => H - M.b - ((v - lo) / (hi - lo)) * (H - M.t - M.b);
+    const grid = S('g', {}), area = S('path', { 'fill-opacity': 0.1 }), stems = S('g', {}), spotLine = S('line', { class: 'os-cvspot' }), line = S('path', { fill: 'none', 'stroke-width': 2.6, 'stroke-linejoin': 'round' });
+    const mk = S('g', {}), brk = S('g', {}), labs = S('g', {}), bal = S('g', {});
     for (let mo = 0; mo <= 12; mo += 2) svg.append(S('text', { x: X(mo), y: H - 12, 'text-anchor': 'middle', class: 'os-ax' }, mo === 0 ? 'spot' : '+' + mo + ' mo'));
-    const area = S('path', { fill: C.red, 'fill-opacity': 0.08 }), line = S('path', { fill: 'none', stroke: C.red, 'stroke-width': 2.6 }), spot = S('circle', { r: 5, fill: C.crude });
-    const mk = S('g', {}), lab = S('text', { x: W - M.r, y: M.t + 12, 'text-anchor': 'end', class: 'os-lab' });
-    svg.append(area, line, spot, mk, lab);
+    svg.append(grid, area, spotLine, stems, line, mk, brk, labs, bal);
     const read = h('div', { class: 'os-read' });
-    const sS = slider('Spot', 20, 150, 1, st.S, (v) => { st.S = v; draw(); }, (v) => '$' + v);
-    const sR = slider('Interest r', 0, 10, 0.5, st.r, (v) => { st.r = v; draw(); }, (v) => v + ' %/yr');
-    const sU = slider('Storage u', 0, 40, 1, st.u, (v) => { st.u = v; draw(); }, (v) => v + ' %/yr');
-    const sY = slider('Convenience y', 0, 60, 1, st.y, (v) => { st.y = v; draw(); }, (v) => v + ' %/yr');
-    const presets = { oct2026: { S: 102, r: 4, u: 4, y: 30 }, apr2020: { S: 18, r: 1, u: 120, y: 0 }, calm: { S: 70, r: 4, u: 6, y: 8 } };
-    ctrl.append(seg([['oct2026', 'Oct 2026: scarcity'], ['calm', 'A calm market'], ['apr2020', 'Apr 2020: full tanks']], st.preset, (v) => { st.preset = v; Object.assign(st, presets[v]); sS.set(st.S); sR.set(st.r); sU.set(Math.min(40, st.u)); sY.set(st.y); draw(); }));
+    const sS = slider('Spot', 10, 150, 1, st.S, (v) => { st.S = tg.S = v; draw(); }, (v) => '$' + v);
+    const sR = slider('Interest r', 0, 10, 0.5, st.r, (v) => { st.r = tg.r = v; draw(); }, (v) => v + ' %/yr');
+    const sU = slider('Storage u', 0, 120, 1, st.u, (v) => { st.u = tg.u = v; draw(); }, (v) => v + ' %/yr');
+    const sY = slider('Convenience y', 0, 60, 1, st.y, (v) => { st.y = tg.y = v; draw(); }, (v) => v + ' %/yr');
+    ctrl.append(seg([['oct2026', 'Oct 2026: scarcity'], ['calm', 'A calm market'], ['apr2020', 'Apr 2020: full tanks']], st.preset, (v) => {
+      st.preset = v; Object.assign(tg, presets[v]); sS.set(tg.S); sR.set(tg.r); sU.set(tg.u); sY.set(tg.y); if (REDUCED) { Object.assign(st, tg); draw(); } else L.kick();
+    }));
     const ctrl2 = h('div', { class: 'os-ctrl' }, sS.el, sR.el, sU.el, sY.el);
     stage.append(svg, ctrl2, read);
-    const tgt = { k: 0 }; let cur = null;
-    function F(mo) { return st.S * Math.exp(((st.r + st.u - st.y) / 100) * (mo / 12)); }
+    const F = (mo) => st.S * Math.exp(((st.r + st.u - st.y) / 100) * (mo / 12));
     function draw() {
-      const pts = []; for (let mo = 0; mo <= 12; mo += 0.25) pts.push([X(mo), Y(clamp(F(mo), 0, 170))]);
-      cur = pts;
-      line.setAttribute('d', dOf(pts)); area.setAttribute('d', dOf(pts) + `L${X(12)},${Y(st.S)}L${X(0)},${Y(st.S)}Z`);
-      spot.setAttribute('cx', X(0)); spot.setAttribute('cy', Y(st.S));
-      const carry = st.r + st.u - st.y, f12 = F(12);
-      line.setAttribute('stroke', carry >= 0 ? C.diesel : C.red); area.setAttribute('fill', carry >= 0 ? C.diesel : C.red);
-      lab.textContent = carry >= 0 ? 'CONTANGO · STORE IT' : 'BACKWARDATION · SELL IT NOW'; lab.setAttribute('fill', carry >= 0 ? C.diesel : C.red);
-      mk.replaceChildren();
+      const carry = st.r + st.u - st.y, f12 = F(12), up = carry >= 0, col = up ? C.diesel : C.red;
       const ref = st.preset === 'oct2026' ? cu.curves.oct2026 : st.preset === 'apr2020' ? cu.curves.apr2020 : null;
-      if (ref) for (const [mo, v] of ref.pts) mk.append(S('circle', { cx: X(mo), cy: Y(v), r: 4.5, fill: 'none', stroke: C.line, 'stroke-width': 1.5 }, S('title', {}, ref.label + ': ' + v)));
-      read.innerHTML = `$$F(T) = S\\,e^{(r + u - y)T}$$ <b>r + u − y = ${carry.toFixed(1)} % a year</b> → 12-month future <b>$${f12.toFixed(1)}</b> against spot $${st.S}` + (ref ? ` · rings: ${ref.label}` : '');
-      read.innerHTML = read.innerHTML.replace(/\$\$F\(T\)[^$]*\$\$/, '<span class="os-eq">F(T) = S·e<sup>(r+u−y)T</sup></span>');
+      // the axis follows the curve, so a gentle slope is not flattened against a fixed $0-160 scale
+      const vals = [st.S, f12, ...(ref ? ref.pts.map((p) => p[1]) : [])];
+      const pad = Math.max(4, (Math.max(...vals) - Math.min(...vals)) * 0.25);
+      const t0 = niceTicks(Math.max(0, Math.min(...vals) - pad), Math.max(...vals) + pad, 4), step = t0[1] - t0[0];
+      lo = Math.max(0, Math.floor((Math.min(...vals) - pad / 2) / step) * step); hi = Math.ceil((Math.max(...vals) + pad / 2) / step) * step;
+      const tk = []; for (let v = lo; v <= hi + 1e-9; v += step) tk.push(+v.toFixed(6));
+      grid.replaceChildren(...tk.flatMap((t) => [S('line', { x1: M.l, x2: X(12), y1: Y(t), y2: Y(t), class: 'os-gridh' }), S('text', { x: M.l - 7, y: Y(t) + 3.5, 'text-anchor': 'end', class: 'os-ax' }, '$' + t)]));
+      const pts = []; for (let mo = 0; mo <= 12; mo += 0.25) pts.push([X(mo), Y(F(mo))]);
+      line.setAttribute('d', dOf(pts)); line.setAttribute('stroke', col);
+      area.setAttribute('d', dOf(pts) + `L${X(12)},${Y(st.S)}L${X(0)},${Y(st.S)}Z`); area.setAttribute('fill', col);
+      spotLine.setAttribute('x1', X(0)); spotLine.setAttribute('x2', X(12)); spotLine.setAttribute('y1', Y(st.S)); spotLine.setAttribute('y2', Y(st.S));
+      // one stem per monthly contract: how far each delivery month sits from spot
+      stems.replaceChildren();
+      for (let mo = 1; mo <= 12; mo++) {
+        const v = F(mo);
+        stems.append(S('line', { x1: X(mo), x2: X(mo), y1: Y(st.S), y2: Y(v), stroke: col, 'stroke-opacity': 0.45, 'stroke-width': 1.4 }),
+          S('circle', { cx: X(mo), cy: Y(v), r: 3.2, fill: C.paper, stroke: col, 'stroke-width': 1.6 }, S('title', {}, `+${mo} months: $${v.toFixed(1)}`)));
+      }
+      stems.append(S('circle', { cx: X(0), cy: Y(st.S), r: 5.5, fill: C.crude }));
+      mk.replaceChildren();
+      if (ref) for (const [mo, v] of ref.pts) mk.append(S('circle', { cx: X(mo), cy: Y(v), r: 7, fill: 'none', stroke: C.line, 'stroke-width': 1.4, 'stroke-dasharray': '2 2' }, S('title', {}, ref.label + ': $' + v)));
+      // bracket: the 12-month spread
+      const bx = X(12) + 14, d = f12 - st.S;
+      brk.replaceChildren(S('path', { d: `M${bx - 5},${Y(st.S)}h5V${Y(f12)}h-5`, fill: 'none', stroke: col, 'stroke-width': 1.3 }),
+        S('text', { x: bx + 8, y: (Y(st.S) + Y(f12)) / 2 - 4, class: 'os-lab', fill: col, style: `fill:${col}` }, (d >= 0 ? '+$' : '−$') + Math.abs(d).toFixed(1)),
+        S('text', { x: bx + 8, y: (Y(st.S) + Y(f12)) / 2 + 11, class: 'os-small' }, 'in 12 months,'),
+        S('text', { x: bx + 8, y: (Y(st.S) + Y(f12)) / 2 + 24, class: 'os-small' }, `from spot $${st.S.toFixed(0)}`));
+      labs.replaceChildren(S('text', { x: M.l, y: 18, class: 'os-cvreg', style: `fill:${col}` }, up ? 'CONTANGO' : 'BACKWARDATION'),
+        S('text', { x: M.l, y: 34, class: 'os-small' }, up ? 'futures above spot: the market pays you to store' : 'futures below spot: oil now is worth more than oil later'));
+      // carry balance: what pushes the curve up (interest + storage) against what pulls it down (convenience yield)
+      const bx0 = W - 196, sc = 120 / Math.max(60, st.r + st.u, st.y);
+      bal.replaceChildren(
+        S('text', { x: bx0, y: 14, class: 'os-small' }, `interest + storage ${(st.r + st.u).toFixed(0)} %/yr`),
+        S('rect', { x: bx0, y: 19, width: Math.max(1, (st.r + st.u) * sc), height: 8, rx: 2, fill: C.diesel }),
+        S('text', { x: bx0, y: 42, class: 'os-small' }, `convenience yield ${st.y.toFixed(0)} %/yr`),
+        S('rect', { x: bx0, y: 47, width: Math.max(1, st.y * sc), height: 8, rx: 2, fill: C.red }));
+      read.innerHTML = `<span class="os-eq">F(T) = S·e<sup>(r+u−y)T</sup></span> <b>r + u − y = ${carry.toFixed(1)} % a year</b> → 12-month future <b>$${f12.toFixed(1)}</b> against spot $${st.S.toFixed(0)}` + (ref ? ` · dashed rings: ${ref.label}` : '');
     }
+    const L = looper(svg, (dt) => {
+      let moving = false;
+      for (const k of ['S', 'r', 'u', 'y']) { const d = tg[k] - st[k]; if (Math.abs(d) > 0.01) { st[k] += d * (1 - Math.exp(-dt / 0.18)); moving = true; } else st[k] = tg[k]; }
+      if (moving) draw();
+    });
     draw();
   };
+
 
   // ---- the Atlantic: why Brent minus WTI is the price of the journey
   FIG.route = function (root) {
@@ -857,7 +932,7 @@
     const lane = S('path', { d: smoothD(sea), class: 'os-route', stroke: C.wti, 'stroke-width': 2, 'stroke-dasharray': '1 6', 'stroke-linecap': 'round' });
     svg.append(pipe1, pipe2, lane);
     for (const n of ['Cushing', 'Midland', 'Houston', 'Rotterdam']) { const [x, y] = at(n); svg.append(S('rect', { x: x - 5, y: y - 5, width: 10, height: 10, class: 'os-term' }), S('text', { x: x + (n === 'Midland' ? -9 : 9), y: y - 8, 'text-anchor': n === 'Midland' ? 'end' : 'start', class: 'os-place' }, n)); }
-    const ship = S('g', {}, S('rect', { x: -8, y: -3, width: 16, height: 6, rx: 3, fill: '#f6d2a8', stroke: C.wti }));
+    const ship = S('g', {}, S('rect', { x: -8, y: -3, width: 16, height: 6, rx: 3, fill: '#ffffff', stroke: C.wti }));
     svg.append(ship);
     // cost stack
     const W = 760, H = 120;
@@ -872,10 +947,10 @@
       stack.replaceChildren();
       for (const t of [0, 5, 10, 15, 20, 25, 30]) stack.append(S('line', { x1: sx(t), x2: sx(t), y1: 18, y2: 76, class: 'os-gridv' }), S('text', { x: sx(t), y: 92, 'text-anchor': 'middle', class: 'os-ax' }, '$' + t));
       let acc = 0;
-      for (const [n, v, c] of parts) { stack.append(S('rect', { x: sx(acc), y: 28, width: Math.max(0, sx(acc + v) - sx(acc) - 1), height: 34, fill: c, 'fill-opacity': 0.85 }, S('title', {}, `${n}: $${v.toFixed(1)}`))); if (v > 2.4) stack.append(S('text', { x: sx(acc + v / 2), y: 50, 'text-anchor': 'middle', class: 'os-segv', fill: '#0b1424' }, n.split(' ')[0])); acc += v; }
+      for (const [n, v, c] of parts) { stack.append(S('rect', { x: sx(acc), y: 28, width: Math.max(0, sx(acc + v) - sx(acc) - 1), height: 34, fill: c, 'fill-opacity': 0.85 }, S('title', {}, `${n}: $${v.toFixed(1)}`))); if (v > 2.4) stack.append(S('text', { x: sx(acc + v / 2), y: 50, 'text-anchor': 'middle', class: 'os-segv', fill: '#04204b' }, n.split(' ')[0])); acc += v; }
       stack.append(S('line', { x1: sx(6.4), x2: sx(6.4), y1: 18, y2: 72, stroke: C.brent, 'stroke-width': 2, 'stroke-dasharray': '4 3' }), S('text', { x: sx(6.4), y: 14, 'text-anchor': 'middle', class: 'os-small', fill: C.brent }, 'Feb 2026 spot gap $6.4'));
       stack.append(S('line', { x1: sx(25), x2: sx(25), y1: 18, y2: 72, stroke: C.red, 'stroke-width': 2, 'stroke-dasharray': '4 3' }), S('text', { x: sx(25), y: 14, 'text-anchor': 'middle', class: 'os-small', fill: C.red }, 'Oct 1–20 spot gap $25.0'));
-      stack.append(S('text', { x: sx(tot) + 6, y: 50, class: 'os-lab', fill: '#f3f6fb' }, '= $' + tot.toFixed(1)));
+      stack.append(S('text', { x: sx(tot) + 6, y: 50, class: 'os-lab', fill: '#04204b' }, '= $' + tot.toFixed(1)));
       read.innerHTML = `WTI at Cushing <b>+ $${tot.toFixed(1)}</b> to get it to Rotterdam ≈ what a North Sea barrel must cost there, so <b>Brent − WTI ≈ $${tot.toFixed(1)}</b>. Pipeline and dock costs are round estimates.`;
     }
     draw();
@@ -897,7 +972,7 @@
         const r = S('rect', { x: sx(acc), y: 40, width: Math.max(0, sx(acc + v) - sx(acc) - 2), height: 54, fill: c, 'fill-opacity': 0.88, onpointermove: (ev) => showTip(ev, `<b>${n}</b><br>${v.toFixed(3)} ${p.unit.split(' ')[0]} · ${(100 * v / tot).toFixed(0)} %`), onpointerleave: hideTip });
         svg.append(r);
         const mid = sx(acc + v / 2);
-        svg.append(S('text', { x: mid, y: 72, 'text-anchor': 'middle', class: 'os-segv', fill: '#0b1424' }, (100 * v / tot).toFixed(0) + '%'));
+        svg.append(S('text', { x: mid, y: 72, 'text-anchor': 'middle', class: 'os-segv', fill: onFill(c) }, (100 * v / tot).toFixed(0) + '%'));
         svg.append(S('text', { x: mid, y: i % 2 ? 120 : 30, 'text-anchor': 'middle', class: 'os-small', fill: c }, n));
         acc += v;
       });

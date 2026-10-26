@@ -5,6 +5,13 @@ al-folio Jekyll site, self-hosted on niklas-abraham.de. Deploy from this folder 
 
 ## Blog posts (`_posts/`, `/blog/:year/:title/`)
 
+- **Always the site's own look (CI), never the look of the source.** When a post is inspired by a video, reel or
+  article, take the content, not its style: no dark sheets, condensed display fonts, blueprint title blocks or
+  slide-like figures. Figures are the light `.concept.bx` cards of the food and AI posts (white stage, ink #04204b,
+  blue #0b4fc0, warm #b4552f, teal #138374), at text width, set inside the prose with the caption under the card.
+  Niklas rejected the reel look of the oil post on 26 Oct 2026 ("clean, fact-based, like the others").
+- **The blog index is newest first.** Do not set `pinned: true` on a post unless Niklas asks for it.
+
 - **No stat-tile row at the top.** No grid of headline numbers ("2,925 TWh / 59.8 % / 89 EUR/MWh …")
   between the intro note and the text. Niklas removed it from the energy post (18 Oct 2026); the
   numbers belong in the prose and figures where they are explained. Open with eyebrow, title, lede,
@@ -70,4 +77,4 @@ Niklas wanted the physics-first post *and* the biology with 3D, so section 00 "T
 
 ## Oil-market post
 
-`_posts/2026-10-26-oil-market.md` (`/blog/2026/oil-market/`): the whole oil market (crude, refining, crack spread, producers, demand, costs, OPEC+, chokepoints, tankers, Cushing, benchmarks, curve, Brent−WTI, the 2026 Hormuz war, diesel, stocks, pump price) in the look of a *Crude & Conflict* reel. Pipeline `bin/oil_article/` (README there): EIA/FRED → `assets/oil-article/oil.json`, Natural Earth → `geo.json`, hand-curated `curated.py`. Figures are blueprint sheets `{% include oil.html kind=… %}` from `assets/js/oil-explorer.js` (styles `_sass/_oil_article.scss`, Barlow Condensed vendored); four isometric drawings from the anatomy skill are iframes `{% include oil-anat.html name=… %}` (`assets/oil-article/anatomy/`, sources in `bin/oil_article/anatomy/`). Source tags `{% include oil-ref.html k=… %}` from `_data/oil_article/refs.yml`. "Brent spot" in the post always means the EIA series; ICE futures are named as such. Check with `node bin/oil_article/shots.mjs [--phone]`.
+`_posts/2026-10-26-oil-market.md` (`/blog/2026/oil-market/`): the whole oil market (crude, refining, crack spread, producers, demand, costs, OPEC+, chokepoints, tankers, Cushing, benchmarks, curve, Brent−WTI, the 2026 Hormuz war, diesel, stocks, pump price). Pipeline `bin/oil_article/` (README there): EIA/FRED → `assets/oil-article/oil.json`, Natural Earth → `geo.json`, hand-curated `curated.py` (series colours live there too, in the site palette). Figures are `{% include oil.html kind=… %}` from `assets/js/oil-explorer.js`, drawn in the site's `.concept.bx` card (restyled 26 Oct 2026 from the first version's navy blueprint sheets, which Niklas rejected; styles `_sass/_oil_article.scss`). The four isometric drawings are iframes `{% include oil-anat.html name=… %}` of the `-light` pages in `assets/oil-article/anatomy/`, each patched with a `<style id="oil-site-light">` block that forces the light variables on every `.iso` and a white page: re-add it if the drawings are rebuilt from `bin/oil_article/anatomy/`. Source tags `{% include oil-ref.html k=… %}` from `_data/oil_article/refs.yml`. "Brent spot" in the post always means the EIA series; ICE futures are named as such. Check with `node bin/oil_article/shots.mjs [--phone]`. Thumbnail: `oil()` in `bin/thumbs/build.py` (crude flows on a pale map).

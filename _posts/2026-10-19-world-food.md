@@ -6,7 +6,6 @@ date: 2026-10-19
 tags: [food, agriculture, trade, data]
 image: /assets/blog-thumbs/food.webp
 categories: [long-read]
-pinned: true
 read_time: 35 # the word count does not include the interactive figures
 ---
 {%- assign data = '/assets/food-article/' | relative_url -%}

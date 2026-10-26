@@ -1,6 +1,7 @@
-{%- comment -%} An isometric anatomy figure of the oil-market long read, a standalone page in an iframe: name= (refinery|crack-balance|vlcc|cushing-tank), title=, caption=, h= (initial height px). The page posts its height; the dark drawing is used in both site themes. {%- endcomment -%}
-{%- assign src = '/assets/oil-article/anatomy/' | append: include.name | append: '.html' | relative_url -%}
-<figure class="oil-anat" data-anat="{{ include.name }}">
+{%- comment -%} An isometric drawing of the oil-market long read, a standalone light page in an iframe inside the site's figure card: name= (refinery|crack-balance|vlcc|cushing-tank), title=, caption=, h= (initial height px). The page posts its height. {%- endcomment -%}
+{%- assign src = '/assets/oil-article/anatomy/' | append: include.name | append: '-light.html' | relative_url -%}
+<figure class="concept bx oil-anat" data-anat="{{ include.name }}">
+<header><span class="concept-kind">Drawing</span><span class="concept-title">{{ include.title }}</span></header>
 <iframe src="{{ src }}" title="{{ include.title | escape }}" loading="lazy" style="height:{{ include.h | default: 560 }}px" scrolling="no"></iframe>
 <figcaption>{{ include.caption }}</figcaption>
 </figure>

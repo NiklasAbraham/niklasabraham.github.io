@@ -93,29 +93,47 @@ def ai():
 
 
 def oil():
-    """Blueprint paper: the 3-2-1 crack since 2006 as a red ridge over the Brent line, an orange barrel split by a crack."""
-    o = json.load(open(A / "oil-article/oil.json"))["monthly"]
-    t = [i for i, d in enumerate(o["t"]) if d >= "2006-07" and o["crack321_nyw"][i] is not None]
-    c = np.array([o["crack321_nyw"][i] for i in t]); b = np.array([o["brent"][i] for i in t])
-    fig, ax = canvas("#0b1424")
-    for x in range(0, W, 40): ax.plot([x, x], [0, H], color="#1a2a44", lw=0.6 if x % 160 else 1.1)
-    for y in range(0, H, 40): ax.plot([0, W], [y, y], color="#1a2a44", lw=0.6 if y % 160 else 1.1)
-    x = np.linspace(80, W - 80, len(t))
-    yb = H - 90 - b / 160 * (H - 400); yc = H - 90 - np.clip(c, 0, None) / 82 * (H - 420)
-    ax.plot(x, yb, color="#8fb0f5", lw=2, alpha=0.55)
-    ax.fill_between(x, H - 90, yc, color="#e5533d", alpha=0.22, lw=0); ax.plot(x, yc, color="#e5533d", lw=3)
-    ax.plot([80, W - 80], [H - 90, H - 90], color="#dfe6f1", lw=1.6)
-    cx, top, bw, bh = 600, 60, 130, 210  # barrel with a zigzag crack
-    zig = [(cx + dx, top + dy) for dx, dy in [(0, 0), (12, 30), (-8, 60), (14, 95), (-6, 130), (12, 165), (-10, 200), (6, 230), (0, bh)]]
-    for side in (-1, 1):
-        off = side * 14
-        xs = [cx - bw / 2 + off, cx - bw / 2 + off] if side < 0 else [cx + bw / 2 + off, cx + bw / 2 + off]
-        poly = [(xs[0], top), *[(p[0] + off, p[1]) for p in zig], (xs[0], top + bh)] if side < 0 else [(xs[0], top), *[(p[0] + off, p[1]) for p in zig], (xs[0], top + bh)]
-        ax.add_patch(Polygon(poly, closed=True, fc="#13223a", ec="#dfe6f1", lw=2, zorder=5))
-        for yy in (top + bh / 3, top + 2 * bh / 3): ax.plot([xs[0], zig[2][0] + off], [yy, yy], color="#dfe6f1", lw=1, alpha=0.5, zorder=6)
-        ax.plot([p[0] + off for p in zig], [p[1] for p in zig], color="#e8913a", lw=3, zorder=7)
+    """The year's crude flows at sea on a pale world map: lanes as warm ribbons, width by million barrels a day, rings at
+    the chokepoints by the oil through them; same lanes, flows and Equal Earth projection as the post's flow map."""
+    g = json.load(open(A / "oil-article/geo.json"))["world"]; cu = json.load(open(A / "oil-article/oil.json"))["curated"]
+    A1, A2, A3, A4, D = 1.340264, -0.081106, 0.000893, 0.003796, np.pi / 180
+    def P(lon, lat):
+        l = (lon - g["lon0"] + 180) % 360 - 180
+        th = np.arcsin(np.sqrt(3) / 2 * np.sin(lat * D)); t2 = th * th; t6 = t2 ** 3
+        x = 2 * np.sqrt(3) * l * D * np.cos(th) / (3 * (A1 + 3 * A2 * t2 + t6 * (7 * A3 + 9 * A4 * t2)))
+        return g["cx"] + g["s"] * x, g["cy"] - g["s"] * th * (A1 + A2 * t2 + t6 * (A3 + A4 * t2))
+    # crop: the Atlantic to Japan, scaled to the card
+    x0, y0, x1, y1 = 170, 95, 930, 402
+    sc = W / (x1 - x0); oy = (H - (y1 - y0) * sc) / 2
+    T = lambda x, y: ((x - x0) * sc, (y - y0) * sc + oy)
+    nums = lambda d: [[tuple(map(float, m)) for m in re.findall(r"(-?[\d.]+),(-?[\d.]+)", r)] for r in d.split("Z") if r]
+    fig, ax = canvas("#f4f6fb")
+    for c in g["c"].values():
+        for ring in nums(c["d"]):
+            if len(ring) > 2 and np.ptp([q[0] for q in ring]) < 400:  # skip rings cut by the antimeridian
+                ax.add_patch(Polygon([T(*q) for q in ring], closed=True, fc="#ffffff", ec="#cdd5e2", lw=0.5))
+    def chaikin(xy, n=4):  # round the schematic lanes
+        for _ in range(n):
+            q = 0.75 * xy[:-1] + 0.25 * xy[1:]; r = 0.25 * xy[:-1] + 0.75 * xy[1:]
+            xy = np.vstack([xy[:1], np.column_stack([q, r]).reshape(-1, 2), xy[-1:]])
+        return xy
+    col = {"crude": RUST, "wti": "#d98a52", "urals": "#8e4fb3"}
+    load = {}
+    for f in cu["flows"]:
+        for k in f["lanes"]: load.setdefault(k, {}); load[k][f["c"]] = load[k].get(f["c"], 0) + f["mbd"]
+    for k, pts in cu["lanes"].items():
+        if k not in load: continue
+        lon = np.concatenate([np.linspace(a[0], b[0], 12) for a, b in zip(pts, pts[1:])])
+        lat = np.concatenate([np.linspace(a[1], b[1], 12) for a, b in zip(pts, pts[1:])])
+        xy = chaikin(np.array([T(*P(a, b)) for a, b in zip(lon, lat)])[::6])
+        for c, v in sorted(load[k].items(), key=lambda kv: -kv[1]):
+            ax.plot(xy[:, 0], xy[:, 1], color=col.get(c, RUST), lw=1.2 + 1.35 * v, alpha=0.82, solid_capstyle="round", solid_joinstyle="round")
+    for ch in cu["chokepoints"]:
+        x, y = T(*P(ch["lon"], ch["lat"])); r = 7 + 4.2 * np.sqrt(ch["mbd"])
+        hot = ch["k"] == "hormuz"
+        ax.add_patch(plt.Circle((x, y), r, fc="none", ec=INK, lw=2.6 if hot else 1.4, zorder=6))
+        if hot: ax.add_patch(plt.Circle((x, y), r * 1.55, fc="none", ec=INK, lw=0.9, ls=(0, (3, 3)), zorder=6))
     save(fig, "oil-market")
-
 
 for fn in (energy, food, budget, ai, oil):
     fn()

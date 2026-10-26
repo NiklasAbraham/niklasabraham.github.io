@@ -6,12 +6,12 @@ its entry in _data/oil_article/refs.yml. build.py writes them into oil.json unde
 YIELDS = {
     'source': 'EIA, US refinery yields 2023', 'date': '2023', 'ref': 'eia-yields',
     'items': [  # bottom to top in the stack
-        {'k': 'other', 'name': 'Coke, asphalt, other', 'gal': 2.06 + 0.84 + 0.38 + 0.34 + 0.21 + 0.21 + 0.08 + 0.04 + 0.04, 'c': '#9b8670'},
-        {'k': 'resid', 'name': 'Fuel oil', 'gal': 0.71, 'c': '#7d6a58'},
-        {'k': 'diesel', 'name': 'Diesel and heating oil', 'gal': 12.47, 'c': '#4fa8e0'},
-        {'k': 'jet', 'name': 'Jet fuel', 'gal': 4.41, 'c': '#e9edf4'},
-        {'k': 'gas', 'name': 'Gasoline', 'gal': 19.57, 'c': '#a6c94a'},
-        {'k': 'lpg', 'name': 'Still gas and LPG', 'gal': 1.68 + 1.55, 'c': '#f2c14e'},
+        {'k': 'other', 'name': 'Coke, asphalt, other', 'gal': 2.06 + 0.84 + 0.38 + 0.34 + 0.21 + 0.21 + 0.08 + 0.04 + 0.04, 'c': '#7a5c45'},
+        {'k': 'resid', 'name': 'Fuel oil', 'gal': 0.71, 'c': '#4e3b2c'},
+        {'k': 'diesel', 'name': 'Diesel and heating oil', 'gal': 12.47, 'c': '#6a47c2'},
+        {'k': 'jet', 'name': 'Jet fuel', 'gal': 4.41, 'c': '#8a93a6'},
+        {'k': 'gas', 'name': 'Gasoline', 'gal': 19.57, 'c': '#138374'},
+        {'k': 'lpg', 'name': 'Still gas and LPG', 'gal': 1.68 + 1.55, 'c': '#c99a1e'},
     ],
 }
 
@@ -113,18 +113,18 @@ PLACES = [  # Wikipedia geodata unless marked approx. in the research note
 ]
 # the Gulf in 2026, stage by stage: Hormuz flow (mb/d, crude and products, trackers differ), bypass use, state of the Red Sea
 HORMUZ_STAGES = [  # oil through the strait (IEA; Kpler for Oct), Gulf exports by all routes (IEA; The National/Kpler for Oct)
-    {'k': 'prewar', 'd': 'Feb 2026', 'title': 'Before the war', 'hormuz': 20.0, 'exports': 24.0, 'ships': 'about 100', 'ew': '2–2.5 mb/d (of 7)', 'red': 'open',
-     'text': 'About a hundred ships a day; some 20 mb/d of crude and products through the strait, a fifth of world consumption. Gulf exports by all routes about 24 mb/d.'},
-    {'k': 'mar', 'd': 'Mar 2026', 'title': 'The strait closes', 'hormuz': 2.3, 'exports': None, 'ships': 'a trickle', 'ew': 'filling to 7 mb/d', 'red': 'open: Yanbu loads',
+    {'k': 'prewar', 'd': 'Feb 2026', 'title': 'Before the war', 'hormuz': 20.0, 'exports': 24.0, 'ships': 'about 80', 'ew': '2–2.5 mb/d (of 7)', 'red': 'open',
+     'text': 'About 80 ships a day; some 20 mb/d of crude and products through the strait, a fifth of world consumption. Gulf exports by all routes about 24 mb/d.'},
+    {'k': 'mar', 'd': 'Mar 2026', 'title': 'The strait closes', 'hormuz': 2.3, 'exports': 8.7, 'ships': 'about 3', 'ew': 'filling to 7 mb/d', 'red': 'open: Yanbu loads',
      'text': 'Strikes on Iran on 28 February; the Revolutionary Guard closes the strait. Gulf producers shut in more than 10 mb/d within two weeks. Saudi Arabia pushes crude west through the East–West line to Yanbu, the UAE fills its line to Fujairah.'},
-    {'k': 'apr', 'd': 'Apr 2026', 'title': 'Bypasses at full stretch', 'hormuz': 2.7, 'exports': 10.5, 'ships': 'a trickle', 'ew': 'full, 7 mb/d', 'red': 'Yanbu 5.3 mb/d',
+    {'k': 'apr', 'd': 'Apr 2026', 'title': 'Bypasses at full stretch', 'hormuz': 2.7, 'exports': 10.5, 'ships': 'about 7', 'ew': 'full, 7 mb/d', 'red': 'Red Sea loadings 4.2 mb/d',
      'text': 'Bypass exports reach 7.8 mb/d, total Gulf exports 10.5 mb/d, 14 mb/d below February. A ceasefire on 7 April crashes futures by $20; the US blockades Iranian ports from 13 April.'},
     {'k': 'jun', 'd': 'Jun 2026', 'title': 'The memorandum', 'hormuz': None, 'exports': 16.1, 'ships': 'tankers return', 'ew': 'easing', 'red': 'open',
      'text': 'The Islamabad Memorandum is signed on 17 June and both blockades are lifted; Ras Tanura loads again from 29 June. Gulf exports climb to 16.1 mb/d.'},
-    {'k': 'aug', 'd': 'Aug 2026', 'title': 'Blockades again', 'hormuz': 7.6, 'exports': 15.0, 'ships': 'about 5', 'ew': 'Yanbu under fire', 'red': 'Houthi blockade',
-     'text': 'The memorandum collapses on 7–8 July; the US blockade returns on 14 July and the Houthis declare a blockade of the Red Sea. Hormuz carries 7.6 mb/d.'},
-    {'k': 'oct', 'd': 'Oct 2026', 'title': 'Dark transits', 'hormuz': 11.6, 'exports': 24.5, 'ships': 'about 5 counted', 'ew': 'restarted 22 Sep', 'red': '2.6 mb/d (Sep)',
-     'text': 'Drones shut the East–West line on 11 September. In October PortWatch counts about five transits a day, yet Kpler sees 11.6 mb/d leave through the strait: most tankers sail with their transponders off, and non-Iranian Middle East exports are back at their pre-war level.'},
+    {'k': 'aug', 'd': 'Aug 2026', 'title': 'Blockades again', 'hormuz': 7.6, 'exports': 13.0, 'ships': 'about 5', 'ew': 'Yanbu under fire', 'red': 'Houthi blockade',
+     'text': 'The memorandum collapses on 7–8 July; the US blockade returns on 14 July and the Houthis declare a blockade of the Red Sea. Hormuz carries 7.6 mb/d; Gulf exports by all routes fall to about 13 mb/d.'},
+    {'k': 'oct', 'd': 'Oct 2026', 'title': 'Dark transits', 'hormuz': 11.6, 'exports': 24.5, 'ships': 'about 4 counted', 'ew': 'partly restarted 22 Sep', 'red': '2.6 mb/d (Sep)',
+     'text': 'Drones shut the East–West line on 11 September. In October PortWatch counts about four transits a day, yet Kpler sees 11.6 mb/d leave through the strait: most tankers sail with their transponders off, and non-Iranian Middle East exports are back at their pre-war level.'},
 ]
 
 # Energy Institute Statistical Review 2026: 2025 production (crude + condensate + NGLs) and consumption (total liquids), kb/d,
@@ -144,8 +144,8 @@ COUNTRIES = [
 ]
 WORLD = {'production': 100590, 'consumption': 106519, 'eu_consumption': 11072}
 # IEA OMR Feb 2026: world demand by product, 2025, kb/d
-PRODUCTS = [['Diesel and gasoil', 28857, '#4fa8e0'], ['Gasoline', 27786, '#a6c94a'], ['LPG and ethane', 15244, '#f2c14e'], ['Other products', 10917, '#5d6b85'],
-            ['Jet fuel and kerosene', 7718, '#e9edf4'], ['Naphtha', 7203, '#b190f0'], ['Fuel oil', 6297, '#9b8670']]
+PRODUCTS = [['Diesel and gasoil', 28857, '#6a47c2'], ['Gasoline', 27786, '#138374'], ['LPG and ethane', 15244, '#c99a1e'], ['Other products', 10917, '#a3acbd'],
+            ['Jet fuel and kerosene', 7718, '#8a93a6'], ['Naphtha', 7203, '#b39ddb'], ['Fuel oil', 6297, '#7a5c45']]
 # barrels per person per year, 2024 (EIA international statistics, computed in the research note)
 PERCAP = [['Saudi Arabia', 38.2], ['Canada', 22.4], ['United States', 22.0], ['South Korea', 17.9], ['Russia', 9.6], ['Japan', 9.3],
           ['European Union', 9.0], ['Germany', 8.9], ['Brazil', 5.6], ['World', 4.6], ['China', 4.2], ['India', 1.4]]
@@ -181,15 +181,15 @@ NORTHSEA = [
     {'n': 'Troll', 'lat': 60.64, 'lon': 3.72, 'kbd': 70, 'term': 'Mongstad', 'tlat': 60.81, 'tlon': 5.03},
 ]
 MIDLAND_NL = 459   # kb/d of US crude into the Netherlands, Sep 2026 (S&P Commodities at Sea)
-# Brent futures curve, $ per barrel by months ahead (front ~102, 6 months ~90, 12 months ~83 in early October 2026)
+# Brent futures curve, $ per barrel by months ahead (Dec26 105.92, Jun27 93.20, Dec27 85.08 on 15 Oct 2026)
 CURVES = {
-    'oct2026': {'label': 'Brent, early Oct 2026 (backwardation)', 'pts': [[0, 102], [6, 90], [12, 83]]},
+    'oct2026': {'label': 'Brent futures, 15 Oct 2026 settlements', 'pts': [[0, 105.92], [6, 93.20], [12, 85.08]]},  # CME bulletin #199 via Baratelli
     'apr2020': {'label': 'WTI, 17 Apr 2020 (super-contango)', 'pts': [[0, 18.27], [1, 25.03], [2, 27.06], [3, 28.21], [6, 31.0], [12, 33.5]]},
 }
 # what a litre / gallon costs, October 2026 (own calc in the research note)
 PUMP = {
-    'de_diesel': {'price': 2.255, 'unit': '€ per litre', 'date': '21 Oct 2026', 'parts': [['Crude (Brent ≈ $110)', 0.617, '#e8913a'], ['Refining spread', 0.496, '#e5533d'], ['Distribution, stocks, retail', 0.278, '#5d6b85'], ['CO₂ price', 0.174, '#43c0a8'], ['Energy tax (cut)', 0.330, '#8fb0f5'], ['VAT 19 %', 0.360, '#b190f0']]},
-    'us_diesel': {'price': 6.276, 'unit': '$ per gallon', 'date': '19 Oct 2026', 'parts': [['Crude', 2.64, '#e8913a'], ['Refining', 1.57, '#e5533d'], ['Distribution and marketing', 1.44, '#5d6b85'], ['Taxes', 0.69, '#8fb0f5']]},
+    'de_diesel': {'price': 2.255, 'unit': '€ per litre', 'date': '21 Oct 2026', 'parts': [['Crude (Brent ≈ $110)', 0.617, '#b4552f'], ['Refining spread', 0.496, '#d98a52'], ['Distribution, stocks, retail', 0.278, '#a3acbd'], ['CO₂ price', 0.174, '#5fb3a5'], ['Energy tax (cut)', 0.330, '#0b4fc0'], ['VAT 19 %', 0.360, '#b39ddb']]},
+    'us_diesel': {'price': 6.276, 'unit': '$ per gallon', 'date': '19 Oct 2026', 'parts': [['Crude', 2.64, '#b4552f'], ['Refining', 1.57, '#d98a52'], ['Distribution and marketing', 1.44, '#a3acbd'], ['Taxes', 0.69, '#0b4fc0']]},
 }
 
 CURATED = {'yields': YIELDS, 'history': HISTORY, 'events': EVENTS, 'gapEvents': GAP_EVENTS, 'usEvents': US_EVENTS,
