@@ -72,6 +72,14 @@ The barrel in the first figure is the American average. In 2023 US refineries tu
 
 A refinery that sells $150 of products for every $100 of crude does not care much whether crude costs $70 or $110, as long as the gap holds. Everyone downstream of it does care, because the gap is part of every litre they buy. In 2026 that gap, not the crude price, reached a record, and it explains why diesel cost more in Germany in September than at any time before, why European refineries lost money in October while American ones made record margins, and why the price of a barrel of Brent and a barrel of WTI drifted $25 apart.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **A barrel of crude is worth only what can be made from it.** The margin between products and crude, the crack, is what reaches the pump → when the crack moves, fuel prices move even if crude does not.
+- **In 2026 that margin, not crude, set the record.** → The shock is best read as a refining shock: watch the crack, not only the barrel.
+
+</div>
+
 {: .da-bridge}
 To see why the gap exists at all, start with what crude is: not one substance but a mixture, different in every field.
 
@@ -88,6 +96,14 @@ What a refiner really wants to know is the **assay**: how much of the crude boil
 {% include oil.html kind="assay" title="Six crudes, <em>six different barrels</em>" caption="Straight-run yields by boiling range in weight per cent, from TotalEnergies assays (true boiling point distillation; gas and LPG are the remainder to 100). Light grades sit at the top, heavy ones at the bottom. Hover a segment for its value." %}
 
 One row in the figure matters more than the others: the gasoil cut, the raw material of diesel. It is 23 to 29 per cent for almost every grade, light or heavy (Nigeria's Bonny Light, at 36 per cent, is the exception). No crude comes out of the ground as mostly diesel. Most of the diesel in the world has to be **made**, by cracking the heavier vacuum gasoil and residue. That is the engineering behind the reel's line that "crude gets priced by the diesel inside it": a grade is worth what its middle distillates plus the diesel a complex refinery can crack out of its heavy end are worth.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Every crude is a different mixture.** Light sweet grades carry more naphtha and kerosene, heavy sour ones more residue and sulphur → refiners pay for the products inside a grade, not for "oil".
+- **Gasoil is 23 to 29 per cent of almost every grade.** → No crude is mostly diesel; most diesel has to be made by cracking heavier oil.
+
+</div>
 
 {: .da-bridge}
 Before the machine, the physics it uses: why the molecules of a crude can be sorted by heat at all.
@@ -126,6 +142,14 @@ A product is drawn off where it collects. Below that height the trays are too ho
 
 The bottom of the column has one limit: heat. Above about 350 to 370 °C the long molecules begin to break apart in the furnace tubes, so the furnace stops there and about half the crude stays liquid as **atmospheric residue** {% include oil-ref.html k="osha" %} {% include oil-ref.html k="psu" %}. To split it further the residue goes to a second column under vacuum. Lowering the pressure lowers every boiling point: a wax that boils at 500 °C at atmospheric pressure boils at roughly 350 to 400 °C at 50 mmHg, a fifteenth of an atmosphere (my Clausius–Clapeyron estimate, checked against measured boiling points of C22 and C36 wax) {% include oil-ref.html k="wiki-alkane" %}. Under vacuum the heavy gasoil boils off below the cracking temperature. What is left is vacuum residue, the asphalt end of the barrel.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Bigger molecules boil higher, and a column sorts by boiling point.** Each tray is a small still: the vapour gets lighter and the column cooler on the way up → each product is drawn where the column sits in its boiling range.
+- **Above about 350–370 °C the molecules start to crack.** → The heavy half of the barrel can only be split under vacuum, and turning it into fuel needs conversion units, not more distillation.
+
+</div>
+
 {: .da-bridge}
 Sorting by boiling point gives a refinery its raw streams. Turning the heavy ones into diesel is what the rest of the refinery is for.
 
@@ -151,6 +175,14 @@ The table is from the OSHA Technical Manual, converted from °F and psi {% inclu
 
 The US refining system changed in 2026, but not quite as the reel suggests. Refiners were paid to make diesel, yet the measurable shift in the American output went into **jet fuel**: between February and April 2026 the gasoline yield fell from 46.1 to 43.4 per cent and jet rose from 11.0 to 12.5 per cent, while distillate stayed at about 30 per cent {% include oil-ref.html k="eia-yieldseries" %}. The diesel yield is capped by hardware, hydrocracker and hydrotreater capacity, and cannot be raised by turning a valve; the kerosene cut can be widened. When a yield cannot respond, the price does the rationing. American refineries ran at 98.0 per cent of capacity in the last week of August 2026 {% include oil-ref.html k="eia-wpsr" %}.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Distillation only sorts; conversion units change molecules.** FCC, hydrocracker and coker turn residue and gasoil into lighter fuels → how much diesel a refinery makes is set by its hardware.
+- **In 2026 US refiners shifted to jet, not diesel.** → Yields move a few points at most within months; when they cannot move, prices do the rationing.
+
+</div>
+
 {: .da-bridge}
 The refinery's income is the difference between its outputs and its input. That difference has a name and a formula.
 
@@ -172,6 +204,14 @@ The second view shows where the 2026 gap came from: diesel. Diesel minus WTI ave
 
 A refiner is naturally long the crack, so to lock in a margin it **sells** the crack: it buys crude futures and sells product futures in the 3:2:1 ratio. An airline, which is short jet fuel, buys it. The NYMEX lists the components, and ICE lists a European gasoil–Brent crack; on 23 October 2026 that one stood at about $88 a barrel, which matches the reel's "about $90 against Brent" ({% include oil-ref.html k="hellenic-gasoil" %}, own arithmetic: $1,477 a tonne ÷ 7.45 barrels a tonne − Brent near $110).
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **The 3-2-1 crack hit $68 in September 2026, against $29 before the war**, a monthly record since 2006 → refiners with access to crude earned more than at any time in twenty years.
+- **Diesel drove it; gasoline fell below Brent.** → A refinery running for diesel floods the market with gasoline, so the two fuels can move in opposite directions.
+
+</div>
+
 {: .da-bridge}
 Refining is the middle of the chain. Before it comes the oil itself: where it is pumped and where it is burned.
 
@@ -187,7 +227,15 @@ The American number is the result of the shale revolution: horizontal wells, fra
 
 {% include oil.html kind="us" title="Shale <em>and exports</em>" caption="US crude field production and crude exports, weekly, 2004 to 16 October 2026, thousand barrels a day. Data: EIA Weekly Petroleum Status Report." %}
 
-Shale has a property that shapes the whole market: it runs out quickly. A new well in the Midland basin starts at about 730 barrels a day and produces about 200 a year later, a decline of more than 70 per cent, and delivers about 80 per cent of its lifetime output in two years {% include oil-ref.html k="api-decline" %}. To hold production flat the industry must keep drilling. That makes shale the market's flexible supply, but a slow one: at $100 oil in October 2026 the US had 460 oil rigs, only 40 more than a year earlier (Baker Hughes, as reported), and the EIA expected US crude output to rise just 0.2 million barrels a day in 2026 {% include oil-ref.html k="eia-steo" %}.
+Shale has a property that shapes the whole market: it runs out quickly. A new well in the Midland basin starts at about 730 barrels a day and produces about 200 a year later, a decline of more than 70 per cent, and delivers about half of its first ten years' oil in its first two (an illustrative fit, see [three ways out of the ground](#upstream)) {% include oil-ref.html k="api-decline" %}. To hold production flat the industry must keep drilling. That makes shale the market's flexible supply, but a slow one: at $100 oil in October 2026 the US had 460 oil rigs, only 40 more than a year earlier (Baker Hughes, as reported), and the EIA expected US crude output to rise just 0.2 million barrels a day in 2026 {% include oil-ref.html k="eia-steo" %}.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **The United States is the largest producer**, 21.1 million barrels a day by the wide definition, and became a net crude exporter in April 2026 → American barrels now cushion shocks elsewhere.
+- **Shale grows only while it keeps drilling.** → It answers prices, but with a lag of months, and in 2026 rigs barely rose.
+
+</div>
 
 {: .da-bridge}
 Production is concentrated in a few countries; consumption is spread across the world, and the two maps do not overlap.
@@ -201,6 +249,14 @@ The world used 106.5 million barrels a day of liquids in 2025 (103.0 excluding b
 By product, diesel and gasoil (28.9 million barrels a day) lead gasoline (27.8), then LPG and ethane (15.2), jet fuel (7.7), naphtha (7.2) and fuel oil (6.3) {% include oil-ref.html k="iea-feb" %}. Petrochemical feedstocks, LPG, ethane and naphtha together, were set to supply more than half of the growth in 2026 before the war {% include oil-ref.html k="iea-feb" %}. Transport is the rest of the story, and it is where the long-term change shows: the global fleet of electric vehicles displaced about 1.7 million barrels a day in 2025, about 1 million of it in China, where gasoline demand stopped growing in 2025 {% include oil-ref.html k="iea-gevo" %}.
 
 Diesel matters out of proportion to its volume. It moves trucks, trains, ships near shore, tractors, mining machines and back-up generators; there is no quick substitute, and demand for it hardly falls when the price rises. That is why a shortage of diesel, rather than of crude, is what turns an oil shock into an economic one.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Consumption is spread across the world; production is not.** An American uses about 22 barrels a year, an Indian 1.4 → demand growth comes from Asia, supply from a few exporters.
+- **Diesel has no quick substitute.** → A diesel shortage, more than a crude shortage, turns an oil shock into an economic one.
+
+</div>
 
 {: .da-bridge}
 Between the producers and the consumers sits a cost: what it takes to get a barrel out of the ground. That depends first on the rock.
@@ -227,6 +283,14 @@ What a barrel costs comes in four kinds, and they must not be mixed. **Lifting c
 
 The gap between building cost and breakeven is mostly the state. Saudi Arabia takes a royalty of 15 per cent of the value up to $70 Brent, 45 per cent of the part between $70 and $100 and 80 per cent above, plus 50 per cent income tax (as reported); Norway taxes the profit of a field at 78 per cent {% include oil-ref.html k="np-tax" %}; Guyana's share of Stabroek oil rose to 39.8 per cent in 2026 as the companies' cost recovery fell {% include oil-ref.html k="dpi-guyana" %}; a Texas well pays a private royalty of 20 to 25 per cent and a production tax of 4.6 per cent {% include oil-ref.html k="tx-tax" %}. Cheap rock does not make cheap oil for the buyer. It makes rich states.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Permeability decides everything.** Ghawar and Sverdrup flow like 13 and 66 new Permian wells per well → cheap barrels come from rare, porous rock; shale needs thousands of wells.
+- **A shale well loses about three quarters of its rate in a year.** → Shale is a treadmill: fast to start, fast to fade, and expensive at the margin ($68.57 for a new Midland well).
+
+</div>
+
 {: .da-bridge}
 Those are the costs of single kinds of field. The market price is set by the most expensive barrel the world still needs.
 
@@ -237,6 +301,14 @@ The cost of a barrel varies by a factor of three. Rystad Energy's breakeven pric
 {% include oil.html kind="cost" title="What a barrel <em>costs</em>" caption="Breakeven prices of new supply (Rystad Energy, 2024, full-cycle, Brent; Dallas Fed Energy Survey, March 2026, WTI) and the oil prices at which Gulf state budgets balance (IMF, May 2025, 2026 projection). Drag the price line." %}
 
 States have a second breakeven: the price at which the government budget balances. The IMF put it for 2026 at $87 for Saudi Arabia, $79 for Iraq, $77 for Kuwait and $45 for the UAE, before the war {% include oil-ref.html k="imf" %}. A fiscal breakeven assumes the barrels can be sold. In 2026, with exports shut in, a high price did not balance anything: the IMF expected double-digit contractions in several Gulf economies.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Breakevens range from about $27 to $57 for new supply.** → The price is set by the most expensive barrel the world still needs, not by the cheapest.
+- **Gulf state budgets need $45 to $87.** → A high price balances nothing if the barrels cannot be shipped, which is what 2026 showed.
+
+</div>
 
 {: .da-bridge}
 The cheapest barrels in the world are also the ones that keep the market's insurance policy: spare capacity.
@@ -250,6 +322,14 @@ The cartel's power lies in **spare capacity**: production that can be started wi
 {% include oil.html kind="spare" title="The cushion <em>behind the chokepoint</em>" caption="OPEC+ effective spare capacity in February 2026 (IEA Oil Market Report, March 2026) and the crude shut in by country, March to July 2026 average (EIA Short-Term Energy Outlook, October 2026). Red: exports pass the Strait of Hormuz." %}
 
 This is the point on which 2026 turns. The market's insurance against a supply loss was stored in the one place a single event could reach. When the strait closed, the EIA counted OPEC's spare capacity as close to zero (0.02 million barrels a day) from the second quarter, and Middle East OPEC capacity itself as having fallen from 22.9 to 11.9 million barrels a day {% include oil-ref.html k="eia-steo" %}.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **77 per cent of OPEC+'s spare capacity sat in four countries behind Hormuz.** → Spare capacity insures against a lost field, not a lost strait.
+- **It fell to a record 0.32 million barrels a day in March 2026.** → When the strait closed, the market's cushion closed with it.
+
+</div>
 
 {: .da-bridge}
 Which brings us to geography: the routes oil takes from the wells to the refineries, and the narrow places on them.
@@ -265,6 +345,14 @@ About 44 million barrels a day of crude cross a border, and about 80 million bar
 The tankers pass eight narrow places, which the EIA calls chokepoints {% include oil-ref.html k="eia-choke" %}. The Strait of Malacca carries 23.2 million barrels a day, the Strait of Hormuz 20.9, the Cape of Good Hope route 9.1, Suez and the SUMED pipeline 4.9, the Danish Straits 4.9, Bab el-Mandeb 4.2, the Turkish Straits 3.7 and the Panama Canal 2.3 (first half of 2025). Suez and Bab el-Mandeb were already carrying about half their 2023 volume, after the Houthi attacks on Red Sea shipping that began in November 2023 {% include oil-ref.html k="eia-choke" %}.
 
 Hormuz is the one without an alternative. About 20 million barrels a day passed through it in 2024, a fifth of world consumption, 84 per cent of it bound for Asia {% include oil-ref.html k="eia-hormuz" %}. Only two pipelines bypass it: Saudi Arabia's East–West line from Abqaiq to Yanbu on the Red Sea, rated 5 million barrels a day and convertible to 7, and the UAE's line from Habshan to Fujairah, 1.5 to 1.8. Together they can move about 4.7 million barrels a day out of the Gulf, roughly a third of the crude that normally goes through the strait {% include oil-ref.html k="eia-choke" %}. Kuwait and Iraq's southern fields, Qatar and Bahrain have no bypass at all.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Three quarters of world oil supply moves by sea, through eight chokepoints.** → A disruption at one narrow place reaches every buyer.
+- **Hormuz carried about 20 million barrels a day with bypasses for about 4.7.** → It is the one chokepoint that cannot be avoided, only waited out.
+
+</div>
 
 {: .da-bridge}
 What carries all of this is a fleet of about 6,300 tankers above 25,000 tonnes {% include oil-ref.html k="safety4sea" %}, and in 2026 their price became the story.
@@ -285,6 +373,14 @@ The agencies' own numbers bracket it. Poten put the rate at about $30,000 a day 
 
 Freight rose everywhere, not just in the Gulf, because the fleet is one pool. Ships stranded in the Gulf, ships sailing around Africa instead of through the Red Sea and ships carrying US crude to Asia instead of Gulf crude all take tonnage out of the pool. On the route from the US Gulf to Europe (TD25) an Aframax earned $23,600 a day in July 2025 and $308,200 in mid-October 2026 {% include oil-ref.html k="cyprus-vlcc" %}. Valero, the largest US refiner, said on 22 October that shipping a cargo of US crude to Asia now cost $30 to $35 a barrel against about $5 in 2025, and Asian buyers halved their orders for November loading {% include oil-ref.html k="oilprice-valero" %}.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **A supertanker's day rate rose 55 times, to $1.4 million.** At about $33 a barrel, freight became a quarter of the delivered cost of Gulf crude → in 2026 moving oil cost as much as refining it.
+- **The fleet is one pool.** → A shock on one route raises freight on every route, including from Houston to Rotterdam.
+
+</div>
+
 {: .da-bridge}
 Not every tanker on the sea sails in the open market. Some carry oil that the West has sanctioned.
 
@@ -295,6 +391,14 @@ Part of the world's oil moves outside the rules of the rest. Since December 2022
 Iran ran its own version. Its exports, almost all to independent refiners in China, reached 2.16 million barrels a day in February 2026, the most since 2018; after the US blockade returned in July no new Iranian cargo crossed the blockade line, and exports fell to 220,000 to 255,000 barrels a day in August {% include oil-ref.html k="iranintl" %}. Iran also sold its own compulsory "Hormuz insurance", paid in cryptocurrency, until the US Treasury designated the two firms behind it on 29 July {% include oil-ref.html k="treasury-hormuz" %}.
 
 Sanctioned oil matters to everyone else for two reasons. It is cheaper, so the refiners that can buy it (in India, China and Turkey) have an edge over those that cannot. And it uses tankers: every ship in the dark fleet is a ship missing from the ordinary market, which is one more reason freight rose so far in 2026.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Russia sells far above the price cap with a fleet of about 980 old shadow tankers.** → The cap shapes who carries the oil more than what it costs.
+- **Sanctioned crude is cheaper for the refiners that can buy it.** → India, China and Turkey gain an edge, and every dark tanker is missing from the ordinary market.
+
+</div>
 
 {: .da-bridge}
 On land, oil moves by pipe.
@@ -317,6 +421,14 @@ Over land a pipeline is the cheapest way to move oil, at roughly $3 to $5 a barr
 
 **Africa.** The lines are fewer and the risk is theft and war: Nigeria's Trans Niger Pipeline had 460 illegal taps removed before its 2023 restart, Sudan's civil war cut South Sudan's export line in 2024, and the heated East African line was 92.7 per cent built in September 2026, with first oil at Tanga expected in 2027 {% include oil-ref.html k="eacop-tz" %}.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Over land a pipeline is the cheapest way to move oil**, about $3 to $5 a barrel per 1,000 km, but a whole line stops when one pumping station burns → drones in 2025–26 went for exactly those stations.
+- **Europe and the Gulf bypasses depend on a few lines.** → The East–West line, Druzhba, CPC and the Transalpine are single points of failure for whole regions.
+
+</div>
+
 {: .da-bridge}
 Pipelines end at hubs, and one hub in the American network matters to the whole world.
 
@@ -327,6 +439,14 @@ Cushing, a small town in Oklahoma, is the delivery point of the NYMEX WTI future
 {% include oil-anat.html name="cushing-tank" title="A floating-roof tank at Cushing" h=640 caption="Drawing D. One floating-roof tank stands for the hub that sets the WTI price; its roof follows Cushing stocks week by week since 2004." %}
 
 What happens at Cushing shows in the price. In April 2020, with demand collapsed by Covid and the tanks filling, nobody holding the expiring May contract could find storage, and WTI spot closed at **−$36.98** a barrel on 20 April {% include oil-ref.html k="eia-spot" %}. In 2026 the opposite: US crude was pulled to the coast for export, Cushing fell below 20 million barrels in June and to 18.6 million on 24 July, the lowest since 2014, and for a few days in June and July WTI traded above Brent {% include oil-ref.html k="foley" %}. A landlocked price is a local price. It is tied to the world only through the pipes to the coast and the ships beyond them.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **WTI is a landlocked price tied to tanks in Oklahoma.** → When the tanks are full it can fall below zero (April 2020); when they are empty it can rise above Brent (June–July 2026).
+- **Its link to the world runs through pipes to the coast and ships beyond.** → Export capacity, not the global market alone, sets the American price.
+
+</div>
 
 {: .da-bridge}
 That tie, coast to coast and ocean to ocean, is how the benchmarks are built.
@@ -345,6 +465,14 @@ Almost every barrel in the world is sold at a **differential** to one of three b
 
 **WTI** is the NYMEX contract delivered at Cushing. **Dubai** is a Platts assessment of Gulf crude for Asia, and in March 2026, when Asia lost its supply first, Dubai averaged $128.20, far above Dated Brent at $103.84 {% include oil-ref.html k="iea-apr" %}. On 31 July ADNOC announced that from 1 November 2026 the official prices of all Abu Dhabi grades (Murban, Das, Umm Lulu, Upper Zakum) will be set off prompt-month Platts Dubai plus a differential, instead of its own Murban futures contract on ICE Futures Abu Dhabi {% include oil-ref.html k="adnoc-dubai" %}.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Brent is a basket of five North Sea grades plus Texan WTI Midland.** → American crude delivered to Rotterdam can set the price of oil sold far from America.
+- **Physical and paper prices split in 2026**: Dated Brent hit $144.68 while futures traded near $109 → "the oil price" in the news is not what a refinery paid for a cargo.
+
+</div>
+
 {: .da-bridge}
 A benchmark is not one price but a line of prices, one for each delivery month. Its shape tells you whether the market has too much oil or too little.
 
@@ -359,6 +487,14 @@ When stocks are ample, $$y$$ is small, futures trade above spot and the curve sl
 {% include oil.html kind="curve" title="The shape of <em>scarcity</em>" caption="The futures curve from the cost-of-carry formula. The rings are market points: Brent futures settlements on 15 October 2026, $105.92 for December, $93.20 for June 2027 and $85.08 for December 2027 (CME settlement bulletin); WTI on 17 April 2020, three days before the negative price, rising steeply from a prompt $18 (EIA). Move the sliders to see how storage cost and convenience yield bend the curve." %}
 
 The Brent curve has been in backwardation since the war began on 28 February, with one brief contango after the June truce {% include oil-ref.html k="tradingpedia" %}. In early October the front month was about $102 against $90 six months out and $83 twelve months out {% include oil-ref.html k="sa-curve" %}. The settlements of 15 October show the same shape: December Brent at $105.92, June 2027 at $93.20 and December 2027 at $85.08, a backwardation of $12.72 over six months and a front month 24.5 per cent above the contract a year later {% include oil-ref.html k="cme-curve" %}. The curve says the market expected the shortage to end; it does not say when.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **A curve slopes down (backwardation) when oil is scarce.** On 15 October the front month was 24.5 per cent above the contract a year later → the market paid for oil now and expected relief later.
+- **Backwardation pays holders to sell from storage.** → It explains why stocks were drawn so hard; the curve says the shortage should end, not when.
+
+</div>
 
 {: .da-bridge}
 The curve explains the price of time. The spread between the two big benchmarks explains the price of distance.
@@ -377,6 +513,14 @@ The reel's number, a futures gap near $14 on 6 October, is smaller than the spot
 
 The same arithmetic split the world's refiners. An American refinery bought WTI and sold diesel at Gulf Coast or New York prices; a European refinery bought crude at Brent plus freight. On 19 October the reel's "same diesel, two cracks" read about $100 against WTI and about $90 against Brent {% include oil-ref.html k="reel" %}. In Europe the freight-adjusted diesel crack fell from about $100 in early September to $57 in the first week of October {% include oil-ref.html k="iru" %}, and a standard Rotterdam refining margin was −$10.95 a barrel on 5 October {% include oil-ref.html k="indexbox" %}.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Brent minus WTI is roughly the cost of shipping US crude to Europe.** It averaged $24.99 in early October 2026, against $6.38 in February → freight, not pipelines, separated the two prices.
+- **When freight jumps, American refiners buy cheap crude.** → US refiners made record margins while European ones lost money on the same diesel.
+
+</div>
+
 {: .da-bridge}
 With the machinery in place, the long history of the price reads differently.
 
@@ -385,6 +529,14 @@ With the machinery in place, the long history of the price reads differently.
 {% include oil.html kind="prices" title="Forty years <em>of oil</em>" caption="Brent and WTI spot prices, weekly means 1986–2024 and daily since 2025, in dollars of the day (not adjusted for inflation). The lettered markers are explained on hover; the 2025–2026 view shows the war year in daily detail. Data: EIA via FRED." range="all" %}
 
 The long chart is a series of shocks and gluts. Iraq's invasion of Kuwait in 1990, which took Brent spot from $15 in early July to $41 in late September; the Asian crisis of 1998, when Brent fell to $9.10; the climb to the all-time spot high of $143.95 on 3 July 2008 and the collapse that followed; OPEC's decision in November 2014 not to cut against shale, which halved the price; Covid and the negative WTI print in April 2020; Russia's invasion of Ukraine in 2022, with Brent spot at $133.18 on 8 March {% include oil-ref.html k="eia-spot" %}. 2026 is the first shock in which the physical price broke the 2008 record, and the first in which the supply lost was larger than any before it: the IEA called the 10.1 million barrel a day fall in March "the largest disruption in history" {% include oil-ref.html k="iea-apr" %}.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **The price has been a run of shocks and gluts for forty years.** → Each spike was followed by a fall, often deep, as supply and demand adjusted.
+- **2026 is the first shock in which the physical price beat the 2008 record**, and the largest supply loss ever recorded → the scale, not the direction, is new.
+
+</div>
 
 {: .da-bridge}
 Here is that year, month by month.
@@ -412,6 +564,14 @@ The numbers through the year, mostly from the IEA's monthly reports:
 
 One thing the chart makes plain is that the crude price did not stay high. Brent spot averaged $117 in April, $85 in June and $84 in July, and $114 in September. What stayed high, and kept rising into the autumn, was diesel, and with it the gap between crude and products.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Gulf exports fell from about 24 to 8.7 million barrels a day in March and recovered only through bypasses and dark transits.** → Volumes returned before normal routes did.
+- **Trackers disagree by millions of barrels a day.** → In 2026 even the size of the shock is an estimate; read single numbers as ranges.
+
+</div>
+
 {: .da-bridge}
 Why diesel, of all the products, ran away from crude is the subject of the next section.
 
@@ -428,6 +588,14 @@ Diesel futures in New York crossed $100 a barrel over WTI for the first time on 
 
 {% include oil.html kind="war" title="Diesel against <em>gasoline</em>" caption="The gaps in 2026: diesel minus Brent, the 3-2-1 crack, gasoline minus Brent and Brent minus WTI, daily, dollars per barrel. Data: EIA via FRED, own calculation." view="cracks" %}
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **Four things hit diesel at once**: Gulf refineries, Russian refineries, closures in Europe and the US, and fixed hardware → supply lost from several sides, with no quick replacement.
+- **US retail diesel reached a record $6.529 a gallon while gasoline stayed below its 2022 peak.** → The shortage was in molecules that need cracking, not in crude.
+
+</div>
+
 {: .da-bridge}
 A shortage shows up first in the tanks, and the tanks were drawn harder in 2026 than ever before.
 
@@ -439,6 +607,14 @@ Between the end of February and the end of September the world drew about 509 mi
 
 US distillate stocks fell to 100.8 million barrels on 22 May and stood at 104.3 million on 16 October, against 120.4 million on 20 February; on the East Coast they were 32 per cent below the five-year average in September {% include oil-ref.html k="eia-wpsr" %} {% include oil-ref.html k="eia-steo" %}. Low stocks are why the curve is backwardated and why the prompt barrel of diesel commands a premium.
 
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **About 509 million barrels came out of the world's observed stocks in seven months.** The US SPR fell to its lowest level since 1982 → stocks, not new supply, bridged the gap.
+- **China drew 162 million barrels from its own tanks.** → Strategic stocks worked, but they are finite; a long closure would have run them down.
+
+</div>
+
 {: .da-bridge}
 All of this arrives, in the end, at a pump.
 
@@ -449,6 +625,14 @@ German diesel set an all-time record of €2.453 a litre on 16 September 2026, a
 {% include oil.html kind="pump" title="One litre, <em>taken apart</em>" caption="A litre of German diesel on 21 October 2026 and a US gallon on 19 October. Germany: VAT, energy tax (after the cut), CO₂ price at €65 a tonne, and the crude, refining and distribution shares estimated from Brent near $110 and the ICE gasoil price (research note, own calculation, an order of magnitude). United States: EIA's May 2026 shares applied to the October price, an illustration only." %}
 
 Taken apart, the German litre is about 36 cents of VAT, 33 of energy tax, 17 of CO₂ price, about 62 of crude, about 50 of refining margin and about 28 of distribution, stocks, biofuel quota and retail. Before the war the refining spread on a litre of diesel was about 20 cents; now it is about as large as the crude itself (refining research note, own calculation from Brent, ICE gasoil and the exchange rate; the gasoil quote is for November delivery, so treat the split as an order of magnitude). Taxes are 38 per cent of the German price and 11 to 12 per cent of an American gallon {% include oil-ref.html k="eia-gasdiesel" %}, which is why the same crack added 64 per cent to US diesel since February and 33 per cent to the EU average {% include oil-ref.html k="iru" %}.
+
+<div class="oil-take" markdown="1">
+<p class="oil-take-h">Key takeaways</p>
+
+- **In a German litre of diesel the refining margin was about as large as the crude.** → Drivers paid for the crack and freight more than for the barrel.
+- **Taxes are 38 per cent of the German price and about 11 per cent of the American.** → The same crack raised US diesel by 64 per cent but EU diesel by 33; the 14-cent tax cut eased the price, not the cause.
+
+</div>
 
 {: .da-bridge}
 That is the chain from the well to the pump. What the figures and numbers above cannot show deserves a list of its own.

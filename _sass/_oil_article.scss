@@ -141,3 +141,11 @@ text.os-hzshut { font-family: 'Inter', system-ui, sans-serif; font-weight: 700; 
 // pipeline map: oil creeping along the operating lines
 .os-pflow { fill: none; stroke-dasharray: 1.5 7; stroke-linecap: round; opacity: 0.8; animation: osFlow 3s linear infinite; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .os-pflow { animation: none; } }
+
+// key takeaways at the end of each section
+.oil-take { margin: 2rem 0 0; padding: 0.85rem 1.1rem 0.4rem; border: 1px solid rgba(4, 32, 75, 0.14); border-left: 3px solid #0b4fc0; border-radius: 0 10px 10px 0; background: rgba(11, 79, 192, 0.04);
+  .oil-take-h { margin: 0 0 0.45rem; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #0b4fc0; }
+  ul { margin: 0 0 0.4rem; padding-left: 1.1rem; }
+  li { font-size: 0.95rem; line-height: 1.6; margin-bottom: 0.45rem; }
+}
+.oil-take + p.da-bridge { margin-top: 1.6rem; }
