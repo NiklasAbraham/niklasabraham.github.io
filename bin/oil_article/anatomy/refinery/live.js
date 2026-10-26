@@ -96,7 +96,7 @@ function tick(now) {
     const h = Math.max(0.05, (vr.level / DATA.scaleMax) * glass.h);
     const cy = cylinder(g.gx, g.gy, glass.r, glass.z0, h, P, 32);
     vr.body.setAttribute("d", cy.fill);
-    vr.edge.setAttribute("d", sideArc(g.gx, g.gy, glass.r, glass.z0 + h, P, 24));
+    vr.edge.setAttribute("d", sideArc(g.gx, g.gy, glass.outer + 0.15, glass.z0 + h, P, 40));
   }
   const goal = crudeRGB[pick];
   tint = tint.map((v, i) => v + (goal[i] - v) * k);

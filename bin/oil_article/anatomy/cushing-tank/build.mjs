@@ -70,7 +70,9 @@ const pol = (r, a, z) => [r * Math.cos(a * D2R), r * Math.sin(a * D2R), z];
 
 const R_ = A.recorder(P);
 const record = R_.solid;
+const RECORDED = new Set();
 function put(name, ref, svg, shapes = [], { bias = 0, ...rest } = {}) {
+  for (const sh of shapes) if (!RECORDED.has(sh) && !R_.solids.includes(sh) && sh.kind !== "tube") (RECORDED.add(sh), R_.solids.push(Object.assign(sh, sh.name ? {} : { name })));
   return R_.put({ name, at: ref, bias, svg, shapes: shapes.map((s) => (s.name ? s : Object.assign(s, { name }))), piece: "site", ...rest });
 }
 
@@ -340,6 +342,26 @@ function ballItem(name, c, r, style = {}, { bias = 0, owner } = {}) {
   put(name, c, S(G.sphereOf(c, r, P, { steps: 32 }), { tone: "mid", ...style }), [shape], { bias });
   return shape;
 }
+// a saddle pad on a curved host: its base follows the host surface, its flat face at h from the point
+function padOn(name, host, point, outward, a, h, { tone = "mid", owner, extra = "" } = {}) {
+  const hosts = [host].flat();
+  const inside = (p) => hosts.some((shape) => A.sdf(shape, p) < 0);
+  const F = G.frameAlong(point, G.unit3(outward));
+  const start = (angle) => {
+    let lo = -2.5 * a;
+    let hi = h;
+    if (!inside(G.pointOf(F, lo, a, angle))) return 0;
+    for (let step = 0; step < 40; step++) {
+      const mid = (lo + hi) / 2;
+      if (inside(G.pointOf(F, mid, a, angle))) lo = mid;
+      else hi = mid;
+    }
+    return hi;
+  };
+  const low = Math.min(...Array.from({ length: 48 }, (_, i) => start((i / 48) * Math.PI * 2)));
+  put(name, G.add3(point, G.mul3(F.a, h / 2)), S(G.saddleOf(F, a, start, h, P), { tone }) + extra, [record(A.disc(F, low - 0.05, h, a, { name, owner, seated: true, cut: hosts }))], { bias: 0.1 });
+  return G.add3(point, G.mul3(F.a, h));
+}
 function tubeItems(name, route, r, { tone = "mid", gaps = [], maxLength = 14, rims, ends = [true, true], bias = 0, touch, limp = false, caps = true } = {}) {
   R_.route(name, route, r, { gaps, rims, ends, touch, limp, piece: "site" });
   tubePieces(route, r, P, { maxLength, spacing: Math.max(0.6, Math.min(1.6, r * 0.6)), gaps, caps }).forEach((piece, index) =>
@@ -347,7 +369,7 @@ function tubeItems(name, route, r, { tone = "mid", gaps = [], maxLength = 14, ri
   );
 }
 // a flanged pipe: route through control points, collars (flanges/bands/sleeves) gap it
-function pipe(name, control, r, { bend = 2.6, tone = "mid", collars = [], extraGaps = [], maxLength = 14, rims, ends } = {}) {
+function pipe(name, control, r, { bend = 2.6, tone = "mid", collars = [], extraGaps = [], maxLength = 14, rims, ends, touch } = {}) {
   const line = G.fillet(control, Math.max(r * bend, 3), 12, { P, tube: r });
   const total = G.pathLength(line);
   const gaps = [...(typeof extraGaps === "function" ? extraGaps(line, total) : extraGaps)];
@@ -362,9 +384,9 @@ function pipe(name, control, r, { bend = 2.6, tone = "mid", collars = [], extraG
     const F = G.frameAlong(centre, tangent);
     const half = (to - from) / 2;
     const faceDots = c.bolts && Math.abs(G.dot3(F.a, V)) > 0.12 ? Dots(G.dotsOf(F, G.dot3(F.a, V) > 0 ? half : -half, c.r * 0.76, c.bolts, P, { all: true }), { size: 0.4, tone: "mid" }) : "";
-    discItem(`${name}.${c.kind}${Math.round(along)}`, F, -half, half, c.r, { tone: c.tone ?? "mid" }, { owner: name, extra: faceDots, bevel: 0.2 });
+    discItem(`${name}.${c.kind}${Math.round(along)}`, F, -half, half, c.r, { tone: c.tone ?? "mid" }, { owner: c.owner === undefined ? name : c.owner, extra: faceDots, bevel: 0.2 });
   }
-  tubeItems(name, line, r, { tone, gaps, maxLength, rims, ends });
+  tubeItems(name, line, r, { tone, gaps, maxLength, rims, ends, touch });
   line.owner = name;
   line.total = total;
   return line;
@@ -396,7 +418,7 @@ function gateValve(name, line, along, r, { tone = "mid", up = 1 } = {}) {
   const side = G.unit3(G.cross3([0, 0, 1], tangent));
   for (const s of [-1, 1]) {
     const c = G.add3(centre, G.mul3(side, s * r * 0.5));
-    const YF = G.frameOf([c[0], c[1], 0], [0, 0, 1], side, tangent);
+    const YF = G.frameOf(c, [0, 0, 1], side, tangent);
     prismItem(`${name}.yoke${s > 0 ? "R" : "L"}`, YF, rect(-0.35, 0.35, -0.7, 0.7), yb, yt, { tone: "mid" }, { owner: line.owner, bias: 0.25 });
   }
   const nutF = G.frameAlong(G.add3(centre, [0, 0, 0]), [0, 0, 1]);
@@ -411,7 +433,12 @@ function gateValve(name, line, along, r, { tone = "mid", up = 1 } = {}) {
     const a = (i / 5) * Math.PI * 2 + 0.3;
     return path3([G.add3(nutF.o, [Math.cos(a) * 0.75, Math.sin(a) * 0.75, hw + 0.3]), G.add3(nutF.o, [Math.cos(a) * (rw - 0.55), Math.sin(a) * (rw - 0.55), hw + 0.3])]);
   }).join("");
-  put(`${name}.wheel`, G.add3(nutF.o, [0, 0, hw]), Ln(spokes, { tone: "mid" }) + S(wheel, { tone: "mid" }) + S(G.solidOf(hub, nutF, P), { tone: "mid" }), [record(A.ring(nutF, hw - 0.35, hw + 0.35, rw - 0.55, rw, { name: `${name}.wheel`, owner: line.owner })), record(A.disc(nutF, hw - 0.5, hw + 0.5, 0.75, { name: `${name}.hub`, owner: line.owner }))], { bias: 0.4 });
+  const spokeShapes = [0, 1, 2, 3, 4].map((i) => {
+    const a = (i / 5) * Math.PI * 2 + 0.3;
+    const SF = G.frameAlong(G.add3(nutF.o, [0, 0, hw]), [Math.cos(a), Math.sin(a), 0]);
+    return record(A.disc(SF, 0.6, rw - 0.45, 0.18, { name: `${name}.spoke${i}`, owner: line.owner }));
+  });
+  put(`${name}.wheel`, G.add3(nutF.o, [0, 0, hw]), Ln(spokes, { tone: "mid" }) + S(wheel, { tone: "mid" }) + S(G.solidOf(hub, nutF, P), { tone: "mid" }), [record(A.ring(nutF, hw - 0.35, hw + 0.35, rw - 0.55, rw, { name: `${name}.wheel`, owner: line.owner })), record(A.disc(nutF, hw - 0.5, hw + 0.5, 0.75, { name: `${name}.hub`, owner: line.owner })), ...spokeShapes], { bias: 0.4 });
   return { centre, half };
 }
 
@@ -423,28 +450,60 @@ for (let i = 1; i < STAIR.n; i++) {
   const z = ((H + 0.4) * i) / STAIR.n;
   const a = stairA(z);
   const F = G.frameOf([0, 0, 0], [0, 0, 1], Mh.radial(a), Mh.radial(a + 90));
-  prismItem(`stair.tread${i}`, F, rect(STAIR.r0, STAIR.r1, -1.3, 1.3), z - 0.5, z, { tone: "mid" }, { inner: "" });
+  prismItem(`stair.tread${i}`, F, rect(STAIR.r0, STAIR.r1, -1.3, 1.3), z - 0.5, z, { tone: "mid" });
 }
 const helix = (r, dz, a0 = STAIR.a0, a1 = STAIR.a1) => Mh.span(a0, a1, 1).map((a) => pol(r, a, stairZ(a) + dz));
 // landing at the foot of the stair
-box("stair.landing", [pol(R + 2, STAIR.a0, 0)[0] - 3.4, pol(R + 2, STAIR.a0, 0)[1] - 3.4, 0], [pol(R + 2, STAIR.a0, 0)[0] + 3.4, pol(R + 2, STAIR.a0, 0)[1] + 3.4, 0.8], { tone: "lo" });
+prismItem("stair.landing", G.frameOf([0, 0, 0], [0, 0, 1], Mh.radial(STAIR.a0 + 1), Mh.radial(STAIR.a0 + 91)), rect(R + 0.3, R + 7.4, -3.6, 3.6), 0, 0.8, { tone: "lo" });
 // gauger's platform on the rim
 const PF = G.frameOf([0, 0, 0], [0, 0, 1], Mh.radial(LADDER_A), Mh.radial(LADDER_A + 90));
 prismItem("platform.deck", PF, rect(RI - 3.6, R + 5.2, -4.6, 4.6), H, H + 0.8, { tone: "mid" }, { extra: Ln([-2.3, 0, 2.3].map((v) => path3([G.add3(G.mul3(PF.u, RI - 3.6), G.add3(G.mul3(PF.v, v), [0, 0, H + 0.8])), G.add3(G.mul3(PF.u, R + 5.2), G.add3(G.mul3(PF.v, v), [0, 0, H + 0.8]))])).join(""), { tone: "faint" }) });
-// stringer and handrail up the stair, landing on the platform's side
-const STRINGER = helix(R + 4.75, 0.2, STAIR.a0 + 0.5, STAIR.a1 - 0.5);
-STRINGER[0][2] = 0.8;
-tubeItems("stair.stringer", G.fillet([pol(R + 4.75, STAIR.a0 + 1.2, 0.8), ...STRINGER.slice(2)], 3, 8), 0.42, { tone: "mid", maxLength: 6 });
-tubeItems("stair.rail", helix(R + 4.75, 5.4, STAIR.a0 + 4, STAIR.a1 - 4.3), 0.3, { tone: "mid", maxLength: 6 });
-for (let i = 2; i < STAIR.n; i += 3) {
-  const z = ((H + 0.4) * i) / STAIR.n;
-  const a = stairA(z) ;
-  const c = pol(R + 4.75, a, 0);
-  turned(`stair.post${i}`, G.frameAlong([c[0], c[1], 0], [0, 0, 1]), [[stairZ(a) + 0.3, 0.25], [stairZ(a) + 5.3, 0.25]], { tone: "mid" }, { owner: "stair.rail" });
+// stringer up the stair (the treads are welded to it), from the landing to the platform's side face
+const STR_R = R + 4.75;
+{
+  const top = G.add3(G.add3(G.mul3(PF.u, STR_R), G.mul3(PF.v, -4.6)), [0, 0, H + 0.4]);
+  const pts = [pol(STR_R, STAIR.a0 + 1.2, 0.8), pol(STR_R, STAIR.a0 + 1.2, 2.6), ...Mh.span(STAIR.a0 + 6, 150, 2).map((a) => pol(STR_R, a, stairZ(a) + 0.2)), G.sub3(top, G.mul3(PF.v, 3.2)), top];
+  tubeItems("stair.stringer", G.fillet(pts, 2.4, 8, { P, tube: 0.42 }), 0.42, { tone: "mid", maxLength: 6, touch: ["stair.tread*"] });
 }
-// platform railing: two posts on its outer edge and a top rail between them
-const railPts = [-4, 4].map((v) => G.add3(G.mul3(PF.u, R + 4.6), G.mul3(PF.v, v)));
-railPts.forEach((p, i) => turned(`platform.post${i}`, G.frameAlong([p[0], p[1], 0], [0, 0, 1]), [[H + 0.8, 0.28], [H + 5.4, 0.28]], { tone: "mid" }));
+// handrail: posts on the treads, knuckle balls on the posts, rail segments between the knuckles
+const RAIL_R = R + 3.7;
+const POSTS = [2, 5, 8, 11, 13];
+const knuckles = POSTS.map((i) => {
+  const z = ((H + 0.4) * i) / STAIR.n;
+  const a = stairA(z);
+  const c = pol(RAIL_R, a, 0);
+  turned(`stair.post${i}`, G.frameAlong([c[0], c[1], 0], [0, 0, 1]), [[z, 0.26], [z + 4.6, 0.26]], { tone: "mid" });
+  const k3 = [c[0], c[1], z + 4.6 + 0.45];
+  ballItem(`stair.knuckle${i}`, k3, 0.5, { tone: "mid" });
+  return k3;
+});
+for (let i = 0; i < knuckles.length - 1; i++) {
+  const a = knuckles[i];
+  const b = knuckles[i + 1];
+  const aa = Math.atan2(a[1], a[0]) / D2R;
+  const bb = Math.atan2(b[1], b[0]) / D2R;
+  const mid = Mh.span(aa, bb, 2).slice(1, -1).map((ang) => pol(RAIL_R, ang, a[2] + ((b[2] - a[2]) * (ang - aa)) / (bb - aa)));
+  const pts = [a, ...mid, b];
+  const d0 = G.unit3(G.sub3(pts[1], pts[0]));
+  const d1 = G.unit3(G.sub3(pts[pts.length - 1], pts[pts.length - 2]));
+  const off = Math.sqrt(0.5 ** 2 - 0.3 ** 2);
+  pts[0] = G.add3(a, G.mul3(d0, off));
+  pts[pts.length - 1] = G.sub3(b, G.mul3(d1, off));
+  tubeItems(`stair.rail${i}`, pts, 0.3, { tone: "mid", maxLength: 6 });
+}
+// platform railing: two posts on its outer edge, knuckles, and the top rail between them
+{
+  const railPts = [-4, 4].map((v) => G.add3(G.mul3(PF.u, R + 4.6), G.mul3(PF.v, v)));
+  const ks = railPts.map((p, i) => {
+    turned(`platform.post${i}`, G.frameAlong([p[0], p[1], 0], [0, 0, 1]), [[H + 0.8, 0.28], [H + 5.4, 0.28]], { tone: "mid" });
+    const k3 = [p[0], p[1], H + 5.4 + 0.45];
+    ballItem(`platform.knuckle${i}`, k3, 0.5, { tone: "mid" });
+    return k3;
+  });
+  const d = G.unit3(G.sub3(ks[1], ks[0]));
+  const off = Math.sqrt(0.5 ** 2 - 0.3 ** 2);
+  tubeItems("platform.rail", [G.add3(ks[0], G.mul3(d, off)), G.sub3(ks[1], G.mul3(d, off))], 0.3, { tone: "mid", maxLength: 6 });
+}
 
 // ---------- gauge board with float-gauge target ----------
 const GB = { a: 20, s0: R + 3.6, s1: R + 4.4, w: 2.6 };
@@ -463,13 +522,13 @@ const zOfMbbl = (m) => M.Z_HIGH - (m / (M.WORKING_KB / 1000)) * (M.Z_HIGH - M.Z_
   for (const z of [M.Z_LOW + 1, (M.Z_LOW + M.Z_HIGH) / 2, M.Z_HIGH - 1]) prismItem(`gauge.bracket${Math.round(z)}`, GF, rect(-0.6, 0.6, z - 0.6, z + 0.6), R - 0.02, GB.s0, { tone: "lo" });
   // gauge head (sheave box) on top of the board, conduit over the rim to the tape sheave on the rim
   prismItem("gauge.head", GF, rect(-1.8, 1.8, M.Z_HIGH + 0.6, M.Z_HIGH + 3), GB.s0, GB.s1 + 1.4, { tone: "mid" }, { extra: Dots([G.add3(G.mul3(GF.a, GB.s1 + 1.4), [0, 0, M.Z_HIGH + 1.8])].map(at), { size: 0.45 }) });
-  prismItem("gauge.sheave", GF, rect(-1.4, 1.4, H, H + 2.4), RI - 1.2, R + 1.4, { tone: "mid" });
+  prismItem("gauge.sheave", GF, rect(-1.4, 1.4, H, H + 3.6), RI - 1.2, R + 1.4, { tone: "mid" });
 }
 const TAPE_U = 1.2;
 const tapeAt = (z) => G.add3(G.mul3(GF.a, GB.s1 + 0.05), G.add3(G.mul3(GF.u, TAPE_U), [0, 0, z]));
 const TARGET0 = M.Z_HIGH; // target index at the "0 m bbl" mark when the roof is on its legs
 {
-  const conduit = [G.add3(G.mul3(GF.a, GB.s0 + 1.6), [0, 0, M.Z_HIGH + 3]), G.add3(G.mul3(GF.a, GB.s0 + 1.6), [0, 0, H + 1.2]), G.add3(G.mul3(GF.a, R + 1.4), [0, 0, H + 1.2])];
+  const conduit = [G.add3(G.mul3(GF.a, GB.s0 + 1.6), [0, 0, M.Z_HIGH + 3]), G.add3(G.mul3(GF.a, GB.s0 + 1.6), [0, 0, H + 2.4]), G.add3(G.mul3(GF.a, R + 1.4), [0, 0, H + 2.4])];
   tubeItems("gauge.conduit", G.fillet(conduit, 1.2, 8, { P, tube: 0.45 }), 0.45, { tone: "mid", maxLength: 6 });
 }
 
@@ -492,27 +551,28 @@ const teeEnd = HEADER_X - Math.sqrt(TEE_R ** 2 - PR ** 2);
 const valves = [];
 TANK_LINES.forEach((a, i) => {
   const start = pol(R - 0.02, a, 4.6);
-  const rise = pol(70, a, 4.6);
+  const rise = pol(74, a, 4.6);
   const pts = [start, rise, [rise[0], rise[1], RUN_Z], [teeEnd, rise[1], RUN_Z]];
-  const line = pipe(`line${i}`, pts, PR, { collars: [{ kind: "pad", at: 0.3, thick: 0.6, r: 4.2 }] });
-  const v = gateValve(`valve${i}`, line, 0.6 + 2.1 * PR + 0.6, PR);
+  const vAt = 0.6 + 2.1 * PR;
+  const line = pipe(`line${i}`, pts, PR, { collars: [{ kind: "pad", at: 0.3, thick: 0.6, r: 4.2, owner: null }, { kind: "flange", at: vAt + 2.1 * PR + 0.35, thick: 0.7, r: 3.5, bolts: 8 }], extraGaps: [[vAt - 2.1 * PR, vAt + 2.1 * PR]], touch: [`support${i}.*`] });
+  const v = gateValve(`valve${i}`, line, vAt, PR);
   valves.push(v);
 });
 // supports: T-posts outside the berm
 for (const x of [95]) {
   for (const [i, a] of TANK_LINES.entries()) {
-    const y = pol(70, a, 0)[1];
+    const y = pol(74, a, 0)[1];
     box(`support${i}.cap`, [x - 1.6, y - 3, RUN_Z - PR - 0.8], [x + 1.6, y + 3, RUN_Z - PR], { tone: "mid" });
-    box(`support${i}.post`, [x - 0.7, y - 0.7, 0], [x + 0.7, y + 0.7, RUN_Z - PR - 0.8], { tone: "mid" });
+    box(`support${i}.post`, [x - 0.7, y - 0.7, 0.7], [x + 0.7, y + 0.7, RUN_Z - PR - 0.8], { tone: "mid" });
     box(`support${i}.foot`, [x - 2, y - 2, 0], [x + 2, y + 2, 0.7], { tone: "lo" });
   }
 }
 
 // ---------- pipe rack and manifold ----------
 const BEAM_TOP = RUN_Z - PR;
-for (const y of [-30, -4, 18, 44]) {
-  box(`rack.beam${y}`, [HEADER_X - 8, y - 1, BEAM_TOP - 1], [HEADER_X + 34, y + 1, BEAM_TOP], { tone: "mid" });
-  for (const x of [HEADER_X - 6, HEADER_X + 12, HEADER_X + 31]) box(`rack.post${y}.${x}`, [x - 0.8, y - 0.8, 0], [x + 0.8, y + 0.8, BEAM_TOP - 1], { tone: "mid" });
+for (const y of [-32, 14, 50]) {
+  box(`rack.beam${y}`, [HEADER_X - 8, y - 1, BEAM_TOP - 1], [HEADER_X + 28, y + 1, BEAM_TOP], { tone: "mid" });
+  for (const x of [HEADER_X - 6, HEADER_X + 25]) box(`rack.post${y}.${x}`, [x - 0.8, y - 0.8, 0], [x + 0.8, y + 0.8, BEAM_TOP - 1], { tone: "mid" });
 }
 // header + meter run (south) + kicker (north) as one line, from the meter riser to the launcher barrel
 const BARREL = { x: HEADER_X + 38, y0: 40, y1: 68, r: 4.2 };
@@ -531,37 +591,45 @@ function alongOf(line, p) {
   }
   return best;
 }
-const STRAINER_AT = [124, SOUTH_Y, RUN_Z];
+const STRAINER_AT = [127, SOUTH_Y, RUN_Z];
 const STRAINER_R = 3.4;
-const METER_AT = [146, SOUTH_Y, RUN_Z];
+const METER_AT = [147.5, SOUTH_Y, RUN_Z];
 const METER_HALF = 5.2;
-const meterLine = pipe("header", [[RISER_X, SOUTH_Y, 1.2], [RISER_X, SOUTH_Y, RUN_Z], [HEADER_X, SOUTH_Y, RUN_Z], [HEADER_X, 60, RUN_Z], [BARREL.x - BARREL.r - 0.6, 60, RUN_Z]], PR, {
-  collars: [{ kind: "sleeve", at: 0.6, thick: 1.2, r: 3.6, tone: "lo" }, { kind: "flange", at: -0.35, thick: 0.7, r: 3.6, bolts: 8 }],
-  extraGaps: (line) => [...TANK_LINES.map((a) => [HEADER_X, pol(70, a, 0)[1], RUN_Z]), STRAINER_AT, METER_AT].map((p) => {
+const meterLine = pipe("header", [[RISER_X, SOUTH_Y, 0], [RISER_X, SOUTH_Y, RUN_Z], [HEADER_X, SOUTH_Y, RUN_Z], [HEADER_X, 60, RUN_Z], [BARREL.x - BARREL.r - 1.2, 60, RUN_Z]], PR, {
+  collars: [{ kind: "sleeve", at: 0.6, thick: 1.2, r: 3.6, tone: "lo" }],
+  touch: ["rack.beam*", "skid.cap*", "skid.post*"],
+  extraGaps: (line) => [...TANK_LINES.map((a) => [HEADER_X, pol(74, a, 0)[1], RUN_Z]), STRAINER_AT, METER_AT].map((p) => {
     const s = alongOf(line, p);
-    const c = p === STRAINER_AT ? Math.sqrt(STRAINER_R ** 2 - PR ** 2) : p === METER_AT ? METER_HALF : Math.sqrt(TEE_R ** 2 - PR ** 2);
+    const c = p === STRAINER_AT ? STRAINER_R + 0.8 : p === METER_AT ? METER_HALF : Math.sqrt(TEE_R ** 2 - PR ** 2);
     return [s - c, s + c];
   }),
 });
 // tees on the header where the tank lines land
-for (const [i, a] of TANK_LINES.entries()) ballItem(`tee${i}`, [HEADER_X, pol(70, a, 0)[1], RUN_Z], TEE_R, { tone: "mid" }, { owner: "header" });
+for (const [i, a] of TANK_LINES.entries()) ballItem(`tee${i}`, [HEADER_X, pol(74, a, 0)[1], RUN_Z], TEE_R, { tone: "mid" }, { owner: "header" });
 
+let POT;
 // basket strainer: a vertical pot the line passes through, bolted cover on top
 {
   const F = G.frameAlong([STRAINER_AT[0], STRAINER_AT[1], 0], [0, 0, 1]);
   const z0 = RUN_Z - 5;
   const z1 = RUN_Z + 4.2;
-  turned("strainer.pot", F, [[z0, STRAINER_R * 0.7, 1], [z0 + 1.6, STRAINER_R, 1], [z1, STRAINER_R]], { tone: "mid" }, { inner: Ln(G.arcOf(F, RUN_Z, STRAINER_R, P), { tone: "faint" }) });
+  POT = turned("strainer.pot", F, [[z0, STRAINER_R * 0.7, 1], [z0 + 1.6, STRAINER_R, 1], [z1, STRAINER_R]], { tone: "mid" }, { owner: "header", inner: Ln(G.arcOf(F, RUN_Z, STRAINER_R, P), { tone: "faint" }) });
   discItem("strainer.cover", F, z1, z1 + 0.9, STRAINER_R + 0.7, { tone: "mid" }, { extra: Dots(G.dotsOf(F, z1 + 0.9, STRAINER_R + 0.2, 10, P, { all: true }), { size: 0.4 }) });
   turned("strainer.vent", F, [[z1 + 0.9, 0.5], [z1 + 2.2, 0.5]], { tone: "mid" });
   discItem("strainer.drain", F, z0 - 1.4, z0, 0.6, { tone: "mid" });
+  // inlet and outlet nozzles: flanged stubs out of the pot, the line lands on their faces
+  for (const sgn of [-1, 1]) {
+    const NF = G.frameAlong(STRAINER_AT, [sgn, 0, 0]);
+    padOn(`strainer.nozzle${sgn > 0 ? "out" : "in"}`, POT, STRAINER_AT, [sgn, 0, 0], PR * 1.05, STRAINER_R + 0.2, { owner: "header" });
+    turned(`strainer.flange${sgn > 0 ? "out" : "in"}`, NF, [[STRAINER_R + 0.2, PR * 1.5], [STRAINER_R + 0.8, PR * 1.5]], { tone: "mid" }, { owner: "header", extra: Dots(G.dotsOf(NF, STRAINER_R + 0.8, PR * 1.2, 8, P, { fade: [0.04, 0.42] }), { size: 0.38 }) });
+  }
 }
 // turbine meter: flanged spool with a register head on a neck
 {
   const F = G.frameAlong(METER_AT, [1, 0, 0]);
   const h = METER_HALF;
   const prof = [[-h, PR * 1.55], [-h + 0.9, PR * 1.55], [-h + 0.9, PR * 1.15], [h - 0.9, PR * 1.15], [h - 0.9, PR * 1.55], [h, PR * 1.55]];
-  turned("meter.body", F, prof, { tone: "mid" }, { extra: Dots([...G.dotsOf(F, -h, PR * 1.2, 8, P, { fade: [0.04, 0.42] }), ...G.dotsOf(F, h, PR * 1.2, 8, P, { fade: [0.04, 0.42] })], { size: 0.4, tone: "mid" }) });
+  turned("meter.body", F, prof, { tone: "mid" }, { owner: "header", extra: Dots([...G.dotsOf(F, -h, PR * 1.2, 8, P, { fade: [0.04, 0.42] }), ...G.dotsOf(F, h, PR * 1.2, 8, P, { fade: [0.04, 0.42] })], { size: 0.4, tone: "mid" }) });
   const NF = G.frameAlong(METER_AT, [0, 0, 1]);
   turned("meter.neck", NF, [[PR * 1.15 - 0.2, 0.8], [PR * 1.15 + 1.4, 0.8]], { tone: "mid" });
   const z0 = METER_AT[2] + PR * 1.15 + 1.4;
@@ -571,7 +639,7 @@ for (const [i, a] of TANK_LINES.entries()) ballItem(`tee${i}`, [HEADER_X, pol(70
 {
   const skid = { x: 118, y: SOUTH_Y - 6, w: 44, d: 12, r: 0.6 };
   box("skid.base", [skid.x, skid.y, 0], [skid.x + skid.w, skid.y + skid.d, 1.4], { tone: "lo" }, { inner: Ln(k.sideSeam(skid, 0.7, P, 2), { tone: "faint" }) });
-  for (const x of [134, 158]) {
+  for (const x of [137, 157]) {
     box(`skid.post${x}`, [x - 0.7, SOUTH_Y - 0.7, 1.4], [x + 0.7, SOUTH_Y + 0.7, RUN_Z - PR - 0.8], { tone: "mid" });
     box(`skid.cap${x}`, [x - 1.6, SOUTH_Y - 2.6, RUN_Z - PR - 0.8], [x + 1.6, SOUTH_Y + 2.6, RUN_Z - PR], { tone: "mid" });
   }
@@ -580,11 +648,12 @@ for (const [i, a] of TANK_LINES.entries()) ballItem(`tee${i}`, [HEADER_X, pol(70
 {
   const F = G.frameOf([BARREL.x, 0, RUN_Z], [0, 1, 0], [1, 0, 0], [0, 0, 1]);
   const prof = [[BARREL.y0, PR], [BARREL.y0 + 3.2, BARREL.r, 1], [BARREL.y1, BARREL.r]];
-  turned("launcher.barrel", F, [[BARREL.y0 - 1.2, PR * 1.5], [BARREL.y0 - 0.5, PR * 1.5], [BARREL.y0 - 0.5, PR], [BARREL.y0, PR], ...prof.slice(1)], { tone: "mid" }, { inner: Ln(G.arcOf(F, BARREL.y0 + 14, BARREL.r, P), { tone: "faint" }) });
+  const BAR = turned("launcher.barrel", F, [[BARREL.y0 - 1.2, PR * 1.5], [BARREL.y0 - 0.5, PR * 1.5], [BARREL.y0 - 0.5, PR], [BARREL.y0, PR], ...prof.slice(1)], { tone: "mid" }, { inner: Ln(G.arcOf(F, BARREL.y0 + 14, BARREL.r, P), { tone: "faint" }) });
+  padOn("launcher.kickerpad", BAR, [BARREL.x, 60, RUN_Z], [-1, 0, 0], PR * 1.3, BARREL.r + 1.2, { tone: "mid" });
   discItem("launcher.hub", F, BARREL.y1, BARREL.y1 + 1.2, BARREL.r + 0.8, { tone: "mid" });
   discItem("launcher.door", F, BARREL.y1 + 1.2, BARREL.y1 + 2.2, BARREL.r + 0.4, { tone: "mid" }, { extra: Dots(G.dotsOf(F, BARREL.y1 + 2.2, BARREL.r - 0.6, 6, P, { all: true }), { size: 0.45, tone: "mid" }) + Ln(G.circleOf(F, BARREL.y1 + 2.2, 1.6, P, 24), { tone: "faint" }) });
   // closure hinge block on the side of the hub
-  box("launcher.hinge", [BARREL.x + BARREL.r + 0.2, BARREL.y1 - 0.4, RUN_Z - 1.2], [BARREL.x + BARREL.r + 1.8, BARREL.y1 + 2.6, RUN_Z + 1.2], { tone: "mid" });
+  box("launcher.hinge", [BARREL.x + BARREL.r + 0.8, BARREL.y1 - 0.4, RUN_Z - 1.2], [BARREL.x + BARREL.r + 2.2, BARREL.y1 + 2.6, RUN_Z + 1.2], { tone: "mid" });
   // pressure gauge on a nipple on top of the barrel near the door
   const g = [BARREL.x, BARREL.y1 - 3, RUN_Z];
   const NF = G.frameAlong(g, [0, 0, 1]);
@@ -596,10 +665,13 @@ for (const [i, a] of TANK_LINES.entries()) ballItem(`tee${i}`, [HEADER_X, pol(70
     box(`launcher.saddle${y}`, [BARREL.x - 2.4, y - 1.2, RUN_Z - BARREL.r - 0.8], [BARREL.x + 2.4, y + 1.2, RUN_Z - BARREL.r], { tone: "mid" });
     box(`launcher.leg${y}`, [BARREL.x - 0.7, y - 0.7, 0], [BARREL.x + 0.7, y + 0.7, RUN_Z - BARREL.r - 0.8], { tone: "mid" });
   }
-  const main = pipe("mainline", [[BARREL.x, BARREL.y0 - 1.2, RUN_Z], [BARREL.x, 12, RUN_Z], [BARREL.x, 12, 1.2]], PR, {
-    collars: [{ kind: "flange", at: 0.35, thick: 0.7, r: 3.6, bolts: 8 }, { kind: "sleeve", at: -0.6, thick: 1.2, r: 3.6, tone: "lo" }],
+  const MV = 7.6;
+  const main = pipe("mainline", [[BARREL.x, BARREL.y0 - 1.2, RUN_Z], [BARREL.x, 20, RUN_Z], [BARREL.x + 14, 20, RUN_Z], [BARREL.x + 14, 20, 0]], PR, {
+    collars: [{ kind: "flange", at: 0.35, thick: 0.7, r: 3.6, bolts: 8, owner: null }, { kind: "sleeve", at: -0.6, thick: 1.2, r: 3.6, tone: "lo" }],
+    extraGaps: [[MV - 2.1 * PR, MV + 2.1 * PR]],
+    touch: ["rack.beam*"],
   });
-  gateValve("valve.main", main, 9, PR);
+  gateValve("valve.main", main, MV, PR);
 }
 
 // ---------- order, page ----------

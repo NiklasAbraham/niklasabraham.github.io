@@ -12,7 +12,7 @@ import { SERIES, STOPS, SCALE, DEG_PER_USD, H_PER_USD, LAST_PRICE, monthName } f
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, "..", "..", "..", "..", "assets", "oil-article", "anatomy");
 const theme = process.argv.includes("--light") ? "light" : "dark";
-const FIG = "Fig";
+const FIG = "Drawing B";
 
 const WIDTH = 600;
 const HEIGHT = 420;

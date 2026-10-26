@@ -17,7 +17,7 @@ YIELDS = {
 
 # numbered markers on the long price charts (date, number, text)
 HISTORY = [
-    {'d': '1990-08-02', 'n': 'A', 't': 'Iraq invades Kuwait; prices double within two months.'},
+    {'d': '1990-08-02', 'n': 'A', 't': 'Iraq invades Kuwait: Brent spot from $15 in early July to $41 in late September.'},
     {'d': '1998-12-10', 'n': 'B', 't': 'Asian crisis and an OPEC output rise: Brent near $10.'},
     {'d': '2008-07-03', 'n': 'C', 't': 'The all-time nominal high: Brent spot $143.95 on 3 July 2008, then the financial crisis.'},
     {'d': '2014-11-27', 'n': 'D', 't': 'OPEC decides not to cut against US shale: prices halve into 2016.'},
@@ -40,7 +40,7 @@ EVENTS = [  # 2026, numbered markers on the war-year charts (research note 010_c
     {'d': '2026-10-02', 'n': '10', 't': 'G7 agrees to release up to 100 million barrels, diesel first; EIA Brent spot $135.51.'},
 ]
 GAP_EVENTS = [
-    {'d': '2011-09-06', 'n': 'A', 't': 'Cushing glut: the Permian and Bakken boom fills the Oklahoma hub before pipelines to the Gulf exist; Brent trades up to $27 over WTI.'},
+    {'d': '2011-09-06', 'n': 'A', 't': 'Cushing glut: the Permian and Bakken boom fills the Oklahoma hub before pipelines to the Gulf exist; Brent spot trades up to $29.59 over WTI (23 Sep 2011).'},
     {'d': '2015-12-18', 'n': 'B', 't': 'The US lifts its 40-year ban on crude exports.'},
     {'d': '2023-06-01', 'n': 'C', 't': 'WTI Midland enters the Dated Brent basket (cargoes from June 2023).'},
     {'d': '2026-10-06', 'n': 'D', 't': 'Record tanker rates: the futures gap reaches about $13.80.'},

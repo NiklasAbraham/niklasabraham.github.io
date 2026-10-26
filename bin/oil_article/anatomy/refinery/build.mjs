@@ -189,7 +189,7 @@ const arcPts = (cx, cy, r, z, steps = 28) => Array.from({ length: steps + 1 }, (
   const t = towardA - Math.PI / 2 + (Math.PI * i) / steps;
   return [cx + r * Math.cos(t), cy + r * Math.sin(t), z];
 });
-const MANI = { x0: -158, x1: -152, y0: -82, y1: -2, z0: 4, z1: 15 };
+const MANI = { x0: -162, x1: -156, y0: -82, y1: -2, z0: 4, z1: 15 };
 box("feed.manifold", [MANI.x0, MANI.y0, MANI.z0], [MANI.x1, MANI.y1, MANI.z1], { tone: "mid" }, { r: 1, steps: 3, bevel: 0.4, extra: Dots([MANI.y0 + 3, MANI.y1 - 3].map((y) => at([(MANI.x0 + MANI.x1) / 2, y, MANI.z1])), { size: 0.45 }) });
 BARREL.ys.forEach((y, i) => {
   const x = BARREL.x;
@@ -204,7 +204,7 @@ BARREL.ys.forEach((y, i) => {
   cyl(`barrel${i}.vent`, x - 4, y + 4, 1.2, BARREL.z1, BARREL.z1 + 0.9, { tone: "mid" }, { steps: 14 });
   const body = R.solids.find((s) => s.name === `barrel${i}.body`);
   const face = pad(`barrel${i}.pad`, body, [x + BARREL.r, y, 9], [1, 0, 0], 2.3, 1.4);
-  const line = pipe(`barrel${i}.branch`, [face, [MANI.x0, y, 9]], 1.3, { flow: `branch${i}`, flangeR: 1.7, valve: { at: 0.5, R: 2.4 } });
+  const line = pipe(`barrel${i}.branch`, [face, [MANI.x0, y, 9]], 1.3, { flow: `branch${i}`, flanges: [false, false], valve: { at: 0.5, R: 2.4 } });
   // ball valve with a lever: lever along the pipe = open
   const vc = [(face[0] + MANI.x0) / 2, y, 9];
   void line;
@@ -215,8 +215,8 @@ BARREL.ys.forEach((y, i) => {
 box("pump.skid", [-146, -52, 0], [-107, -28, 3], { tone: "lo" }, { r: 1.2, steps: 3, bevel: 0.4, extra: Dots([[-143, -49], [-110, -49], [-143, -31], [-110, -31]].map(([x, y]) => at([x, y, 3])), { size: 0.45 }) });
 box("pump.pedestal", [-137, -44, 3], [-133, -36, 5], { tone: "mid" });
 const PX = G.frameOf([-138, -40, 11], [1, 0, 0], [0, 1, 0], [0, 0, 1]);
-const casing = disc("pump.casing", PX, 0, 7, 6, { tone: "hi" }, { bevel: 0.4 });
-disc("pump.bearing", PX, 7, 10, 3, { tone: "mid" }, {});
+const casing = disc("pump.casing", PX, 0, 8, 6, { tone: "hi" }, { bevel: 0.4 });
+disc("pump.bearing", PX, 8, 10, 3, { tone: "mid" }, {});
 box("pump.guard", [-128, -43.5, 3], [-123, -36.5, 15], { tone: "mid" }, { r: 0.6, extra: Ln(path3([[-128, -36.5, 9], [-123, -36.5, 9]]), { tone: "faint" }) });
 box("pump.motorfeet", [-121, -45, 3], [-112, -35, 5.8], { tone: "lo" });
 {
@@ -228,7 +228,7 @@ box("pump.motorfeet", [-121, -45, 3], [-112, -35, 5.8], { tone: "lo" });
 }
 const suction = pipe("feed.suction", [[MANI.x1, -40, 11], [-138, -40, 11]], 1.8, { flow: "crude" });
 void suction;
-const discharge0 = pad("pump.discharge", casing, [-134.5, -40, 17], UP, 3, 3);
+const discharge0 = pad("pump.discharge", casing, [-133, -40, 17], UP, 3, 1.4);
 
 // ---------- fired heater ----------
 const FX1 = FUR.x + FUR.w;
@@ -259,7 +259,28 @@ let furnaceWindow = "";
   parts.push(`<g clip-path="url(#rf-fwin)">`);
   parts.push(`<path class="rf-cavity" d="${path3(opening, true)}"/>`);
   // back wall seams (refractory brick courses)
-  parts.push(Ln([30, 38, 46, 54, 62, 70].map((z) => path3([[WIN.x0 - 30, FUR.y + 2, z], [WIN.x1 + 30, FUR.y + 2, z]])).join(""), { tone: "faint", className: "rf-brick" }));
+  // brick courses on the back wall, clipped in screen space to the opening so each ends on its outline
+  const quad = opening.map(at);
+  const clipSeg = (a, b) => {
+    let t0 = 0, t1 = 1;
+    const n = quad.length;
+    let cx = 0, cy = 0;
+    quad.forEach(([x, y]) => { cx += x / n; cy += y / n; });
+    for (let i = 0; i < n; i++) {
+      const p = quad[i], q = quad[(i + 1) % n];
+      let nx = -(q[1] - p[1]), ny = q[0] - p[0];
+      if (nx * (cx - p[0]) + ny * (cy - p[1]) < 0) { nx = -nx; ny = -ny; }
+      const den = nx * (b[0] - a[0]) + ny * (b[1] - a[1]);
+      const num = nx * (a[0] - p[0]) + ny * (a[1] - p[1]);
+      if (Math.abs(den) < 1e-9) { if (num < 0) return null; continue; }
+      const t = -num / den;
+      if (den > 0) t0 = Math.max(t0, t); else t1 = Math.min(t1, t);
+    }
+    if (t1 <= t0) return null;
+    const L = (t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    return k.pathOf([L(t0), L(t1)]);
+  };
+  parts.push(Ln([32, 40, 48, 56, 64].map((z) => clipSeg(at([WIN.x0 - 40, FUR.y + 2, z]), at([WIN.x1 + 40, FUR.y + 2, z]))).filter(Boolean).join(""), { tone: "faint", className: "rf-brick" }));
   // radiant coil: vertical tubes along the back wall
   for (let x = FUR.x + 5; x < FX1 - 3; x += 4.4) parts.push(S(k.cylinder(x, FUR.y + 4.5, 1.4, FUR.floor, FUR.roof - FUR.floor, P, 12), { tone: "lo", crease: "none" }));
   // flames: one per burner, rising from the floor (drawn in world space, flickered by the page)
@@ -324,7 +345,7 @@ cyl("stack.lip", STK.x, STK.y, STK.r + 0.8, 196, 198, { tone: "mid" }, { steps: 
   box("ladder.bracket", [xs[0] - 0.4, STK.y + 6, 140], [xs[1] + 0.4, ly - 0.4, 141], { tone: "lo" }, { r: 0.1 });
 }
 const convIn = [CONV.x, -40, 99];
-pipe("feed.riser", [discharge0, [-134.5, -40, 99], convIn], 1.8, { flow: "crude", bend: 3.2 });
+pipe("feed.riser", [discharge0, [-133, -40, 99], convIn], 1.8, { flow: "crude", bend: 3.2 });
 
 // ---------- atmospheric column ----------
 const CF = G.frameOf([COL.x, COL.y, 0], UP, [1, 0, 0], [0, 1, 0]);
@@ -369,8 +390,9 @@ function columnWindow() {
       if (Math.hypot(a + side * -2, b) < inner - 3 && side * (x - cx) < -2) caps.push(at([x, y, z]));
     }
     parts.push(Dots(caps, { size: 0.35, tone: "lo" }));
-    // weir on the downcomer side
-    parts.push(Ln(path3([[cx, COL.y - half, z + 1.2], [cx, COL.y + half, z + 1.2]]), { tone: "faint" }));
+    // outlet weir: the downcomer plate standing 1.2 above the tray
+    const weir = [[cx, COL.y - half, z], [cx, COL.y + half, z], [cx, COL.y + half, z + 1.2], [cx, COL.y - half, z + 1.2]];
+    parts.push(`<path class="iso-shade" data-shade="2" d="${path3(weir, true)}"/>` + Ln(path3(weir, true), { tone: "lo" }));
   });
   parts.push(`</g>`);
   // the cut edges: sill (a ring band seen from above) and the left jamb
@@ -507,8 +529,8 @@ for (const x of [70, 82]) {
   pipe("cond.cwline", [f, G.add3(f, [0, 0, 4])], 0.9, { flanges: [true, false], blind: [false, true], ends: [true, false] });
 }
 const vapIn = pad("cond.in", cond, [62, COND.y, CZ + COND.r], UP, 3.9, 1.6);
-const condOut = pad("cond.out", cond, [77, COND.y, CZ - COND.r], [0, 0, -1], 2.6, 1.2);
-const drumIn = pad("drum.in", drum, [77, DRUM.y, DRUM.z + DRUM.r], UP, 2.6, 1.2);
+const condOut = pad("cond.out", cond, [81, COND.y, CZ - COND.r], [0, 0, -1], 2.6, 1.2);
+const drumIn = pad("drum.in", drum, [81, DRUM.y, DRUM.z + DRUM.r], UP, 2.6, 1.2);
 const lpgOut = pad("drum.gas", drum, [80, DRUM.y + DRUM.r, DRUM.z], [0, 1, 0], 1.9, 1.2);
 const refluxOut = (() => {
   const F = G.frameAlong([DRUM.x0 + 0.6, DRUM.y, DRUM.z], [-1, 0, 0]);
@@ -547,12 +569,11 @@ for (const cut of CUTS) {
     `<g class="rf-liq" data-cut="${cut.id}"><path class="rf-liq-body" d="${liq.fill}"/><path class="rf-liq-top" d="${liq.top}"/></g>`,
     cut.id === "resid" ? `<g class="rf-liq" data-cut="vr"><path class="rf-liq-body" d="${liq.fill}"/><path class="iso-line rf-liq-edge" d=""/></g>` : "",
     shine,
-    `<path class="iso-edge" d="${glass.outline}"/>`,
+    `<path class="iso-line iso-edge" data-tone="mid" d="${glass.outline}"/>`,
   ].join("");
   put(`glass.${cut.id}.tube`, [gx, gy, GLASS.z0 + GLASS.h / 2], svg, [record(A.cylinder(gx, gy, GLASS.r, GLASS.z0, GLASS.h, { name: `glass.${cut.id}.tube` }))]);
   // guard rods at the two screen-side corners
-  cyl(`glass.${cut.id}.rod`, gx + b - 1, gy - b + 1, 0.55, GLASS.z0, GLASS.z0 + GLASS.h, { tone: "mid" }, { steps: 8 });
-  cyl(`glass.${cut.id}.rod`, gx - b + 1, gy + b - 1, 0.55, GLASS.z0, GLASS.z0 + GLASS.h, { tone: "mid" }, { steps: 8 });
+  for (const side of [1, -1]) cyl(`glass.${cut.id}.rod`, gx + side * 6.5 * Math.sin(towardA), gy - side * 6.5 * Math.cos(towardA), 0.55, GLASS.z0, GLASS.z0 + GLASS.h, { tone: "mid" }, { steps: 8 });
   // graduated scale plate 0-60 % vol, ticks every 5, major every 10, rooted on the plate's left edge
   const sx0 = gx + b + 0.6;
   const sx1 = gx + b + 2.6;
@@ -649,7 +670,7 @@ const DATA = {
   crudes: CRUDES,
   cuts: CUTS.map((c) => c.id),
   scaleMax: SCALE_MAX,
-  glass: { z0: GLASS.z0, h: GLASS.h, r: GLASS.r - 0.5 },
+  glass: { z0: GLASS.z0, h: GLASS.h, r: GLASS.r - 0.5, outer: GLASS.r },
   glasses: GLASSES,
   valves: VALVES,
   furnace: FURNACE,

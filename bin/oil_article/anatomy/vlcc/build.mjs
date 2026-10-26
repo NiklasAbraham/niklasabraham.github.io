@@ -694,7 +694,7 @@ const f13 = M.freightPerBbl(M.RATE_MAX);
 const caption = `Freight per barrel = day rate × days of hire ÷ barrels carried. A VLCC (about 330 m long, 60 m beam, 22 m draught, 300,000 dwt) carries about ${(M.CARGO_BBL / 1e6).toFixed(0)} million barrels; Ras Tanura to Ningbo is about ${M.LADEN_DAYS} days laden at ${M.SPEED_KN} knots, and with the ballast leg back and port time the charterer pays for about ${M.VOYAGE_DAYS} days (both round numbers). At ${M.fmtUsd(M.HOLDS[0].rate)}/day (January 2026) that is ${M.fmtBbl(f70)} a barrel; at the record ${M.fmtUsd(M.RATE_MAX)}/day of early October 2026 it is ${M.fmtBbl(f13)}, about a third of the ${"$" + Math.round(CRUDE.usd)} the crude itself cost (WTI, ${CRUDE.month}). Bunker fuel and war-risk insurance are not included; in 2026 the war-risk premium was a further cost. Ship schematic, tank layout simplified, pipes drawn about twice their true size.`;
 
 const body = k.plateHtml({
-  fig: "Fig",
+  fig: "Drawing C",
   title: "VLCC freight",
   hint: "Hover across to set the day rate",
   readout: M.readout(START, CRUDE.usd),
