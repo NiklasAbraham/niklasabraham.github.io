@@ -1,0 +1,23 @@
+/* page inside an iframe: no margins, the card fills the width */
+body{margin:0}
+.iso-page{width:100%;max-width:720px;margin:0 auto}
+.iso-figure{margin:0}
+.ct-stage{outline:none;touch-action:pan-y;cursor:ew-resize}
+.ct-stage:focus-visible{box-shadow:0 0 0 1px var(--anatomy-mid)}
+/* mesh faces: stroke each face in its own tone so abutting facets show no hairline */
+.ct-mesh>.iso-shade,.ct-mesh>.iso-top{stroke-width:.35;stroke-linejoin:round}
+.ct-mesh>.iso-shade[data-shade="0"]{stroke:var(--anatomy-shade-0)}
+.ct-mesh>.iso-shade[data-shade="1"]{stroke:var(--anatomy-shade-1)}
+.ct-mesh>.iso-shade[data-shade="2"]{stroke:var(--anatomy-shade-2)}
+.ct-mesh>.iso-shade[data-shade="3"]{stroke:var(--anatomy-shade-3)}
+.ct-mesh>.iso-top{stroke:var(--anatomy-top)}
+/* the floating roof is the lit part */
+.ct-roof{--anatomy-top:var(--anatomy-lit-top)}
+/* inside of the shell: a darker cavity */
+.ct-cavity{--anatomy-shade-0:#0c0c0c;--anatomy-shade-1:#0e0e0e;--anatomy-shade-2:#101010;--anatomy-shade-3:#121212;--anatomy-top:#141414}
+.iso[data-theme="light"] .ct-cavity{--anatomy-shade-0:#c9c9c5;--anatomy-shade-1:#d0d0cc;--anatomy-shade-2:#d6d6d2;--anatomy-shade-3:#dcdcd8;--anatomy-top:#e2e2de}
+/* crude: the one colour in the drawing (#E8913A) */
+.ct-oil{--anatomy-paper:#b8692a;--anatomy-shade-0:#a85f25;--anatomy-shade-1:#c06d2c;--anatomy-shade-2:#d47c33;--anatomy-shade-3:#e8913a;--anatomy-top:#e8913a;--anatomy-mid:#e8913a}
+.iso[data-theme="light"] .ct-oil{--anatomy-paper:#e8913a;--anatomy-shade-0:#d27a2c;--anatomy-shade-1:#df8733;--anatomy-shade-2:#e8913a;--anatomy-shade-3:#efa25a;--anatomy-top:#efa25a;--anatomy-mid:#b8692a}
+.ct-key-oil{display:inline-block;width:16px;height:8px;background:#e8913a;border-radius:1px}
+.ct-wheel{fill:var(--anatomy-paper);stroke:var(--anatomy-hi);stroke-width:.6}

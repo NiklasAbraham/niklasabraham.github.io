@@ -1,0 +1,27 @@
+wrote /home/niklas/code/niklasabraham.github.io/assets/oil-article/anatomy/refinery.html 963 KB 359 items 246 solids scale 1.309
+clearance: 0 problems
+clearance apart: 0 problems
+terminals: 0 ends not on a mount
+loose ends: 0
+screen folds: 0
+support: 0 unsupported solids · 0 hanging tubes · 0 sunk pairs
+depth order: 5 problems
+  cycle  share 0  barrel0.branch.flange0 (k -92.60) is in front of barrel0.branch:0 (k -91.39) but drawn first   0.38 px² (4.50 px² the other way), up to 1.58 nearer, at 133.8,313.3
+  cycle  share 0  barrel0.branch:1 (k -87.33) is in front of barrel0.branch.flange1 (k -86.12) but drawn first   1.25 px² (3.31 px² the other way), up to 0.99 nearer, at 149.8,317.5
+  cycle  share 0  barrel1.branch.flange0 (k -112.85) is in front of barrel1.branch:0 (k -111.64) but drawn first   0.25 px² (4.63 px² the other way), up to 1.60 nearer, at 155.3,297.5
+  cycle  share 0  barrel1.branch:1 (k -107.58) is in front of barrel1.branch.flange1 (k -106.37) but drawn first   1.31 px² (3.44 px² the other way), up to 0.99 nearer, at 170.8,303.3
+  cycle  share 0  barrel2.branch.flange1 (k -117.54) is in front of barrel2.branch:1 (k -117.42) but drawn first   3.50 px² (1.13 px² the other way), up to 1.91 nearer, at 189.0,290.3
+through in mid-flight: 0 pairs
+self-overlap: 0 chunks whose outline crosses itself on screen
+wobble: 0 smoothed profiles whose slope turns between its ends
+saddles off their host apart: 0
+stand-in shapes: 0 items whose recorded shape covers too little of what it draws
+crowding: 6 pairs where a bend or end touches another line on screen
+  share 0  run.resid start  ×  glass.kero.rod (rod)   outlines 0.11 apart px, 102.54 apart in depth   at screen 355.0,365.7
+  share 0  cond.drop end  ×  cond.leg (rod)   outlines 0.13 apart px, 17.39 apart in depth   at screen 420.6,100.8
+  share 0  cond.drop start  ×  cond.beam (rod)   outlines 0.85 apart px, 12.93 apart in depth   at screen 420.6,97.3
+  share 0  run.diesel start  ×  glass.naphtha.rod (rod)   outlines 0.86 apart px, 102.19 apart in depth   at screen 386.9,376.5
+  share 0  run.kero start  ×  glass.lpg.rod (rod)   outlines 0.86 apart px, 102.19 apart in depth   at screen 419.1,387.0
+  share 0  feed.riser start  ×  feed.manifold (rod)   outlines overlap 1.38 px, 31.72 apart in depth   at screen 193.8,299.8
+audit · 33 tubes · 246 solids · 359 items · 1 depth states · 872 overlaps · 867 order rules · 7.7 s
+audit failed: 11 problems

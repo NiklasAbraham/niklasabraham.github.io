@@ -1,0 +1,150 @@
+// Oil-market long read (/blog/2026/oil-market/): blueprint sheets in the look of the "Crude & Conflict" reels.
+// Every figure is navy drawing paper with a faint grid, a condensed headline, white line work and an engineering title
+// block; filled by assets/js/oil-explorer.js. The sheets stay dark in the light site theme, like a drawing pinned on a page.
+
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 500; font-display: swap; src: url('/assets/vendor/fonts/barlow-condensed/BarlowCondensed-Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 600; font-display: swap; src: url('/assets/vendor/fonts/barlow-condensed/BarlowCondensed-SemiBold.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 700; font-display: swap; src: url('/assets/vendor/fonts/barlow-condensed/BarlowCondensed-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 800; font-display: swap; src: url('/assets/vendor/fonts/barlow-condensed/BarlowCondensed-ExtraBold.woff2') format('woff2'); }
+
+$oil-paper: #0b1424;
+$oil-paper-2: #0e1a2e;
+$oil-line: #dfe6f1;
+$oil-muted: #8c9bb5;
+$oil-orange: #e8913a;
+$oil-red: #e5533d;
+$oil-blue: #4fa8e0;
+$oil-mono: 'JetBrains Mono', ui-monospace, monospace;
+$oil-cond: 'Barlow Condensed', 'Inter', system-ui, sans-serif;
+
+.oil {
+  // headings of the article in the reel's condensed face
+  .da-title { font-family: $oil-cond; font-weight: 800; letter-spacing: 0.005em; text-transform: uppercase; }
+  h2 { font-family: $oil-cond; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; }
+  .da-eyebrow { color: $oil-orange; }
+  .oil-kicker { color: $oil-red; }
+  .oil-formula { margin: 1.1rem 0; }
+}
+
+figure.oil-sheet { margin: 2rem 0 2.2rem; width: 100%; max-width: none;
+  @media (min-width: 1100px) { &.wide { margin-right: -14rem; width: calc(100% + 14rem); } }
+  figcaption { font-size: 0.82rem; line-height: 1.5; color: var(--global-text-color-light, #5b6475); margin-top: 0.6rem; padding: 0 0.2rem; }
+}
+.os-wait { min-height: 220px; display: flex; align-items: center; justify-content: center; background: $oil-paper; color: $oil-muted; font-family: $oil-mono; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; }
+.os-paper { position: relative; background-color: $oil-paper; color: $oil-line; border-radius: 3px; padding: 1.4rem 1.3rem 0.8rem;
+  background-image: linear-gradient(rgba(130, 165, 220, 0.075) 1px, transparent 1px), linear-gradient(90deg, rgba(130, 165, 220, 0.075) 1px, transparent 1px),
+    linear-gradient(rgba(130, 165, 220, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(130, 165, 220, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px, 16px 16px, 16px 16px; background-position: -1px -1px;
+  box-shadow: 0 1px 0 rgba(4, 32, 75, 0.05), 0 10px 30px -18px rgba(4, 32, 75, 0.55);
+  // drawing border with zone marks
+  &::before { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(223, 230, 241, 0.28); border-radius: 2px; pointer-events: none; }
+  &::after { content: ''; position: absolute; inset: 11px; border: 1px solid rgba(223, 230, 241, 0.1); pointer-events: none; }
+  > * { position: relative; z-index: 1; }
+}
+.os-head { text-align: center; padding: 0.2rem 0 0.4rem; }
+.os-eyebrow { font-family: $oil-cond; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.22em; text-transform: uppercase; color: $oil-orange; }
+.os-title { font-family: $oil-cond; font-weight: 800; font-size: 1.85rem; line-height: 1.05; text-transform: uppercase; color: #f3f6fb; margin-top: 0.2rem; letter-spacing: 0.01em;
+  em { font-style: normal; color: $oil-red; } }
+.os-sub { font-size: 0.8rem; color: $oil-muted; margin-top: 0.25rem; }
+.os-ctrl { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; justify-content: center; align-items: center; padding: 0.3rem 0 0.4rem; &:empty { display: none; } }
+.os-seg { display: inline-flex; border: 1px solid rgba(223, 230, 241, 0.35); border-radius: 2px; overflow: hidden;
+  button { font-family: $oil-cond; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; background: transparent; color: $oil-muted; border: 0; border-right: 1px solid rgba(223, 230, 241, 0.2); padding: 0.28rem 0.7rem; cursor: pointer;
+    &:last-child { border-right: 0; } &:hover { color: #fff; } &.on { background: rgba(232, 145, 58, 0.16); color: $oil-orange; } &:focus-visible { outline: 1px solid $oil-orange; outline-offset: -2px; } } }
+.os-slider { display: inline-flex; align-items: center; gap: 0.55rem; font-family: $oil-cond; font-size: 0.84rem; letter-spacing: 0.06em; text-transform: uppercase; color: $oil-muted;
+  input[type='range'] { width: 180px; accent-color: $oil-orange; }
+  output { font-family: $oil-mono; font-size: 0.74rem; color: #f3f6fb; min-width: 5.5rem; text-transform: none; letter-spacing: 0; } }
+.os-btn { font-family: $oil-cond; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; background: transparent; color: $oil-orange; border: 1px solid rgba(232, 145, 58, 0.6); border-radius: 2px; padding: 0.25rem 0.7rem; cursor: pointer; &:hover { background: rgba(232, 145, 58, 0.14); } }
+.os-stage { position: relative; }
+.os-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.os-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 1.1rem; padding: 0.4rem 0 0.2rem; &:empty { display: none; } }
+.os-key { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.74rem; color: #c9d3e3; i { width: 14px; height: 3px; border-radius: 1px; display: inline-block; } }
+.os-read { font-family: $oil-mono; font-size: 0.76rem; color: #f3f6fb; text-align: center; padding: 0.3rem 0; b { color: $oil-orange; font-weight: 600; } }
+
+// title block
+.os-block { display: grid; grid-template-columns: 0.9fr 2.4fr 0.7fr 0.9fr 2fr; margin-top: 0.7rem; border: 1px solid rgba(223, 230, 241, 0.45); font-family: $oil-cond;
+  .c { padding: 0.18rem 0.45rem 0.22rem; border-right: 1px solid rgba(223, 230, 241, 0.3); min-width: 0; &:last-child { border-right: 0; } }
+  i { display: block; font-style: normal; font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: $oil-muted; line-height: 1.2; }
+  b { display: block; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.06em; color: #eef2f8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
+  .no { color: $oil-orange; }
+  @media (max-width: 640px) { grid-template-columns: 1fr 2fr 1fr; .d, .src { display: none; } } }
+
+// svg text and lines
+.os-ax { font-family: $oil-mono; font-size: 10px; fill: $oil-muted; }
+.os-pt { font-family: $oil-cond; font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; fill: $oil-muted; }
+.os-gridh { stroke: rgba(223, 230, 241, 0.09); stroke-width: 1; }
+.os-gridv { stroke: rgba(223, 230, 241, 0.06); stroke-width: 1; }
+.os-zero { stroke: rgba(223, 230, 241, 0.45); stroke-width: 1; }
+.os-band { fill: rgba(229, 83, 61, 0.08); }
+.os-bandl { font-family: $oil-cond; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; fill: rgba(229, 83, 61, 0.8); }
+.os-cross { stroke: rgba(255, 255, 255, 0.55); stroke-width: 1; }
+.os-evl { stroke: rgba(229, 83, 61, 0.55); stroke-width: 1; stroke-dasharray: 2 3; }
+.os-ev { cursor: default; outline: none;
+  rect { fill: $oil-paper; stroke: $oil-red; stroke-width: 1.1; }
+  text { font-family: $oil-mono; font-size: 8.5px; font-weight: 700; fill: $oil-red; pointer-events: none; }
+  &:hover rect, &:focus rect { fill: $oil-red; } &:hover text, &:focus text { fill: #fff; } }
+.os-lab { font-family: $oil-cond; font-weight: 600; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.os-small { font-family: $oil-mono; font-size: 10px; fill: $oil-muted; }
+.os-big { font-family: $oil-cond; font-weight: 800; font-size: 26px; fill: #f3f6fb; }
+.os-solid { fill: $oil-paper-2; stroke: $oil-line; stroke-width: 1.4; &.top { fill: #13223a; } }
+.os-rib { fill: none; stroke: rgba(223, 230, 241, 0.55); stroke-width: 1; }
+.os-hatch { stroke: rgba(223, 230, 241, 0.25); stroke-width: 6; stroke-dasharray: 1 3; }
+.os-crackline { fill: none; stroke: $oil-orange; stroke-width: 2.2; stroke-linejoin: round; }
+.os-crackglow { fill: none; stroke: $oil-orange; stroke-width: 7; stroke-opacity: 0.4; filter: blur(3px); opacity: 0; }
+.os-land { fill: #14233b; stroke: rgba(223, 230, 241, 0.45); stroke-width: 0.6; stroke-linejoin: round; }
+.os-land.hi { fill: #1b2e4c; }
+.os-sea { fill: #0b1424; }
+.os-route { fill: none; stroke-linecap: round; }
+.os-place { font-family: $oil-cond; font-weight: 600; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; fill: #eef2f8; paint-order: stroke; stroke: $oil-paper; stroke-width: 3px; stroke-linejoin: round; }
+.os-place.sm { font-size: 10.5px; fill: $oil-muted; }
+.os-num { font-family: $oil-mono; font-size: 10.5px; font-weight: 600; fill: #f3f6fb; paint-order: stroke; stroke: $oil-paper; stroke-width: 3px; }
+
+.oil-tip { position: fixed; z-index: 2000; display: none; pointer-events: none; max-width: 300px; background: #0e1a2e; color: #eef2f8; border: 1px solid rgba(232, 145, 58, 0.6); border-radius: 2px; padding: 0.45rem 0.6rem; font-size: 0.74rem; line-height: 1.4; box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.6);
+  b { font-family: $oil-cond; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.82rem; color: $oil-orange; }
+  table { border-collapse: collapse; margin-top: 0.2rem; } td { padding: 0.05rem 0.5rem 0.05rem 0; font-family: $oil-mono; font-size: 0.7rem; &:last-child { text-align: right; padding-right: 0; } }
+  i { display: inline-block; width: 9px; height: 3px; margin-right: 0.35rem; vertical-align: middle; } }
+
+// anatomy figures in their own page, embedded
+.oil-anat { margin: 2rem 0 2.2rem;
+  iframe { display: block; width: 100%; border: 0; border-radius: 3px; background: $oil-paper; min-height: 420px; }
+  figcaption { font-size: 0.82rem; line-height: 1.5; color: var(--global-text-color-light, #5b6475); margin-top: 0.6rem; } }
+
+// source tags and the reference list
+sup.oil-ref a { font-family: $oil-mono; font-size: 0.66rem; color: #b4552f; text-decoration: none; white-space: nowrap; &:hover { text-decoration: underline; } }
+ol.oil-refs { list-style: none; padding-left: 0; font-size: 0.82rem; line-height: 1.5;
+  li { padding: 0.25rem 0; border-bottom: 1px solid rgba(4, 32, 75, 0.07); }
+  .k { font-family: $oil-mono; font-size: 0.72rem; color: #b4552f; margin-right: 0.3rem; }
+  .st { margin-left: 0.4rem; font-family: $oil-mono; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0 0.3rem; border-radius: 2px; background: rgba(4, 32, 75, 0.06); color: #4a5a78;
+    &.primary, &.data { background: rgba(19, 131, 116, 0.12); color: #0f6b5e; } &.snippet { background: rgba(180, 85, 47, 0.1); color: #8a3f22; } &.estimate { background: rgba(106, 71, 194, 0.1); color: #553a9e; } } }
+.oil-formula-card { background: $oil-paper; color: $oil-line; border-radius: 3px; padding: 0.9rem 1.1rem; margin: 1.2rem 0; border-left: 3px solid $oil-orange;
+  .lbl { font-family: $oil-cond; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: $oil-orange; }
+  .katex, mjx-container { color: #f3f6fb; } p { margin: 0.35rem 0; font-size: 0.86rem; color: #c9d3e3; } }
+
+// maps
+.os-gratl { fill: none; stroke: rgba(130, 165, 220, 0.09); stroke-width: 0.6; }
+.os-choke { fill: rgba(223, 230, 241, 0.06); stroke: #eef2f8; stroke-width: 1.2; transition: stroke 0.4s; &.bad { stroke: #e5533d; fill: rgba(229, 83, 61, 0.15); } }
+.os-chokep { fill: none; stroke: rgba(238, 242, 248, 0.5); stroke-width: 1; transform-box: fill-box; transform-origin: center; animation: osPulse 2.8s ease-out infinite; &.bad { stroke: #e5533d; animation-duration: 1.2s; } }
+@keyframes osPulse { from { transform: scale(1); opacity: 0.9; } to { transform: scale(2.1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .os-chokep { animation: none; opacity: 0; } }
+.os-pipe { fill: none; stroke: rgba(242, 193, 78, 0.35); stroke-width: 3; stroke-dasharray: 7 4; transition: stroke 0.6s; &.on { stroke: #f2c14e; animation: osFlow 1.2s linear infinite; } &.thin { stroke-width: 2; } }
+@keyframes osFlow { to { stroke-dashoffset: -22; } }
+.os-lane { fill: none; stroke: rgba(232, 145, 58, 0.25); stroke-width: 10; stroke-linecap: round; }
+.os-term { fill: #0b1424; stroke: #eef2f8; stroke-width: 1.3; }
+.os-country { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.3em; fill: rgba(223, 230, 241, 0.28); }
+.os-steps { display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: center;
+  button { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; background: transparent; color: #8c9bb5; border: 1px solid rgba(223, 230, 241, 0.25); border-radius: 2px; padding: 0.2rem 0.55rem; cursor: pointer; text-align: left; line-height: 1.15;
+    i { display: block; font-style: normal; font-size: 0.66rem; color: #e8913a; letter-spacing: 0.12em; }
+    &.on { color: #fff; border-color: #e8913a; background: rgba(232, 145, 58, 0.12); } } }
+.os-hz { display: grid; grid-template-columns: 1.2fr 1.2fr 0.9fr 1fr; gap: 0.2rem 1rem; padding: 0.6rem 0.2rem 0.2rem; border-top: 1px solid rgba(223, 230, 241, 0.2); margin-top: 0.4rem;
+  .g i { display: block; font-style: normal; font-family: 'Barlow Condensed', sans-serif; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: #8c9bb5; }
+  .g b { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.5rem; color: #f3f6fb; &.sm { font-size: 0.95rem; font-weight: 600; } }
+  .bar { display: block; height: 4px; background: rgba(223, 230, 241, 0.12); margin-top: 0.15rem; span { display: block; height: 100%; background: #e8913a; transition: width 0.8s cubic-bezier(.3,.6,.2,1); } }
+  p { grid-column: 1 / -1; margin: 0.3rem 0 0; font-size: 0.8rem; color: #c9d3e3; line-height: 1.45; }
+  @media (max-width: 640px) { grid-template-columns: 1fr 1fr; } }
+.os-zoom { .os-place { font-size: 15px; } .os-place.sm { font-size: 13px; } .os-country { font-size: 19px; } }
+.os-rowl { font-family: 'Inter', system-ui, sans-serif; font-size: 12.5px; fill: #c9d3e3; &.hi { fill: #f3f6fb; font-weight: 600; } }
+.os-rowv { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; fill: #f3f6fb; font-weight: 600; }
+.os-segv { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; font-weight: 700; pointer-events: none; }
+.os-bub { cursor: default; }
+.os-eq { font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 0.95rem; color: #f2c14e; margin-right: 0.6rem; sup { font-size: 0.7em; } }
+.os-svg.os-map { overflow: hidden; }
+.os-slider span { color: #c9d3e3; }

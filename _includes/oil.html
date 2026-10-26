@@ -1,0 +1,3 @@
+{%- comment -%} A blueprint figure of the oil-market long read: kind= (barrel|prices|crack|war|gap|stocks|us|flows|hormuz|world|route|curve|pump|cost|northsea|…), title=, caption=, view=, range=, wide=1 (read by assets/js/oil-explorer.js) {%- endcomment -%}
+{%- assign base = '/assets/oil-article/' | relative_url -%}
+<figure data-oil="{{ include.kind }}" data-base="{{ base }}" data-title="{{ include.title }}" data-caption="{{ include.caption | escape }}"{% if include.view %} data-view="{{ include.view }}"{% endif %}{% if include.range %} data-range="{{ include.range }}"{% endif %}{% if include.wide %} class="wide"{% endif %}{% if include.id %} id="{{ include.id }}"{% endif %}></figure>

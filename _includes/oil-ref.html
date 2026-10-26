@@ -1,0 +1,2 @@
+{%- comment -%} A source tag: {% include oil-ref.html k="iea-omr-oct" %} renders [IEA OMR Oct] linking to the entry in the reference list (_data/oil_article/refs.yml). {%- endcomment -%}
+{%- assign r = site.data.oil_article.refs | where: "key", include.k | first -%}<sup class="oil-ref"><a href="#r-{{ include.k }}" title="{{ r.title | escape }}">[{{ r.short | default: include.k }}]</a></sup>
