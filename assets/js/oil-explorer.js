@@ -1098,6 +1098,47 @@
     draw();
   };
 
+  // ---- Gulf export grades: API gravity against sulphur
+  FIG.gulf = function (root) {
+    const G = DATA.curated.gulf;
+    const { stage, legend } = sheet(root, { eyebrow: 'Gulf export grades: API gravity against sulphur content', short: 'Gulf grades', source: 'Wikipedia crude list · TotalEnergies · KPC', date: 'typical assays' });
+    const COL = { 'Saudi Arabia': C.crude, Kuwait: C.brent, UAE: C.teal, Qatar: C.violet, Oman: C.gold };
+    const W = 760, H = 380, L = 56, R = 24, T = 14, B = 44;
+    const X = (a) => L + ((a - 25) / 28) * (W - L - R), Y = (s) => T + (1 - s / 3.2) * (H - T - B);
+    const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Gulf crude grades by API gravity and sulphur' });
+    svg.append(S('rect', { x: X(38), y: Y(1.2), width: X(53) - X(38), height: Y(0) - Y(1.2), fill: C.teal, 'fill-opacity': 0.07 }), S('text', { x: X(38) + 8, y: Y(0) - 8, class: 'os-small' }, 'light and sweet'));
+    for (const t of [25, 30, 35, 40, 45, 50]) svg.append(S('line', { x1: X(t), x2: X(t), y1: T, y2: H - B, class: 'os-gridv' }), S('text', { x: X(t), y: H - B + 16, 'text-anchor': 'middle', class: 'os-ax' }, t));
+    for (const t of [0, 1, 2, 3]) svg.append(S('line', { x1: L, x2: W - R, y1: Y(t), y2: Y(t), class: 'os-gridv' }), S('text', { x: L - 8, y: Y(t) + 4, 'text-anchor': 'end', class: 'os-ax' }, t + ' %'));
+    svg.append(S('text', { x: (L + W - R) / 2, y: H - 6, 'text-anchor': 'middle', class: 'os-small' }, 'API gravity, ° (higher is lighter)'), S('text', { x: 14, y: T + 4, class: 'os-small' }, 'sulphur'));
+    const left = new Set(['Arab Medium', 'Arab Heavy', 'Upper Zakum', 'Arab Light']);
+    G.forEach((g, i) => {
+      const x = X(g.api), y = Y(g.s), c = COL[g.c], lf = left.has(g.n);
+      const dot = S('circle', { cx: x, cy: y, r: 7, fill: c, 'fill-opacity': 0.85, stroke: '#fff', 'stroke-width': 1.4, tabindex: 0, onpointermove: (ev) => showTip(ev, `<b>${g.n}</b> · ${g.c}<br>${g.api.toFixed(1)}° API · ${g.s.toFixed(2)} % sulphur`), onpointerleave: hideTip });
+      const dy = { 'Arab Light': -8, 'Arab Extra Light': -11, Murban: 15, 'Kuwait Super Light': -11, 'Arab Super Light': -11 }[g.n] || 4;
+      const lab = S('text', { x: lf ? x - 12 : x + 12, y: y + (dy === 4 ? 4 : dy), 'text-anchor': lf ? 'end' : 'start', class: 'os-place sm' }, g.n);
+      if (!REDUCED) { dot.style.opacity = 0; dot.style.transition = `opacity 500ms ${i * 70}ms`; }
+      svg.append(dot, lab);
+      whenSeen(svg, () => { dot.style.opacity = 1; }, '-40px 0px');
+    });
+    stage.append(svg, h('div', { class: 'os-read', html: 'Inside one gulf the range is as wide as between continents: <b>Arab Super Light</b> is 50° API with 0.09 % sulphur, <b>Arab Heavy</b> 28° with 2.9 %. Kuwait sells both ends too, and Murban sits in the light sweet corner that refiners pay for.' }));
+    legend.append(...Object.entries(COL).map(([n, c]) => chip(n, c)));
+  };
+
+  // ---- Asian prices of Gulf crude after Hormuz: freight, and Saudi Arabia's official price
+  FIG.gulfprice = function (root) {
+    const P = DATA.curated.gulfprice;
+    const { stage, ctrl } = sheet(root, { eyebrow: 'What Asian refiners paid to get a barrel, and what Saudi Arabia charged', short: 'Gulf crude in Asia', source: 'Reuters via Hydrocarbon Processing · Saudi Aramco OSP via Reuters', date: 'Oct 2026' });
+    const st = { v: root.dataset.view || 'freight' };
+    ctrl.append(seg([['freight', 'Freight US to Asia'], ['osp', 'Arab Light price to Asia']], st.v, (v) => { st.v = v; draw(); }));
+    function draw() {
+      if (st.v === 'freight') stage.replaceChildren(barRows(P.freight.map(([n, v], i) => ({ label: n, value: v, color: i ? C.red : C.brent, note: i ? 'VLCC charter of about $80 million for 2 million barrels' : 'about $8.60 a barrel' })), { max: 45, labelW: 250, fmt: (v) => '$' + v.toFixed(2) + ' / bbl', tickFmt: (t) => '$' + t, aria: 'Freight from the US Gulf to Asia' }),
+        h('div', { class: 'os-read', html: 'A supertanker with 2 million barrels cost about <b>$80 million</b> to charter from the US Gulf to China for November loading: <b>$40 a barrel</b>, against $8.60 before the war. Gulf crude loaded outside Hormuz, such as <b>Murban at Fujairah</b>, was bid up to more than <b>$11 over Dubai</b> on 8 October.' }));
+      else stage.replaceChildren(barRows(P.osp.map(([n, v], i) => ({ label: n, value: v, color: i ? C.red : C.crude, note: `Arab Light to Asia: $${v.toFixed(2)} below the Oman/Dubai average` })), { max: 6, labelW: 250, fmt: (v) => '−$' + v.toFixed(2) + ' vs Oman/Dubai', tickFmt: (t) => '−$' + t, aria: 'Arab Light official selling price discount to Asia' }),
+        h('div', { class: 'os-read', html: 'Bars are the <b>discount</b> of Saudi Arabia’s official price for Arab Light to Asia below the Oman/Dubai benchmark. For November it widened to <b>$5</b>, the deepest since June 2020, while Europe’s price rose $3 and the American price stayed unchanged.' }));
+    }
+    draw();
+  };
+
   // ---- the North Sea: the Brent basket, and the American barrel that sets it
   FIG.northsea = function (root) {
     const m = GEO.northsea, cu = DATA.curated;

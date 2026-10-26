@@ -97,9 +97,16 @@ What a refiner really wants to know is the **assay**: how much of the crude boil
 
 One row in the figure matters more than the others: the gasoil cut, the raw material of diesel. It is 23 to 29 per cent for almost every grade, light or heavy (Nigeria's Bonny Light, at 36 per cent, is the exception). No crude comes out of the ground as mostly diesel. Most of the diesel in the world has to be **made**, by cracking the heavier vacuum gasoil and residue. That is the engineering behind the reel's line that "crude gets priced by the diesel inside it": a grade is worth what its middle distillates plus the diesel a complex refinery can crack out of its heavy end are worth.
 
+The Gulf shows how wide that range is inside one region. Saudi Arabia alone sells five grades named by density: Arab Super Light at about 50 °API with 0.09 per cent sulphur, Arab Extra Light at 39, Arab Light at 33, Arab Medium at 30 and Arab Heavy at 28 with 2.9 per cent sulphur {% include oil-ref.html k="wiki-grades" %}. Kuwait's main grade, Kuwait Export Crude, is medium and sour (30 °API, 2.7 per cent), but since 2018 it also sells Kuwait Super Light at 48 °API and 0.36 per cent, the first new export grade in decades, which comes from the gas-condensate fields of the Jurassic belt {% include oil-ref.html k="kslc" %}. Abu Dhabi's Murban is the light sweet grade in between, Qatar and Oman each sell one or two more, and Oman's Blend is one of the grades that price the rest {% include oil-ref.html k="reel2" %}. Specifications differ a little between assays and years, so the figure shows typical values.
+
+{% include oil.html kind="gulf" title="Eleven grades, <em>one gulf</em>" caption="Gulf export grades by API gravity (right is lighter) and sulphur content (up is more sour). Values from the Wikipedia list of crude oil products; Murban from the TotalEnergies assay used above; Kuwait Super Light from its 2018 launch. The shaded corner is what refiners pay a premium for. Hover a point." %}
+
+Which end of the figure is worth more depends on the refinery, and in 2026 on the route. A light sweet grade gives more gasoline, jet fuel and naphtha with little treatment. A heavy sour grade is cheaper, but only a complex refinery with cokers and hydrocrackers can turn its residue into fuel, as section 04 shows.
+
 <div class="oil-take" markdown="1">
 <p class="oil-take-h">Key takeaways</p>
 
+- **One region sells crude from 50° to 28° API.** Saudi Arabia's five grades alone span 0.09 to 2.9 per cent sulphur → "Gulf crude" is not one product, and each grade has its own buyer.
 - **Every crude is a different mixture.** Light sweet grades carry more naphtha and kerosene, heavy sour ones more residue and sulphur → refiners pay for the products inside a grade, not for "oil".
 - **Gasoil is 23 to 29 per cent of almost every grade.** → No crude is mostly diesel; most diesel has to be made by cracking heavier oil.
 
@@ -465,9 +472,14 @@ Almost every barrel in the world is sold at a **differential** to one of three b
 
 **WTI** is the NYMEX contract delivered at Cushing. **Dubai** is a Platts assessment of Gulf crude for Asia, and in March 2026, when Asia lost its supply first, Dubai averaged $128.20, far above Dated Brent at $103.84 {% include oil-ref.html k="iea-apr" %}. On 31 July ADNOC announced that from 1 November 2026 the official prices of all Abu Dhabi grades (Murban, Das, Umm Lulu, Upper Zakum) will be set off prompt-month Platts Dubai plus a differential, instead of its own Murban futures contract on ICE Futures Abu Dhabi {% include oil-ref.html k="adnoc-dubai" %}.
 
+The Gulf grades show what the benchmarks do not: a premium or a discount to Dubai is a price for **location and quality at once**. In October 2026, with Hormuz closed to most traffic, the cheapest way to deliver a barrel to Asia was to load it on the near side of the strait. Shipping American crude to Asia cost about $40 a barrel in freight, against $8.60 before the war: a supertanker with 2 million barrels bound for China was chartered for about $80 million for November loading, and VLCC rates from the US Gulf and from Fujairah to the East were up more than 300 per cent since mid-August {% include oil-ref.html k="hcp-freight" %}. Asian refiners turned back to the Gulf, and on 8 October the premium of Murban, a light sweet grade that loads at Fujairah outside Hormuz, over Dubai rebounded above $11 a barrel; one analyst put Murban at about $2 below WTI on a delivered basis {% include oil-ref.html k="hcp-freight" %}. Not every Gulf grade profited. On 5 October Saudi Aramco unexpectedly cut the November official price of Arab Light to Asia to $5 below the Oman/Dubai average, the widest discount since June 2020, when the market had expected a rise of $3 to $5; it raised its European prices by $3 as exports resumed through Yanbu, left the American price unchanged, and cut the sourer Arab Medium and Arab Heavy by $5 as well {% include oil-ref.html k="aramco-nov" %}. A seller with the barrels to spare priced for volume where buyers could now choose, and chose to win them back in Asia.
+
+{% include oil.html kind="gulfprice" title="Same gulf, <em>different prices</em>" caption="Freight view: the freight on a barrel of US crude to Asia, before the war and in October 2026 (a supertanker charter of about $80 million for 2 million barrels, Reuters). Price view: Saudi Arabia's official price of Arab Light to Asia as a discount to the Oman/Dubai average; October's $2 is implied by the $3 cut to November's $5 (Reuters, 5 October). Figures are reported prices, not my calculation." %}
+
 <div class="oil-take" markdown="1">
 <p class="oil-take-h">Key takeaways</p>
 
+- **A Gulf price is a price for location and quality.** US-to-Asia freight went from $8.60 to $40 a barrel, Murban rose above $11 over Dubai, and Arab Light was cut to $5 under it → the strait decided which barrels were worth more, not the oil alone.
 - **Brent is a basket of five North Sea grades plus Texan WTI Midland.** → American crude delivered to Rotterdam can set the price of oil sold far from America.
 - **Physical and paper prices split in 2026**: Dated Brent hit $144.68 while futures traded near $109 → "the oil price" in the news is not what a refinery paid for a cargo.
 

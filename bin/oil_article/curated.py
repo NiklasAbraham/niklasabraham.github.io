@@ -172,6 +172,19 @@ ASSAYS = [
     {'n': 'Johan Sverdrup', 'api': 28.7, 's': None, 'cuts': [10.9, 10.2, 26.5, 28.1, 22.2]},
     {'n': 'Canadian heavy (Synbit)', 'api': 19.0, 's': 2.97, 'cuts': [5.5, 8.3, 28.7, 26.9, 28.0]},
 ]
+# Gulf export grades: API gravity and sulphur % (Wikipedia list of crude oil products; Murban from the TotalEnergies assay above;
+# Kuwait Super Light from KPC's 2018 launch, 48 API and 0.357 % S). Sources quote slightly different values by assay and year.
+GULF = [
+    {'n': 'Arab Super Light', 'c': 'Saudi Arabia', 'api': 50.1, 's': 0.09}, {'n': 'Arab Extra Light', 'c': 'Saudi Arabia', 'api': 39.4, 's': 1.09},
+    {'n': 'Arab Light', 'c': 'Saudi Arabia', 'api': 32.8, 's': 1.97}, {'n': 'Arab Medium', 'c': 'Saudi Arabia', 'api': 30.2, 's': 2.59},
+    {'n': 'Arab Heavy', 'c': 'Saudi Arabia', 'api': 27.7, 's': 2.87},
+    {'n': 'Kuwait Export (Blend)', 'c': 'Kuwait', 'api': 30.2, 's': 2.72}, {'n': 'Kuwait Super Light', 'c': 'Kuwait', 'api': 48.0, 's': 0.36},
+    {'n': 'Murban', 'c': 'UAE', 'api': 40.5, 's': 0.79}, {'n': 'Upper Zakum', 'c': 'UAE', 'api': 32.9, 's': 1.78},
+    {'n': 'Qatar Marine', 'c': 'Qatar', 'api': 35.8, 's': 1.47}, {'n': 'Oman Blend', 'c': 'Oman', 'api': 34.0, 's': 2.0},
+]
+# Asian prices of Gulf crude, Oct 2026 (Hydrocarbon Processing / Reuters 9 Oct; Aramco OSP of 5 Oct via investinglive)
+GULFPRICE = {'freight': [['Before the war (to Feb 2026)', 8.6], ['October 2026, VLCC US Gulf to China', 40.0]],
+             'osp': [['October 2026 (implied)', 2.0], ['November 2026', 5.0]], 'murban': 11.0}
 # North Sea: the Dated Brent basket, loadings in kb/d, September 2026 programmes (Reuters via LSE, snippet), Brent field 2026 average
 NORTHSEA = [
     {'n': 'Brent', 'lat': 61.05, 'lon': 1.71, 'kbd': 23, 'term': 'Sullom Voe', 'tlat': 60.467, 'tlon': -1.275},
@@ -244,6 +257,6 @@ PIPE_EVENTS = [{'d': '2021-05-07', 'pipe': 'Colonial Pipeline', 'lon': -95.174, 
 
 CURATED = {'yields': YIELDS, 'history': HISTORY, 'events': EVENTS, 'gapEvents': GAP_EVENTS, 'usEvents': US_EVENTS,
            'chokepoints': CHOKEPOINTS, 'lanes': LANE, 'flows': FLOWS, 'places': PLACES, 'hormuz': HORMUZ_STAGES,
-           'countries': COUNTRIES, 'world': WORLD, 'products': PRODUCTS, 'percap': PERCAP, 'costs': COSTS, 'fiscal': FISCAL, 'spare': SPARE,
+           'countries': COUNTRIES, 'world': WORLD, 'products': PRODUCTS, 'percap': PERCAP, 'costs': COSTS, 'fiscal': FISCAL, 'spare': SPARE, 'gulf': GULF, 'gulfprice': GULFPRICE,
            'shutins': SHUTINS, 'assays': ASSAYS, 'northsea': NORTHSEA, 'midlandNL': MIDLAND_NL, 'curves': CURVES, 'pump': PUMP,
            'upstream': UPSTREAM, 'shaleArps': SHALE_ARPS, 'fieldHist': FIELD_HIST, 'distill': DISTILL, 'pipes': PIPES, 'pipeEvents': PIPE_EVENTS}
