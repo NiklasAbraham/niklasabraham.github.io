@@ -80,7 +80,7 @@
   // ------------------------------------------------------------------ the frame: the site's figure card (.concept.bx)
   // header with the figure number and title, the unit line, controls, stage, legend, caption below the card
   function sheet(root, o) {
-    const MAPS = ['flows', 'hormuz', 'northsea', 'route', 'producers'];
+    const MAPS = ['flows', 'hormuz', 'northsea', 'route', 'producers', 'pipes'];
     root.classList.add('concept', 'bx', 'oil-fig');
     const head = h('header', {}, h('span', { class: 'concept-kind' }, MAPS.includes(root.dataset.oil) ? 'Map' : 'Chart'), h('span', { class: 'concept-title', html: root.dataset.title || o.title || '' }));
     const unit = h('div', { class: 'os-unit' }, o.eyebrow || '', o.sub ? ' · ' + o.sub : '');
@@ -687,6 +687,124 @@
     return svg;
   }
 
+  // ---- boiling point against molecule size, with the product cuts and the cracking limit; optional vacuum
+  const CUTC = ['#c99a1e', '#5fb3a5', '#138374', '#8a93a6', '#6a47c2', '#b58a5e', '#4e3b2c'];
+  FIG.boil = function (root) {
+    const D = DATA.curated.distill;
+    const { stage, ctrl, legend } = sheet(root, { eyebrow: 'Normal boiling point, °C, against the number of carbon atoms', short: 'Size sets the boiling point', source: 'NIST WebBook · CRC via Wikipedia · ASTM D2887 · TotalEnergies cut points', date: 'reference data' });
+    const st = { vac: false, shapes: true };
+    const W = 760, H = 380, M = { l: 52, r: 150, t: 16, b: 34 };
+    const X = (c) => M.l + ((c - 0) / 41) * (W - M.l - M.r), Y = (t) => H - M.b - ((t + 180) / 760) * (H - M.t - M.b);
+    const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Boiling point of hydrocarbons against carbon number' });
+    for (const t of [-150, -50, 50, 150, 250, 350, 450, 550]) svg.append(S('line', { x1: M.l, x2: W - M.r, y1: Y(t), y2: Y(t), class: 'os-gridh' }), S('text', { x: M.l - 7, y: Y(t) + 3.5, 'text-anchor': 'end', class: 'os-ax' }, t + '°'));
+    for (const c of [1, 5, 10, 15, 20, 25, 30, 35, 40]) svg.append(S('text', { x: X(c), y: H - 12, 'text-anchor': 'middle', class: 'os-ax' }, 'C' + c));
+    // product bands: the temperature range each cut collects
+    D.cuts.forEach(([n, lo, hi], i) => {
+      const a = lo == null ? -180 : lo, b = hi == null ? 580 : hi;
+      svg.append(S('rect', { x: M.l, y: Y(b), width: W - M.l - M.r, height: Y(a) - Y(b), fill: CUTC[i], 'fill-opacity': 0.1 }),
+        S('rect', { x: W - M.r + 6, y: Y(b) + 1, width: 5, height: Y(a) - Y(b) - 2, fill: CUTC[i] }),
+        S('text', { x: W - M.r + 16, y: (Y(a) + Y(b)) / 2 + 4, class: 'os-small', style: 'fill:#04204b' }, n));
+    });
+    // thermal cracking begins (OSHA 343-371 °C, PSU up to 399 °C)
+    svg.append(S('rect', { x: M.l, y: Y(371), width: W - M.l - M.r, height: Y(343) - Y(371), fill: C.red, 'fill-opacity': 0.12 }),
+      S('line', { x1: M.l, x2: W - M.r, y1: Y(360), y2: Y(360), stroke: C.red, 'stroke-width': 1.2, 'stroke-dasharray': '5 3' }),
+      S('text', { x: M.l + 6, y: Y(371) - 5, class: 'os-small', style: `fill:${C.red}` }, 'above ~350–370 °C the molecules start to crack'));
+    const atm = S('path', { fill: 'none', stroke: C.line, 'stroke-width': 2.2 }), vac = S('path', { fill: 'none', stroke: C.brent, 'stroke-width': 2.2, 'stroke-dasharray': '6 3' });
+    const dots = S('g', {}), shp = S('g', {}), vlab = S('text', { class: 'os-lab', style: `fill:${C.brent}` });
+    svg.append(atm, vac, dots, shp, vlab);
+    const ptsA = D.alkanes.map(([c, , t]) => [X(c), Y(t)]);
+    atm.setAttribute('d', dOf(ptsA));
+    D.alkanes.forEach(([c, n, t]) => dots.append(S('circle', { cx: X(c), cy: Y(t), r: 3.2, fill: C.line, onpointermove: (ev) => showTip(ev, `<b>${n}</b>, C${c}<br>boils at ${t} °C at 1 atm`), onpointerleave: hideTip })));
+    const FC = { aromatic: C.red, naphthene: C.teal, branched: C.gold };
+    D.shapes.forEach(([n, c, f, t]) => shp.append(S('path', { d: `M${X(c)},${Y(t) - 5}l5,8.5h-10z`, fill: FC[f], onpointermove: (ev) => showTip(ev, `<b>${n}</b>, C${c}, ${f}<br>boils at ${t} °C (the straight chain C${c}: ${(D.alkanes.find((a) => a[0] === c) || [0, 0, '–'])[2]} °C)`), onpointerleave: hideTip })));
+    // Clausius-Clapeyron at 50 mmHg with the entropy of vaporisation fitted to heavy alkanes (112 J/mol/K): derived, approximate
+    const vacT = (tb) => (tb + 273.15) / (1 - (8.314 / 112) * Math.log(50 / 760)) - 273.15;
+    const ptsV = D.alkanes.filter(([c]) => c >= 10).map(([c, , t]) => [X(c), Y(vacT(t))]);
+    vac.setAttribute('d', dOf(ptsV));
+    const read = h('div', { class: 'os-read' });
+    function draw() {
+      vac.style.opacity = st.vac ? 1 : 0; vlab.style.opacity = st.vac ? 1 : 0;
+      const c40 = vacT(522);
+      vlab.setAttribute('x', X(40) - 4); vlab.setAttribute('y', Y(c40) + 18); vlab.setAttribute('text-anchor', 'end'); vlab.textContent = 'at 50 mmHg';
+      shp.style.opacity = st.shapes ? 1 : 0;
+      read.innerHTML = st.vac
+        ? 'Under a vacuum of 50 mmHg (a fifteenth of an atmosphere) every boiling point drops by about 130–150 °C: a wax that boils at 500 °C now boils near <b>370 °C</b>, so the heavy gasoil can be distilled off before it cracks. Approximate (Clausius–Clapeyron, fitted to measured heavy-alkane data).'
+        : 'Each extra carbon atom adds about the same surface, so the boiling point climbs with size: about <b>+30 °C per carbon</b> at C5–C8, +17 at C15, +7 at C35. The triangles are rings and branched molecules: a ring boils higher than a chain of the same size, a branched one lower.';
+    }
+    ctrl.append(seg([['atm', 'At 1 atmosphere'], ['vac', 'Under vacuum']], 'atm', (v) => { st.vac = v === 'vac'; draw(); }));
+    legend.append(chip('straight-chain alkanes', C.line), chip('aromatics', C.red), chip('naphthenes (rings)', C.teal), chip('branched', C.gold), chip('thermal cracking zone', 'rgba(192,57,43,0.4)'));
+    stage.append(svg, read);
+    draw();
+  };
+
+  // ---- true boiling point curves: how much of each crude has boiled off at a given temperature
+  FIG.tbp = function (root) {
+    const D = DATA.curated.distill;
+    const { stage, ctrl, legend } = sheet(root, { eyebrow: 'Cumulative weight per cent distilled, against temperature', short: 'TBP curves', source: 'TotalEnergies and Equinor assays · crudemonitor.ca (WCS SimDist)', date: 'assays 2006–2026' });
+    const CR = Object.keys(D.tbp), COL = ['#0b4fc0', '#b4552f', '#138374', '#6a47c2', '#4e3b2c'];
+    const st = { cut: 4 };
+    const W = 760, H = 360, M = { l: 48, r: 18, t: 14, b: 54 };
+    const X = (t) => M.l + (t / 700) * (W - M.l - M.r), Y = (v) => H - M.b - (v / 100) * (H - M.t - M.b);
+    const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'True boiling point curves of five crude oils' });
+    for (const v of [0, 20, 40, 60, 80, 100]) svg.append(S('line', { x1: M.l, x2: W - M.r, y1: Y(v), y2: Y(v), class: 'os-gridh' }), S('text', { x: M.l - 7, y: Y(v) + 3.5, 'text-anchor': 'end', class: 'os-ax' }, v + ' %'));
+    for (let t = 0; t <= 700; t += 100) svg.append(S('text', { x: X(t), y: H - M.b + 15, 'text-anchor': 'middle', class: 'os-ax' }, t + ' °C'));
+    const bandG = S('g', {}); svg.append(bandG);
+    D.cuts.forEach(([n, lo, hi], i) => {
+      const a = lo == null ? 0 : lo, b = hi == null ? 700 : hi;
+      svg.append(S('rect', { x: X(a), y: H - M.b + 24, width: X(b) - X(a) - 1, height: 8, fill: CUTC[i], style: 'cursor:pointer', onclick: () => segc.querySelectorAll('button')[i].click() }, S('title', {}, n)));
+    });
+    const interp = (pts, t) => { if (t <= pts[0][0]) return t < pts[0][0] && pts[0][0] > 60 ? null : pts[0][1]; for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) { const [a, va] = pts[i - 1], [b, vb] = pts[i]; return va + (vb - va) * (t - a) / (b - a); } return null; };
+    CR.forEach((k, i) => {
+      const pts = D.tbp[k];
+      svg.append(S('path', { d: dOf(pts.map(([t, v]) => [X(t), Y(v)])), fill: 'none', stroke: COL[i], 'stroke-width': 2.2, 'stroke-dasharray': /SimDist/.test(k) ? '5 3' : null }));
+      const [lt, lv] = pts[pts.length - 1];
+      svg.append(S('text', { x: X(lt) + 5, y: Y(lv) + 4 + ({ Grane: -6, Oman: 5 }[k.split(' ')[0]] || 0), class: 'os-small', style: `fill:${COL[i]}` }, k.split(' ')[0]));
+    });
+    const read = h('div', { class: 'os-read' });
+    function draw() {
+      const [n, lo, hi] = D.cuts[st.cut], a = lo == null ? 0 : lo, b = hi == null ? 700 : hi;
+      bandG.replaceChildren(S('rect', { x: X(a), y: M.t, width: X(Math.min(b, 700)) - X(a), height: H - M.b - M.t, fill: CUTC[st.cut], 'fill-opacity': 0.12 }));
+      const parts = CR.map((k) => { const ya = lo == null ? 0 : interp(D.tbp[k], a), yb = interp(D.tbp[k], b); return ya == null || yb == null ? `${k.split(' ')[0]} –` : `${k.split(' ')[0]} <b>${(yb - ya).toFixed(0)} %</b>`; });
+      read.innerHTML = `${n}, ${lo == null ? 'below ' + hi : hi == null ? 'above ' + lo : lo + '–' + hi} °C: ${parts.join(' · ')} of the crude by weight. The steeper and further left a curve, the lighter the crude.`;
+    }
+    const segc = seg(D.cuts.map(([n], i) => [String(i), n.replace(' / jet', '').replace('Gas and LPG', 'LPG')]), String(st.cut), (v) => { st.cut = +v; draw(); });
+    ctrl.append(segc);
+    legend.append(...CR.map((k, i) => chip(k, COL[i])));
+    stage.append(svg, read);
+    draw();
+  };
+
+  // ---- one tray is one small still: the Raoult staircase of a two-component mixture
+  FIG.stages = function (root) {
+    const D = DATA.curated.distill;
+    const { stage, ctrl } = sheet(root, { eyebrow: 'Composition and temperature on each equilibrium stage, total reflux', short: 'Tray by tray', source: 'own calculation: Raoult’s law with NIST Antoine constants', date: 'derived' });
+    const st = { pair: 'C7/C8' };
+    const box = h('div', {}), read = h('div', { class: 'os-read' });
+    stage.append(box, read);
+    const NAMES = { 'C7/C8': ['heptane', 'octane', C.gas, '#b58a5e'], 'C10/C12': ['decane', 'dodecane', C.jet, C.diesel] };
+    function draw() {
+      const rows = D.stages[st.pair], [ln, hn, lc, hc] = NAMES[st.pair];
+      const W = 760, rh = 52, H = (rows.length + 1) * rh + 20, bx = 210, bw = 420;
+      const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Composition on successive distillation stages' });
+      // stage 0 at the bottom: the liquid we start from; each step up is the vapour of the stage below
+      const all = [[-1, rows[0][1], rows[0][2]], ...rows.map(([k, x, T, a, y]) => [k, y, null])];
+      all.forEach(([k, frac], i) => {
+        const y = H - 20 - (i + 1) * rh, last = i === all.length - 1;
+        svg.append(S('text', { x: bx - 12, y: y + 18, 'text-anchor': 'end', class: 'os-rowl' + (last ? ' hi' : '') }, last ? `vapour leaving stage ${i}` : `liquid on stage ${i + 1}`));
+        if (!last) svg.append(S('text', { x: bx - 12, y: y + 32, 'text-anchor': 'end', class: 'os-small' }, `boils at ${rows[i][2].toFixed(1)} °C`));
+        const r1 = S('rect', { x: bx, y: y + 6, width: 0, height: 24, fill: lc }), r2 = S('rect', { x: bx, y: y + 6, width: bw, height: 24, fill: hc, 'fill-opacity': 0.75 });
+        svg.append(r2, r1, S('text', { x: bx + bw + 10, y: y + 23, class: 'os-lab' }, `${(frac * 100).toFixed(0)} % ${ln}`));
+        setTimeout(() => { r1.style.transition = REDUCED ? '' : 'width 700ms ease'; r1.setAttribute('width', bw * frac); }, REDUCED ? 0 : 80 + i * 160);
+        if (i) svg.append(S('path', { d: `M${bx + bw / 2},${y + rh + 4}v-${rh - 32}`, stroke: C.muted, 'stroke-width': 1 }), S('text', { x: bx + bw / 2 + 6, y: y + rh - 2, class: 'os-small' }, '↑ its vapour, condensed'));
+      });
+      box.replaceChildren(svg);
+      const one = rows[0][4], top = rows[rows.length - 1][4];
+      read.innerHTML = `Start from a 50/50 liquid of ${ln} and ${hn}. One boiling gives a vapour of only <b>${(one * 100).toFixed(0)} %</b> ${ln}; condense it and boil it again, and again: after ${rows.length} stages the vapour is <b>${(top * 100).toFixed(0)} %</b> ${ln}, and each stage boils a little cooler, ${rows[0][2].toFixed(0)} → ${rows[rows.length - 1][2].toFixed(0)} °C. A column does this on every tray at once; that is its temperature gradient.`;
+    }
+    ctrl.append(seg([['C7/C8', 'Heptane and octane'], ['C10/C12', 'Decane and dodecane']], st.pair, (v) => { st.pair = v; draw(); }));
+    draw();
+  };
+
   // ---- crude grades: what each one yields in the first distillation
   FIG.assay = function (root) {
     const A = DATA.curated.assays;
@@ -714,6 +832,72 @@
     stage.append(svg);
     whenSeen(svg, () => segs.forEach((r) => { r.style.transform = 'scaleX(1)'; }), '-40px 0px');
     legend.append(...CUTS.map(([n, c]) => chip(n, c)));
+  };
+
+  // ---- the world's crude pipelines, by region, with the attacks of 2022-2026
+  FIG.pipes = function (root) {
+    const m = GEO.world, cu = DATA.curated;
+    const { stage, ctrl, legend } = sheet(root, { eyebrow: 'Major crude oil pipelines, line width by capacity, and attacks 2022–2026', short: 'Pipelines', source: 'operators · EIA · Wikipedia coordinates · press (see text)', date: 'Oct 2026' });
+    const { svg, P } = baseMap(m, { vb: [20, 40, 960, 420], aria: 'World map of major crude oil pipelines' });
+    svg.classList.add('os-pipemap');
+    const REG = {
+      world: [[-165, -40], [180, 72], 'The big lines run where no tanker can: from Russia and the Caspian to Europe and China, across Arabia to the Red Sea, and from Canada and west Texas to the American coasts. Hover a line or a dot.'],
+      eurasia: [[2, 36], [136, 66], 'Ukraine’s drones went for the pumping stations, not the buried pipe: Unecha, Nikolskoye, Andreapol, Kropotkinskaya, and in February 2026 Kaleykino, after which Transneft cut intake by 250,000 b/d. A Russian strike on the Brody hub in Ukraine on 27 January 2026 stopped Druzhba oil to Hungary and Slovakia until 23 April. CPC’s Black Sea moorings were hit by sea drones.'],
+      gulf: [[27, 12], [62, 42], 'The bypasses of Hormuz: Saudi Arabia’s East–West line, converted to 7 mb/d in March 2026, the UAE’s line to Fujairah and Iran’s little-used line to Jask. The East–West line was hit on 9 April (attributed to Iran) and on 10–11 September by drones launched from Iraq, according to Baghdad; it restarted on 22 September. Kirkuk–Ceyhan reopened in March.'],
+      americas: [[-160, 2], [-55, 70], 'The Permian’s four lines to Corpus Christi carry 2.64 mb/d and ran about 94 % full in 2025; Trans Mountain’s expansion to 890,000 b/d opened in May 2024. American outages were failures, not attacks: Keystone cracked and spilled in Kansas in 2022 and North Dakota in 2025. Colombia’s Caño Limón line is bombed several times a year.'],
+      africa: [[-20, -14], [52, 24], 'Africa’s lines carry less oil and more risk: Sudan’s civil war cut the Petrodar line in 2024 and the RSF took Heglig in 2025; thieves tap Nigeria’s Trans Niger line; the heated EACOP line from Uganda to Tanga was 92.7 % built in September 2026.'],
+    };
+    const st = { reg: root.dataset.view || 'world', vb: [20, 40, 960, 420] };
+    const boxOf = ([a, b]) => { let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (let lon = a[0]; lon <= b[0]; lon += (b[0] - a[0]) / 12) for (let lat = a[1]; lat <= b[1]; lat += (b[1] - a[1]) / 12) { const [x, y] = P([lon, lat]); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      let w = x1 - x0, hh = y1 - y0; const asp = 960 / 420; if (w / hh < asp) { const nw = hh * asp; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / asp; y0 -= (nh - hh) / 2; hh = nh; } return [x0, y0, w, hh]; };
+    const COLS = { op: C.crude, idle: C.grey, build: C.brent, dead: C.grey };
+    const lines = S('g', {}), flow = S('g', {}), dots = S('g', {}), labs = S('g', {});
+    svg.append(lines, flow, dots, labs);
+    const hitNames = new Set(cu.pipeEvents.filter((e) => /attack|sabotage|war|explosion/.test(e.type) && e.d >= '2022').map((e) => e.pipe));
+    const items = cu.pipes.map((p) => {
+      const xy = p.pts.map(P), d = smoothD(xy), w = p.kbd ? 0.9 + Math.sqrt(p.kbd / 100) * 0.75 : 1.1;
+      const col = p.kind === 'products' ? C.teal : COLS[p.c];
+      const tip = (ev) => showTip(ev, `<b>${p.n}</b>${p.km ? ' · ' + p.km.toLocaleString('en-GB') + ' km' : ''}${p.kbd ? ' · ' + p.kbd.toLocaleString('en-GB') + ' kb/d' + (p.n.startsWith('Trans-Alaska') ? ' (2025 flow)' : '') : ''}<br>${p.st}${p.kind === 'products' ? '<br>refined products' : ''}`);
+      const base = S('path', { d, fill: 'none', stroke: col, 'stroke-width': w, 'stroke-opacity': p.c === 'op' ? 0.55 : 0.6, 'stroke-linecap': 'round', 'vector-effect': 'non-scaling-stroke', 'stroke-dasharray': p.c === 'dead' || p.c === 'build' ? '4 3' : null });
+      const hit = S('path', { d, fill: 'none', stroke: 'transparent', 'stroke-width': Math.max(10, w + 6), 'vector-effect': 'non-scaling-stroke', style: 'pointer-events:stroke', onpointermove: tip, onpointerleave: hideTip });
+      lines.append(base, hit);
+      if (p.c === 'op') flow.append(S('path', { d, class: 'os-pflow', 'vector-effect': 'non-scaling-stroke', stroke: p.kind === 'products' ? C.teal : '#7a3a1e', 'stroke-width': Math.max(0.8, w * 0.35) }));
+      const mid = xy[Math.floor(xy.length / 2)];
+      return { p, mid, w };
+    });
+    const TC = { attack: C.red, 'attack (tanker at terminal)': C.red, 'war damage': C.red, 'sabotage/theft': C.gold, explosion: C.gold, accident: C.line, political: C.violet, cyber: C.violet };
+    const evDots = cu.pipeEvents.filter((e) => e.lon != null).map((e) => {
+      const [x, y] = P([e.lon, e.lat]), c = TC[e.type] || TC[e.type.split(' ')[0]] || C.red;
+      const g = S('circle', { cx: x, cy: y, r: 3, fill: c, 'fill-opacity': 0.85, stroke: '#fff', 'stroke-width': 0.8, 'vector-effect': 'non-scaling-stroke', tabindex: 0,
+        onpointermove: (ev) => showTip(ev, `<b>${fdate(ts(e.d))}</b> · ${e.pipe}<br>${e.t}`), onpointerleave: hideTip });
+      dots.append(g); return { g, e };
+    });
+    const read = h('div', { class: 'os-read' });
+    function labels(z) {
+      labs.replaceChildren();
+      const big = st.reg === 'world' ? 1200 : 300;
+      const seen = [];
+      for (const it of items) {
+        if (!it.p.kbd || it.p.kbd < big || it.p.c === 'dead') continue;
+        const [x, y] = it.mid; if (seen.some(([a, b]) => Math.hypot(a - x, b - y) < 40 / z)) continue; seen.push([x, y]);
+        labs.append(S('text', { x: x + 4 / z, y: y - 4 / z, class: 'os-place sm', style: `font-size:${(st.reg === 'world' ? 10 : 11) / z}px;stroke-width:${3 / z}px` }, it.p.n.replace(' Pipeline System', '').replace(' Pipeline', '')));
+      }
+    }
+    let anim = null;
+    function go(reg) {
+      st.reg = reg; const to = reg === 'world' ? [20, 40, 960, 420] : boxOf(REG[reg]), from = st.vb.slice(), t0 = performance.now();
+      read.innerHTML = REG[reg][2];
+      const z = 960 / to[2];
+      evDots.forEach(({ g }) => g.setAttribute('r', 3.2 / z * (reg === 'world' ? 1 : 1.3)));
+      labels(z);
+      cancelAnimationFrame(anim);
+      const step = (now) => { const k = REDUCED ? 1 : ease(clamp((now - t0) / 700, 0, 1)); st.vb = from.map((v, i) => v + (to[i] - v) * k); svg.setAttribute('viewBox', st.vb.join(' ')); if (k < 1) anim = requestAnimationFrame(step); };
+      anim = requestAnimationFrame(step);
+    }
+    ctrl.append(seg([['world', 'World'], ['eurasia', 'Russia and Europe'], ['gulf', 'Middle East'], ['americas', 'North America'], ['africa', 'Africa']], st.reg, go));
+    legend.append(chip('crude line, width ∝ capacity', C.crude), chip('refined products', C.teal), chip('under construction / proposed', C.brent), chip('idle or defunct', C.grey), chip('attack', C.red), chip('theft, sabotage, explosion', C.gold), chip('failure', C.line), chip('politics, cyber', C.violet));
+    stage.append(svg, read);
+    go(st.reg);
   };
 
   // ---- who pumps and who burns: the world map with bubbles
@@ -793,6 +977,110 @@
     }
     draw();
   };
+
+  // ---- three ways out of the ground: what a barrel costs, split
+  FIG.upcost = function (root) {
+    const U = DATA.curated.upstream;
+    const { stage, ctrl, legend } = sheet(root, { eyebrow: '$ per barrel: operating cost, capital cost and the breakeven', short: 'Cost by field type', source: 'Aramco 2025 · Equinor · Petrobras · Diamondback · Rystad · Dallas Fed', date: '2024–2026' });
+    const st = { price: 69 };
+    const W = 760, LW = 190, RW = 40, rh = 62, H = U.length * rh + 34, MAX = 130;
+    const X = (v) => LW + (v / MAX) * (W - LW - RW);
+    const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Cost of a barrel by type of oil field' });
+    for (const t of [0, 20, 40, 60, 80, 100, 120]) svg.append(S('line', { x1: X(t), x2: X(t), y1: 4, y2: H - 20, class: 'os-gridv' }), S('text', { x: X(t), y: H - 6, 'text-anchor': 'middle', class: 'os-ax' }, '$' + t));
+    const grow = [];
+    U.forEach((u, i) => {
+      const y = 8 + i * rh;
+      svg.append(S('text', { x: LW - 12, y: y + 16, 'text-anchor': 'end', class: 'os-rowl hi' }, u.n), S('text', { x: LW - 12, y: y + 31, 'text-anchor': 'end', class: 'os-small' }, u.eg));
+      const tip = (ev) => showTip(ev, `<b>${u.n} (${u.eg})</b><br>operating cost $${u.opex.toFixed(2)} · capital cost about $${u.capex} a barrel<br>breakeven $${u.be}: ${u.be_l}<br>state's share: ${u.take}<br>first oil after ${u.first}`);
+      const a = S('rect', { x: X(0), y: y + 6, width: 0, height: 16, fill: u.c, onpointermove: tip, onpointerleave: hideTip });
+      const b = S('rect', { x: X(u.opex), y: y + 6, width: 0, height: 16, fill: u.c, 'fill-opacity': 0.45, onpointermove: tip, onpointerleave: hideTip });
+      const rest = S('rect', { x: X(u.opex + u.capex), y: y + 10, width: 0, height: 8, fill: 'url(#os-hatch)', stroke: u.c, 'stroke-opacity': 0.5, 'stroke-width': 0.8 });
+      const be = S('g', { opacity: 0 }, S('path', { d: `M${X(u.be)},${y + 2}v24`, stroke: C.line, 'stroke-width': 2 }),
+        S('text', { x: X(u.be) + 5, y: y + 40, class: 'os-small' }, `breakeven $${u.be.toFixed(0)}`));
+      const lab = S('text', { x: X(u.opex + u.capex) + 4, y: y + 0, class: 'os-small', opacity: 0 }, `$${(u.opex + u.capex).toFixed(1)} to lift and build`);
+      svg.append(a, b, rest, be, lab);
+      grow.push(() => { a.setAttribute('width', X(u.opex) - X(0)); b.setAttribute('width', X(u.opex + u.capex) - X(u.opex)); rest.setAttribute('width', Math.max(0, X(u.be) - X(u.opex + u.capex))); be.setAttribute('opacity', 1); lab.setAttribute('opacity', 1); });
+    });
+    svg.prepend(S('defs', {}, S('pattern', { id: 'os-hatch', width: 5, height: 5, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, S('line', { x1: 0, y1: 0, x2: 0, y2: 5, stroke: 'rgba(4,32,75,0.3)', 'stroke-width': 1.2 }))));
+    const pl = S('g', {}); svg.append(pl);
+    const read = h('div', { class: 'os-read' });
+    function mark() {
+      pl.replaceChildren(S('line', { x1: X(st.price), x2: X(st.price), y1: 0, y2: H - 20, stroke: C.red, 'stroke-width': 1.6, 'stroke-dasharray': '4 3' }), S('text', { x: X(st.price) + 4, y: H - 24, class: 'os-small', style: `fill:${C.red}` }, `oil at $${st.price}`));
+      const m = U.map((u) => { const d = st.price - u.be; return `${u.sh} ${d >= 0 ? '+' : '−'}$${Math.abs(d).toFixed(Math.abs(d) < 10 ? 1 : 0)}`; });
+      read.innerHTML = `At <b>$${st.price}</b> a barrel, the price less the breakeven: ${m.join(' · ')}. The hatched gap between building cost and breakeven is royalties, taxes, transport and the return on capital.`;
+    }
+    ctrl.append(seg([['69', 'Feb 2026: $69'], ['125', 'Oct 2026: $125']], '69', (v) => { st.price = +v; mark(); }));
+    stage.append(svg, read);
+    legend.append(chip('operating (lifting) cost', C.line), chip('capital cost per barrel', 'rgba(4,32,75,0.4)'), chip('royalty, tax, transport, return', 'rgba(4,32,75,0.15)'));
+    mark();
+    whenSeen(svg, () => grow.forEach((f, i) => setTimeout(f, REDUCED ? 0 : i * 120)), '-40px 0px');
+    if (!REDUCED) svg.querySelectorAll('rect').forEach((r) => { r.style.transition = 'width 900ms cubic-bezier(.3,.6,.2,1)'; });
+  };
+
+  // ---- wells: one shale well's decline, how many wells make 100 kb/d, whole fields over decades
+  FIG.wells = function (root) {
+    const cu = DATA.curated, U = cu.upstream, A = cu.shaleArps;
+    const { stage, ctrl } = sheet(root, { eyebrow: 'Barrels a day', short: 'Wells and fields', source: 'API/Rystad · OGJ Arps fits · Sodir · Aramco · Wikipedia', date: '1951–2026' });
+    const st = { v: root.dataset.view || 'well' };
+    const W = 760, H = 330, M = { l: 62, r: 24, t: 24, b: 34 };
+    const read = h('div', { class: 'os-read' });
+    const box = h('div', {});
+    stage.append(box, read);
+    const q = (t) => A.qi / Math.pow(1 + A.b * A.Di * t, 1 / A.b);
+    function well() {
+      const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Decline of one Permian shale well' });
+      const X = (t) => M.l + (t / 10) * (W - M.l - M.r), Y = (v) => H - M.b - (v / 800) * (H - M.t - M.b);
+      for (const v of [0, 200, 400, 600, 800]) svg.append(S('line', { x1: M.l, x2: W - M.r, y1: Y(v), y2: Y(v), class: 'os-gridh' }), S('text', { x: M.l - 8, y: Y(v) + 3.5, 'text-anchor': 'end', class: 'os-ax' }, v));
+      for (let t = 0; t <= 10; t += 1) svg.append(S('text', { x: X(t), y: H - 12, 'text-anchor': 'middle', class: 'os-ax' }, t === 0 ? 'start' : 'yr ' + t));
+      const pts = []; for (let t = 0; t <= 10; t += 0.02) pts.push([X(t), Y(q(t))]);
+      const pts2 = pts.filter(([x]) => x <= X(2) + 0.1);
+      svg.append(S('path', { d: dOf(pts2) + `L${X(2)},${Y(0)}L${X(0)},${Y(0)}Z`, fill: C.diesel, 'fill-opacity': 0.18 }),
+        S('path', { d: dOf(pts) + `L${X(10)},${Y(0)}L${X(2)},${Y(0)}Z`, fill: C.diesel, 'fill-opacity': 0.07 }));
+      const line = S('path', { d: dOf(pts), fill: 'none', stroke: C.diesel, 'stroke-width': 2.6 });
+      svg.append(line);
+      for (const [t, lab] of [[0, '730 b/d on day one'], [1, '200 b/d after a year'], [5, '70 b/d after five']]) svg.append(S('circle', { cx: X(t), cy: Y(q(t)), r: 4, fill: C.paper, stroke: C.diesel, 'stroke-width': 2 }), S('text', { x: X(t) + 9, y: Y(q(t)) - 8, class: 'os-lab' }, lab));
+      svg.append(S('text', { x: X(0.9), y: Y(40), class: 'os-small' }, 'first two years: 181,000 bbl'), S('text', { x: X(4.2), y: Y(25), class: 'os-small' }, 'next eight years: 201,000 bbl'));
+      return svg;
+    }
+    function count() {
+      const rows = U.map((u) => ({ u, n: Math.ceil(100000 / u.well) }));
+      const svg = S('svg', { viewBox: `0 0 ${W} ${rows.length * 64 + 20}`, class: 'os-svg', role: 'img', 'aria-label': 'Wells needed for 100,000 barrels a day' });
+      rows.forEach(({ u, n }, i) => {
+        const y = 10 + i * 64;
+        svg.append(S('text', { x: 180, y: y + 16, 'text-anchor': 'end', class: 'os-rowl hi' }, u.n), S('text', { x: 180, y: y + 31, 'text-anchor': 'end', class: 'os-small' }, `${u.well.toLocaleString('en-GB')} b/d a well`));
+        const per = Math.min(n, 140), cols = 35;
+        for (let k = 0; k < per; k++) svg.append(S('rect', { x: 196 + (k % cols) * 15, y: y + 2 + Math.floor(k / cols) * 13, width: 10, height: 10, rx: 2, fill: u.c, 'fill-opacity': 0.8 }));
+        const wrap = per > cols, rows = Math.ceil(per / cols);
+        svg.append(S('text', { x: wrap ? 196 + (per % cols || cols) * 15 + 6 : 196 + per * 15 + 6, y: y + 12 + (rows - 1) * 13, class: 'os-lab' }, `${n} well${n > 1 ? 's' : ''}`));
+      });
+      return svg;
+    }
+    function fields() {
+      const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, class: 'os-svg', role: 'img', 'aria-label': 'Output of four oil fields over time' });
+      const X = (y) => M.l + ((y - 1950) / 77) * (W - M.l - M.r), lg = (v) => Math.log10(Math.max(v, 8));
+      const Y = (v) => H - M.b - ((lg(v) - 1) / 3) * (H - M.t - M.b);
+      for (const v of [10, 100, 1000, 10000]) svg.append(S('line', { x1: M.l, x2: W - M.r, y1: Y(v), y2: Y(v), class: 'os-gridh' }), S('text', { x: M.l - 8, y: Y(v) + 3.5, 'text-anchor': 'end', class: 'os-ax' }, v >= 1000 ? v / 1000 + ' mb/d' : v + ' kb/d'));
+      for (let y = 1950; y <= 2020; y += 10) svg.append(S('text', { x: X(y), y: H - 12, 'text-anchor': 'middle', class: 'os-ax' }, y));
+      const F = [['ghawar', 'Ghawar', '#b4552f'], ['forties', 'Forties', '#8a93a6'], ['brent', 'Brent field', '#04204b'], ['sverdrup', 'Johan Sverdrup', '#0b4fc0']];
+      for (const [k, n, c] of F) {
+        const p = cu.fieldHist[k].filter(([, v]) => v > 0), all = cu.fieldHist[k].map(([y, v]) => [y, Math.max(v, 10)]);  // zero (first oil, shut-in) drawn at the axis floor
+        svg.append(S('path', { d: dOf(all.map(([y, v]) => [X(y), Y(v)])), fill: 'none', stroke: c, 'stroke-width': 2, 'stroke-dasharray': k === 'sverdrup' ? null : '5 3' }));
+        p.forEach(([y, v]) => svg.append(S('circle', { cx: X(y), cy: Y(v), r: 3, fill: c }, S('title', {}, `${n} ${y}: ${v} kb/d`))));
+        const [ly, lv] = k === 'ghawar' ? p[1] : k === 'forties' ? p[1] : k === 'brent' ? p[0] : p[p.length - 1];
+        svg.append(S('text', { x: X(ly) + (k === 'sverdrup' ? -8 : 6), y: Y(lv) - 8, 'text-anchor': k === 'sverdrup' ? 'end' : 'start', class: 'os-lab', style: `fill:${c}` }, n));
+      }
+      return svg;
+    }
+    const views = {
+      well: [well, 'One Permian well, modelled through the published 730 → 200 b/d first year (Arps, b = 1.4; illustrative): <b>47 %</b> of its first ten years of oil comes in the first two. A shale field must drill all the time just to stand still.'],
+      count: [count, 'Wells needed for <b>100,000 barrels a day</b> at the rates of one good well of each kind: a Sverdrup producer flows like 66 new Permian wells, and a Permian well loses most of that within a year.'],
+      fields: [fields, 'Whole fields, log scale. Ghawar has produced since 1951 and still makes about 3.8 mb/d; Forties and Brent peaked within five years of first oil and faded; Johan Sverdrup came off its plateau in 2025. Points are sourced years, lines join them.'],
+    };
+    function draw() { box.replaceChildren(views[st.v][0]()); read.innerHTML = views[st.v][1]; }
+    ctrl.append(seg([['well', 'One shale well'], ['count', 'Wells for 100 kb/d'], ['fields', 'Whole fields']], st.v, (v) => { st.v = v; draw(); }));
+    draw();
+  };
+
 
   // ---- spare capacity before the war, and what was shut in
   FIG.spare = function (root) {
@@ -982,7 +1270,7 @@
   };
 
   // ------------------------------------------------------------------ boot
-  const NEEDS_GEO = new Set(['flows', 'hormuz', 'producers', 'route', 'northsea']);
+  const NEEDS_GEO = new Set(['pipes', 'flows', 'hormuz', 'producers', 'route', 'northsea']);
   for (const root of roots) {
     root.classList.add('oil-sheet');
     root.append(h('div', { class: 'os-wait' }, 'drawing sheet ' + (roots.indexOf(root) + 1) + ' …'));

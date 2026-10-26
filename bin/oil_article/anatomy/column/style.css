@@ -1,0 +1,137 @@
+/* column figure: page styles (light only, the site's look) */
+body{margin:0;background:#fff}
+.iso-page{width:100%!important;max-width:720px;margin:0 auto!important}
+.iso-figure{margin:0}
+.iso-plate{padding:46px 20px 72px}
+.iso-plate-corner[data-corner="hint"]{top:0;bottom:auto!important;left:auto;right:0}
+.iso-plate-corner[data-corner="title"]{display:none}
+.iso-plate-corner[data-corner="readout"]{left:0;white-space:normal;text-align:left;line-height:1.45;font-size:11px}
+.cs-stage{--ink:#04204b;--blue:#0b4fc0;outline:none;touch-action:pan-y;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.cs-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:4px}
+.cs-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* controls */
+.cs-controls{display:flex;flex-direction:column;gap:8px;margin:0 0 10px}
+.cs-chips,.cs-crudes{display:flex;flex-wrap:wrap;gap:5px}
+.cs-chip,.cs-crude{font:inherit;font-size:12px;line-height:1;padding:6px 9px 6px 8px;border-radius:999px;border:1px solid #d9d9dc;background:#fff;color:#3a3a3e;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:border-color .3s,background .3s,color .3s}
+.cs-chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.cs-chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:color-mix(in srgb,var(--c) 10%,#fff)}
+.cs-crude span{color:#8c8c90}
+.cs-crude[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
+.cs-crudes::before{content:"Crude";font-size:11px;color:#8c8c90;align-self:center;margin-right:2px}
+.cs-chip:focus-visible,.cs-crude:focus-visible,.cs-tag:focus-visible{outline:1px solid var(--ink);outline-offset:2px}
+
+/* art and HTML labels over it */
+.cs-art,.cs-detail-art{position:relative}
+.cs-art>svg,.cs-detail{display:block;width:100%;height:auto}
+.cs-over{position:absolute;inset:0;pointer-events:none}
+.cs-tag{position:absolute;transform:translateY(-50%);pointer-events:auto;text-align:left;font:inherit;background:none;border:0;padding:2px 4px 2px 2px;margin:0;cursor:pointer;display:flex;flex-direction:column;gap:1px;color:#57575a;opacity:.78;transition:opacity .3s}
+.cs-tag-name{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:#26262a;white-space:nowrap}
+.cs-tag-name::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
+.cs-icon{width:12px;height:12px;fill:none;stroke:#8a8a8f;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round;order:2}
+.cs-tag-sub{font-size:10.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cs-tag-use{font-size:10.5px;color:#8c8c90;white-space:nowrap}
+.cs-short{display:none}
+.cs-tag[data-on]{opacity:1}
+.cs-tag[data-on] .cs-tag-name{color:var(--ink)}
+.cs-tag-feed{transform:translate(-4%,-150%)}
+.cs-tag-feed .cs-tag-use{display:none}
+.cs-rule-n{position:absolute;transform:translateY(-50%);font-size:10px;color:#8a8a8f;white-space:nowrap;font-variant-numeric:tabular-nums;padding-right:2px}
+.cs-rule-end{color:#26262a}
+
+/* detail panel */
+.cs-detail-wrap{margin-top:14px;border-top:1px solid #e5e5e2;padding-top:10px}
+.cs-detail-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;font-size:12px;line-height:1.4;margin-bottom:6px}
+.cs-detail-title{color:#26262a;font-weight:600}
+.cs-detail-chem{color:#57575a}
+.cs-dl{position:absolute;transform:translate(var(--a),-50%);font-size:10.5px;color:#3a3a3e;white-space:nowrap;background:color-mix(in srgb,#fbfbfa 75%,transparent);padding:0 2px;border-radius:2px}
+.cs-dl-dim{color:#8c8c90}
+.cs-mol-tag{position:absolute;transform:translate(-50%,-140%);font-size:10px;white-space:nowrap;padding:1px 4px;border-radius:3px;background:#fff;box-shadow:0 0 0 1px #e1e1e3;color:#3a3a3e;transition:opacity .4s;opacity:0}
+.cs-mol-tag[data-show]{opacity:1}
+
+@media (max-width:560px){
+  .iso-plate{padding:42px 8px 96px}
+  .cs-art{margin:0 -6px}
+  .cs-tag-use,.cs-tag-sub,.cs-full{display:none}
+  .cs-short{display:inline}
+  .cs-tag-name{font-size:10.5px;gap:3px}
+  .cs-tag-feed .cs-tag-sub{display:block;font-size:9.5px}
+  .cs-icon{display:none}
+  .cs-rule-n{font-size:9px}
+  .cs-dl{font-size:9px}
+  .cs-mol-tag{font-size:8.5px}
+  .cs-chip,.cs-crude{font-size:11px;padding:5px 7px}
+}
+
+/* ---- SVG: heater ---- */
+.cs-cavity{fill:#4a4540}
+.cs-brick{stroke:#6b625a!important}
+.cs-hearth{fill:#4a433b}.cs-tile{fill:#5b5147}
+.cs-glow{fill:#e08a3c;opacity:.35;filter:blur(6px)}
+.cs-coil .iso-fill,.cs-coil .iso-shade,.cs-coil .iso-top{fill:#2b2723}
+.cs-coil .iso-edge{stroke:#1d1a17}
+.cs-flame{fill:#f0a040;opacity:.92;animation:cs-flick 1.3s ease-in-out infinite alternate}
+@keyframes cs-flick{0%{transform:scale(1,1)}50%{transform:scale(1.04,.93)}100%{transform:scale(.97,1.06)}}
+
+/* ---- SVG: pipes tinted by what they carry ---- */
+.it[data-flow] .tb-body{fill:color-mix(in srgb,var(--c) 16%,var(--anatomy-paper))}
+.it[data-flow] .tb-shine{fill:color-mix(in srgb,var(--c) 8%,#fff)}
+.it[data-flow] .tb-shade{fill:color-mix(in srgb,var(--c) 28%,var(--anatomy-shade-0))}
+.it[data-flow][data-on] .tb-body{fill:color-mix(in srgb,var(--c) 34%,var(--anatomy-paper))}
+.it[data-flow="crude"]{--c:#b4552f}.it[data-flow="steam"]{--c:#0b4fc0}.it[data-flow="vapour"]{--c:#c99a1e}.it[data-flow="overhead"]{--c:#c99a1e}
+.it[data-flow="gas"]{--c:#c99a1e}.it[data-flow="lnap"]{--c:#3f9f8c}.it[data-flow="hnap"]{--c:#138374}.it[data-flow="kero"]{--c:#8a93a6}
+.it[data-flow="diesel"]{--c:#6a47c2}.it[data-flow="hgo"]{--c:#b58a5e}.it[data-flow="resid"]{--c:#4e3b2c}
+.it[data-flow="steam"] .tb-body{fill:color-mix(in srgb,#0b4fc0 12%,var(--anatomy-paper))}
+.cs-core{fill:none;stroke:color-mix(in srgb,var(--c) 70%,#fff);stroke-width:var(--w,2px);stroke-linecap:butt;vector-effect:none!important;transition:stroke-width .9s var(--anatomy-ease),stroke .4s}
+.it[data-on] .cs-core{stroke:var(--c)}
+.it[data-on] .iso-edge{stroke:var(--anatomy-hi)}
+
+/* ---- SVG: the section ---- */
+.cs-in{--anatomy-shade-0:#d2d1cc;--anatomy-shade-1:#dbdad5;--anatomy-shade-2:#e4e3de;--anatomy-shade-3:#ecebe7}
+.cs-cut{fill:#ffffff}
+.cs-port{fill:#c9c7c1}
+.cs-liq-top{fill:color-mix(in srgb,var(--c) 22%,#fff)}
+.cs-liq-cut{fill:color-mix(in srgb,var(--c) 38%,#fff)}
+.cs-dense .cs-liq-cut{fill:color-mix(in srgb,var(--c) 70%,#fff)}
+.cs-dense .cs-liq-top{fill:color-mix(in srgb,var(--c) 45%,#fff)}
+.cs-liq-line{stroke:color-mix(in srgb,var(--c) 70%,#555)!important}
+.cs-liq[data-on] .cs-liq-cut{fill:color-mix(in srgb,var(--c) 70%,#fff)}
+.cs-liq[data-on] .cs-liq-line{stroke:#000!important;stroke-width:1.1px}
+.cs-ripple{fill:none;stroke:color-mix(in srgb,var(--c) 55%,#fff);stroke-width:.6;animation:cs-ripple 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes cs-ripple{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.15);opacity:0}}
+.cs-flow{fill:none;stroke:color-mix(in srgb,var(--c) 75%,#333);stroke-width:.6;stroke-dasharray:2 5;opacity:.55;animation:cs-dash 2.2s linear infinite}
+.cs-fall{fill:none;stroke:color-mix(in srgb,#04204b 40%,#fff);stroke-width:.6;stroke-dasharray:2 4;animation:cs-dash 1.2s linear infinite}
+@keyframes cs-dash{to{stroke-dashoffset:-14}}
+.cs-spill{fill:none;stroke:color-mix(in srgb,var(--c) 55%,#fff);stroke-width:2;stroke-linecap:round}
+.cs-capb .iso-fill{fill:#fff}
+.cs-capin{fill:#f4f3ef}
+.cs-slot{fill:color-mix(in srgb,#04204b 8%,#fff)}
+.cs-bub,.cs-vap{fill:#fff;stroke:#8a8a8f;stroke-width:.5;animation:cs-rise 1.2s linear infinite}
+.cs-vap{animation-duration:2.4s}
+.cs-steam{fill:#fff;stroke:#0b4fc0;stroke-width:.5;opacity:.8;animation:cs-rise 1.8s linear infinite}
+@keyframes cs-rise{0%{transform:translateY(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateY(calc(-1 * var(--rise)));opacity:0}}
+.cs-rain{fill:color-mix(in srgb,#b4552f 70%,#fff);animation:cs-fall 1s linear infinite}
+@keyframes cs-fall{0%{transform:translateY(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateY(var(--fall));opacity:0}}
+.cs-steam-pipe .tb-body{fill:color-mix(in srgb,#0b4fc0 14%,#fff)}
+.cs-feed-pipe .tb-body{fill:color-mix(in srgb,#b4552f 22%,#fff)}
+.cs-reflux-pipe .tb-body{fill:color-mix(in srgb,#3f9f8c 22%,#fff)}
+
+/* ---- SVG: the rule ---- */
+.cs-band{fill:var(--c,transparent);opacity:.55;transition:opacity .4s}
+.cs-band-mark{fill:none;stroke:#000;stroke-width:1.4px;stroke-linecap:butt}
+.cs-guide{fill:none;stroke:#04204b;stroke-width:.7px;stroke-dasharray:1.5 2.5;opacity:.7}
+
+/* ---- detail panel ---- */
+.cs-dvap{fill:#f6f6f3}
+.cs-dliq-body{fill:color-mix(in srgb,var(--dc,#8a93a6) 34%,#fff);transition:fill .6s}
+.cs-dcut{fill:url(#cs-hatch);stroke:#8a8a8f;stroke-width:.7}
+.cs-hatch-bg{fill:#fff}.cs-hatch-line{stroke:#c4c4c8;stroke-width:1}
+.cs-dcapin{fill:#f6f6f3}
+.cs-dslot{fill:color-mix(in srgb,var(--dc,#8a93a6) 34%,#fff);stroke:none}
+.cs-dflow{fill:none;stroke:color-mix(in srgb,var(--dc,#8a93a6) 70%,#333);stroke-width:.8;stroke-dasharray:3 6;opacity:.5;animation:cs-dash 1.6s linear infinite}
+.cs-dbub{fill:#fff;stroke:#8a8a8f;stroke-width:.8}
+.cs-mol line{stroke:var(--mc);stroke-width:1.6;stroke-linecap:round}
+.cs-mol circle{fill:#fff;stroke:var(--mc);stroke-width:1.3}
+
+.cs-stage:not([data-run]) *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){.cs-stage *{animation:none!important}}

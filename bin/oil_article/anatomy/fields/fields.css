@@ -1,0 +1,88 @@
+/* page inside an iframe: no margins, the card fills the width */
+body{margin:0}
+.iso-page{width:100%;max-width:720px;margin:0 auto}
+.iso-figure{margin:0}
+.iso{--fd-ink:#04204b;--fd-blue:#0b4fc0;--fd-warm:#b4552f;--fd-teal:#138374;--fd-crude:#b4552f;
+  --fd-oil:#d9ae99;--fd-shaleoil:#ecd6ca;--fd-water:#c3d2ea;--fd-sea:#0b4fc0;--fd-sand:#f4efe3;--fd-seabed:#efede6;--fd-scrub:#f2efe6}
+.fd-stage{outline:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.fd-stage .it{transition:opacity .4s}
+/* lithology patterns: thin lines in the face plane */
+.fd-pat{fill:none;stroke:#9b9ba0;stroke-width:.13;stroke-linecap:round;vector-effect:none;opacity:.55}
+.fd-patdot{stroke-width:.38}
+.fd-sideshade{fill:#000;opacity:.045}
+.fd-plate{fill:var(--anatomy-shade-3)}
+.fd-top-sand{fill:var(--fd-sand)}
+.fd-top-seabed{fill:var(--fd-seabed)}
+.fd-top-scrub{fill:var(--fd-scrub)}
+/* fluids carry the colour */
+.fd-oil{fill:var(--fd-oil)}
+.fd-shaleoil{fill:var(--fd-shaleoil)}
+.fd-water{fill:var(--fd-water)}
+.fd-waterzone{transition:opacity .9s}
+.fd-sea-front{fill:var(--fd-sea);opacity:.16}
+.fd-sea-side{fill:var(--fd-sea);opacity:.22}
+.fd-sea-top{fill:var(--fd-sea);opacity:.15}
+.fd-sea-rip{fill:none;stroke:var(--fd-sea);stroke-width:.5;opacity:.28;stroke-linecap:round}
+.fd-sea-edge{fill:none;stroke:var(--fd-sea);stroke-width:.6;opacity:.5}
+.fd-sea-outline{fill:none;stroke:var(--fd-sea);stroke-width:.6;opacity:.6}
+.fd-sea path{vector-effect:non-scaling-stroke}
+/* wells: steel ribbons in the cut, with the flow inside */
+.fd-well{fill:#fff;stroke:var(--anatomy-hi);stroke-width:.6;stroke-linejoin:round}
+.fd-conductor{fill:none;stroke:var(--anatomy-hi);stroke-width:1.3;stroke-linecap:butt}
+.fd-flow{fill:none;stroke-linecap:round;stroke-dasharray:1.6 3.6;stroke-width:.9}
+.fd-flow-oil{stroke:var(--fd-crude)}
+.fd-flow-water{stroke:var(--fd-blue)}
+.fd-bore{stroke-width:.8;stroke-dasharray:1.4 3}
+.fd-frac{fill:#f6eadf;stroke:var(--fd-warm);stroke-width:.5;transform-box:view-box}
+/* selection: the picked field's wells are the lit part and its flows move */
+.fd-stage .fd-flow{animation:fd-flow 2.4s linear infinite;animation-play-state:paused;opacity:.45}
+.fd-stage[data-sel="ghawar"] [data-field="ghawar"] .fd-flow,.fd-stage[data-sel="sverdrup"] [data-field="sverdrup"] .fd-flow,.fd-stage[data-sel="permian"] [data-field="permian"] .fd-flow{animation-play-state:running;opacity:1}
+.fd-stage[data-sel="ghawar"] [data-field="ghawar"] .fd-well,.fd-stage[data-sel="sverdrup"] [data-field="sverdrup"] .fd-well,.fd-stage[data-sel="permian"] [data-field="permian"] .fd-well{stroke:var(--anatomy-lit);stroke-width:.85}
+.fd-stage[data-sel="ghawar"] .it[data-name="block.ghawar"]>.iso-solid>.iso-edge,.fd-stage[data-sel="sverdrup"] .it[data-name="block.sverdrup"]>.iso-solid>.iso-edge,.fd-stage[data-sel="permian"] .it[data-name="block.permian"]>.iso-solid>.iso-edge{stroke:var(--anatomy-lit)}
+.fd-stage.fd-still .fd-flow{animation:none}
+@keyframes fd-flow{to{stroke-dashoffset:-20.8}}
+@keyframes fd-pulse{0%{transform:scaleY(.05);opacity:0}45%{transform:scaleY(1.18);opacity:1}100%{transform:scaleY(1);opacity:1}}
+.fd-fracs.fd-go .fd-frac{animation:fd-pulse .9s cubic-bezier(.32,.72,0,1) both;animation-delay:calc(var(--i) * 110ms)}
+/* chips */
+.fd-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 0}
+.fd-chip{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:1px;padding:8px 10px 9px;border-radius:4px;cursor:pointer;background:#fff;box-shadow:0 0 0 1px var(--anatomy-faint);font:12px/1.35 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--anatomy-text);transition:box-shadow .2s}
+.fd-chip:hover{box-shadow:0 0 0 1px var(--anatomy-mid)}
+.fd-chip:focus-visible{box-shadow:0 0 0 2px var(--fd-blue)}
+.fd-chip[aria-pressed="true"]{box-shadow:0 0 0 1.5px var(--fd-ink)}
+.fd-chip-t{font-weight:600;color:var(--fd-ink);font-size:13px}
+.fd-chip-s{color:var(--anatomy-muted);margin-bottom:3px}
+.fd-chip-l{font-variant-numeric:tabular-nums}
+/* panel */
+.fd-panels{margin-top:12px;font:13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--anatomy-text)}
+.fd-row{display:grid;grid-template-columns:110px 1fr;gap:2px 12px;padding:5px 0;border-top:1px solid var(--anatomy-faint)}
+.fd-row .fd-src{grid-column:2}
+.fd-k{color:var(--fd-ink);font-weight:600}
+.fd-v{font-variant-numeric:tabular-nums}
+.fd-src{display:inline-flex;flex-wrap:wrap;gap:4px;font-size:11px;color:var(--anatomy-muted)}
+.fd-src span{padding:0 5px;border-radius:3px;background:#f1f1ef}
+.fd-bar{position:relative;display:flex;height:14px;margin-top:3px;border-radius:2px;overflow:visible;background:#f4f4f2;box-shadow:inset 0 0 0 1px #e4e4e2}
+.fd-seg{display:block;height:100%}
+.fd-seg-lift{background:var(--fd-ink)}
+.fd-seg-cap{background:var(--fd-blue)}
+.fd-seg-take{background:var(--fd-warm)}
+.fd-seg-rest{background:transparent}
+.fd-be{position:absolute;top:-4px;bottom:-4px;width:0;border-left:1.5px solid var(--fd-teal)}
+.fd-scale{display:flex;justify-content:space-between;font-size:11px;color:var(--anatomy-muted);margin-top:4px}
+.fd-keys{list-style:none;margin:2px 0 0;padding:0 0 0 122px;display:grid;gap:3px}
+.fd-keys li{display:grid;grid-template-columns:14px 1fr;align-items:baseline;column-gap:6px}
+.fd-keys li .fd-src{grid-column:2}
+.fd-keys li>span:not(.fd-src){display:inline}
+.fd-sw{display:inline-block;width:10px;height:10px;border-radius:2px;flex:none;transform:translateY(1px)}
+.fd-sw-be{width:0;height:12px;border-left:1.5px solid var(--fd-teal);border-radius:0;margin:0 4px}
+@media (max-width:560px){
+  .iso-plate{overflow:hidden}
+  .fd-stage .iso-svg{width:106%;max-width:none;margin:0 0 0 -3%}
+  .fd-chips{gap:5px}
+  .fd-chip{padding:6px 7px 7px;font-size:10.5px}
+  .fd-chip-t{font-size:11.5px}
+  .fd-row{grid-template-columns:1fr;gap:2px}
+  .fd-row .fd-src{grid-column:1}
+  .fd-keys{padding-left:0}
+  .fd-panels{font-size:12.5px}
+}
+@media (prefers-reduced-motion:reduce){.fd-stage .fd-flow{animation:none!important}.fd-fracs .fd-frac{animation:none!important}}

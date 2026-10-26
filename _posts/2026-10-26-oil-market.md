@@ -1,12 +1,12 @@
 ---
 layout: default
 title: The crack writes the story. How the world oil market works, from the well to the pump, in the year of the Hormuz war
-description: The whole oil market in one long read, told the way an engineer would draw it. What crude is and what a refinery does with it, why the crack spread matters more than the price, who pumps and who burns, how oil moves through eight chokepoints, what a supertanker costs per barrel, sanctions and the dark fleet, how Brent and WTI are set and why the gap between them is the price of a voyage, the futures curve, and the 2026 Iran war that closed the Strait of Hormuz. Nineteen interactive figures, maps with moving tankers, four drawings, EIA data to 20 October 2026, and a source for every claim.
+description: The whole oil market in one long read, told the way an engineer would draw it. What crude is, why a column sorts it by boiling point and what a refinery does with it, how a Saudi giant, a North Sea platform and a shale well differ, why the crack spread matters more than the price, who pumps and who burns, how oil moves through eight chokepoints, the world's pipelines and the attacks on them, what a supertanker costs per barrel, sanctions and the dark fleet, how Brent and WTI are set and why the gap between them is the price of a voyage, the futures curve, and the 2026 Iran war that closed the Strait of Hormuz. Twenty-five interactive charts and maps, with moving tankers and a world pipeline map, six drawings, EIA data to 20 October 2026, and a source for every claim.
 date: 2026-10-26
 tags: [oil, energy, markets, geopolitics, data, engineering]
 image: /assets/blog-thumbs/oil-market.webp
 categories: [long-read]
-read_time: 55 # the word count does not include the interactive figures
+read_time: 75 # the word count does not include the interactive figures
 ---
 <article class="da oil" markdown="1" data-stations="off" data-brand="The oil market" data-brand-sub="crude, cracks and conflict · a long read" data-contact="https://www.linkedin.com/in/niklas-abraham-05983b247">
 
@@ -23,9 +23,9 @@ read_time: 55 # the word count does not include the interactive figures
 
 The article has five parts, and every figure in it can be played with.
 
-1. **The molecule and the machine.** What crude is, what a refinery does to it, and the crack spread.
-2. **Pumps and burners.** Who produces oil, who uses it, what a barrel costs to produce, and the spare capacity that was meant to protect the market.
-3. **Moving it.** Sea lanes and chokepoints, supertankers and the price of a voyage, the sanctioned dark fleet, and the tank farm in Oklahoma that sets the American price.
+1. **The molecule and the machine.** What crude is, why a column sorts it by boiling point, what a refinery does to it, and the crack spread.
+2. **Pumps and burners.** Who produces oil, who uses it, how a Saudi giant, a North Sea platform and a shale well get it out of the rock, what a barrel costs to produce, and the spare capacity that was meant to protect the market.
+3. **Moving it.** Sea lanes and chokepoints, supertankers and the price of a voyage, the sanctioned dark fleet, the world's pipelines and the attacks on them, and the tank farm in Oklahoma that sets the American price.
 4. **The price.** The benchmarks, the futures curve, and why Brent minus WTI is the price of crossing the Atlantic.
 5. **2026.** The Hormuz war month by month, the diesel crisis it caused, the stocks that were drawn, and what a litre costs.
 
@@ -34,15 +34,18 @@ The article has five parts, and every figure in it can be played with.
 <ol>
 <li><a href="#crack">The most important number is not the price</a></li>
 <li><a href="#crude">What crude oil is</a></li>
+<li><a href="#column">Why each product leaves at its own height</a></li>
 <li><a href="#refinery">Inside a refinery</a></li>
 <li><a href="#spread">The crack spread</a></li>
 <li><a href="#pump">Who pumps</a></li>
 <li><a href="#burn">Who burns</a></li>
+<li><a href="#upstream">Three ways out of the ground</a></li>
 <li><a href="#cost">What a barrel costs</a></li>
 <li><a href="#opec">OPEC+ and the spare barrels</a></li>
 <li><a href="#lanes">Sea lanes and chokepoints</a></li>
 <li><a href="#tanker">The tanker and the price of a voyage</a></li>
 <li><a href="#sanctions">Sanctions and the dark fleet</a></li>
+<li><a href="#pipelines">The pipelines of the world</a></li>
 <li><a href="#cushing">Pipes, hubs and the tank in Oklahoma</a></li>
 <li><a href="#benchmarks">Brent, WTI and Dubai</a></li>
 <li><a href="#curve">The curve: contango and backwardation</a></li>
@@ -87,9 +90,46 @@ What a refiner really wants to know is the **assay**: how much of the crude boil
 One row in the figure matters more than the others: the gasoil cut, the raw material of diesel. It is 23 to 29 per cent for almost every grade, light or heavy (Nigeria's Bonny Light, at 36 per cent, is the exception). No crude comes out of the ground as mostly diesel. Most of the diesel in the world has to be **made**, by cracking the heavier vacuum gasoil and residue. That is the engineering behind the reel's line that "crude gets priced by the diesel inside it": a grade is worth what its middle distillates plus the diesel a complex refinery can crack out of its heavy end are worth.
 
 {: .da-bridge}
-Making diesel out of residue is what a refinery is for. Here is the machine.
+Before the machine, the physics it uses: why the molecules of a crude can be sorted by heat at all.
 
-<h2 id="refinery"><span class="num">03</span>Inside a refinery</h2>
+<h2 id="column"><span class="num">03</span>Why each product leaves at its own height</h2>
+
+The hydrocarbons in crude hold together in the liquid only through weak attractions between neighbouring molecules, and those grow with the surface a molecule offers. Each extra CH₂ group adds about the same surface, so the boiling point climbs steadily with size: methane boils at −161.5 °C, hexane at 69, hexadecane (C16, a typical diesel molecule) at 287, and a C40 wax at about 522 °C {% include oil-ref.html k="nist" %} {% include oil-ref.html k="wiki-alkane" %} {% include oil-ref.html k="d2887" %}. Shape matters as well: a branched molecule is more compact and boils lower, a flat ring packs better and boils higher. Iso-octane, with eight carbons, boils with heptane; naphthalene, with ten, boils with the chains of twelve and thirteen {% include oil-ref.html k="psu" %}. A product cut is therefore defined by its boiling range, not by a carbon count, and the carbon ranges in the table overlap.
+
+{% include oil.html kind="boil" title="Size sets <em>the boiling point</em>" caption="Normal boiling points of the straight-chain alkanes C1 to C40 (NIST WebBook, CRC Handbook values via Wikipedia, ASTM D2887 calibration table), with rings and branched molecules as triangles, and the boiling ranges of the product cuts (TotalEnergies assay cut points). The red band is where thermal cracking begins (OSHA, Penn State). The vacuum curve is my Clausius–Clapeyron estimate at 50 mmHg, fitted to measured reduced-pressure boiling points; approximate." %}
+
+| Cut | Boiling range | Carbon atoms (straight chains) | Goes to |
+|---|---|---|---|
+| Gas and LPG | below 15 °C | C1–C4 | refinery fuel, LPG, petrochemicals |
+| Light naphtha | 15–80 °C | C5–C6 | gasoline blending, steam crackers |
+| Heavy naphtha | 80–150 °C | C7–C9 | the reformer: high-octane gasoline and hydrogen |
+| Kerosene | 150–230 °C | C10–C12 | jet fuel |
+| Gasoil | 230–375 °C | C13–C22 | diesel and heating oil, after desulphurisation |
+| Vacuum gasoil | 375–565 °C | C23–C44 | cracker feed, lubricants |
+| Vacuum residue | above 565 °C | C45 and up | asphalt, coker, fuel oil |
+
+The cut points are those of the TotalEnergies assays {% include oil-ref.html k="total-assay" %}; other refiners place them tens of degrees apart, because a cut point is a choice: a refinery short of diesel cuts its kerosene narrower and its gasoil wider {% include oil-ref.html k="psu" %}.
+
+A laboratory measures a crude's whole distribution in a **true boiling point** (TBP) distillation: it boils off the crude in a column of many plates and weighs what has come over at each temperature. The curve says, for every temperature, how much of the crude boils below it. Brent has 59 per cent of its weight off by 350 °C; Angola's heavy Dalia only 36 per cent; Canadian WCS, measured by gas chromatography rather than by a still, about 30 per cent {% include oil-ref.html k="total-assay" %} {% include oil-ref.html k="equinor-assay" %} {% include oil-ref.html k="crudemonitor" %}.
+
+{% include oil.html kind="tbp" title="How much <em>boils off</em>" caption="True boiling point curves: cumulative weight per cent distilled against temperature, from TotalEnergies assays (Brent 2006, Oman 2020, Dalia 2015) and Equinor (Grane 2026); WCS is a simulated distillation by gas chromatography (crudemonitor.ca, sample of 1 September 2026), dashed because it is not a physical TBP. The assay sheets start at 80 °C. Pick a cut to read each crude's share of it." %}
+
+A refinery cannot boil off one product at a time like a laboratory still; it has to sort a continuous stream. One boiling is not enough for that. If a 50/50 liquid of heptane and octane is boiled, its vapour is richer in the lighter heptane, because heptane has the higher vapour pressure (Raoult's law), but only 69 per cent heptane. Condense that vapour and boil it again, and it is 83 per cent; after five such stages, 98 per cent. Each stage also boils a little cooler, from 110 to 99 °C, because a lighter mixture boils at a lower temperature (my calculation with NIST's Antoine constants) {% include oil-ref.html k="nist" %}.
+
+{% include oil.html kind="stages" title="One tray is <em>one small still</em>" caption="Vapour composition after each equilibrium stage for two mixtures of straight-chain alkanes, starting from 50/50 liquid at 1.013 bar and total reflux: ideal Raoult's law with NIST Antoine constants (my calculation). Each stage both purifies the vapour and runs cooler." %}
+
+A distillation column is that staircase built vertically. Hot crude, partly vaporised in the furnace, enters near the bottom; the vapour rises through 35 to 50 trays, 60 to 75 centimetres apart, and on each tray it bubbles through a layer of liquid flowing down from the tray above {% include oil-ref.html k="jechura" %}. The heaviest part of the vapour condenses into the liquid, and the heat it releases boils the lightest part of the liquid up into the vapour. So the vapour gets lighter and the column cooler with every tray: in a worked example from a patent, the overhead vapour leaves at about 104 °C, the kerosene draw at 205, diesel at 262, atmospheric gasoil at 322 and the residue at 341 °C (as reported) {% include oil-ref.html k="col-patent" %}. There is no heater at the bottom; all the heat comes in with the feed and is taken out at the top by the condenser and in the middle by **pumparounds**, loops that draw liquid off, cool it against incoming crude and return it {% include oil-ref.html k="jechura" %}.
+
+A product is drawn off where it collects. Below that height the trays are too hot for it to stay liquid, above it they are cool enough that it condenses and runs back down, so it accumulates in the liquid on the trays around the height where the temperature sits in its boiling range. A pipe there takes it out. Small **side strippers** beside the column blow steam through each side stream to send its lightest tail back; at the top, a condenser and a drum separate gas, naphtha and sour water and return part of the naphtha as reflux. Real trays reach only 50 to 60 per cent of a perfect equilibrium stage, so the 35 to 50 trays of a crude column are worth 20 to 30 of the steps in the figure above {% include oil-ref.html k="jechura" %}. The largest single crude column in the world, at the Dangote refinery in Nigeria, weighs about 2,000 tonnes {% include oil-ref.html k="dangote-col" %}.
+
+{% include oil-anat.html name="column" title="The column, <em>cut open</em>" h=1480 caption="Pick a product to see where it is drawn, its boiling range and its share of a light and a heavy crude; the panel below magnifies one bubble-cap tray. Sources and approximations are in the drawing’s own caption." %}
+
+The bottom of the column has one limit: heat. Above about 350 to 370 °C the long molecules begin to break apart in the furnace tubes, so the furnace stops there and about half the crude stays liquid as **atmospheric residue** {% include oil-ref.html k="osha" %} {% include oil-ref.html k="psu" %}. To split it further the residue goes to a second column under vacuum. Lowering the pressure lowers every boiling point: a wax that boils at 500 °C at atmospheric pressure boils at roughly 350 to 400 °C at 50 mmHg, a fifteenth of an atmosphere (my Clausius–Clapeyron estimate, checked against measured boiling points of C22 and C36 wax) {% include oil-ref.html k="wiki-alkane" %}. Under vacuum the heavy gasoil boils off below the cracking temperature. What is left is vacuum residue, the asphalt end of the barrel.
+
+{: .da-bridge}
+Sorting by boiling point gives a refinery its raw streams. Turning the heavy ones into diesel is what the rest of the refinery is for.
+
+<h2 id="refinery"><span class="num">04</span>Inside a refinery</h2>
 
 A refinery is three steps the reel calls *boil, split, crack*.
 
@@ -114,7 +154,7 @@ The US refining system changed in 2026, but not quite as the reel suggests. Refi
 {: .da-bridge}
 The refinery's income is the difference between its outputs and its input. That difference has a name and a formula.
 
-<h2 id="spread"><span class="num">04</span>The crack spread</h2>
+<h2 id="spread"><span class="num">05</span>The crack spread</h2>
 
 The benchmark the reel uses is the **3-2-1 crack**: three barrels of crude in, two of gasoline and one of diesel out, roughly the American yield ratio. Per barrel of crude,
 
@@ -137,7 +177,7 @@ Refining is the middle of the chain. Before it comes the oil itself: where it is
 
 <p class="da-part">Part II<strong>Pumps and burners</strong></p>
 
-<h2 id="pump"><span class="num">05</span>Who pumps</h2>
+<h2 id="pump"><span class="num">06</span>Who pumps</h2>
 
 The world produced 100.6 million barrels a day of crude, condensate and natural gas liquids in 2025, by the Energy Institute's count {% include oil-ref.html k="ei-sr" %}. Agencies that add biofuels and the refinery processing gain get about 106 {% include oil-ref.html k="eia-steo" %}; the two series must not be mixed. The United States produced 21.1 million barrels a day by the wide definition, 13.66 of it crude, more than Saudi Arabia (11.4) and almost as much as Saudi Arabia and Russia (10.7) together {% include oil-ref.html k="ei-sr" %}. Then come Canada, Iran, Iraq, China, the UAE and Brazil.
 
@@ -152,7 +192,7 @@ Shale has a property that shapes the whole market: it runs out quickly. A new we
 {: .da-bridge}
 Production is concentrated in a few countries; consumption is spread across the world, and the two maps do not overlap.
 
-<h2 id="burn"><span class="num">06</span>Who burns</h2>
+<h2 id="burn"><span class="num">07</span>Who burns</h2>
 
 The world used 106.5 million barrels a day of liquids in 2025 (103.0 excluding biofuels) {% include oil-ref.html k="ei-sr" %}. The United States used 20.6, China 17.4, the European Union 11.1, India 5.8. Per head the differences are enormous: an American uses about 22 barrels a year, a Saudi 38, a German 9, a Chinese 4.2 and an Indian 1.4, against a world average of 4.6 (EIA data, the research note's calculation).
 
@@ -163,9 +203,34 @@ By product, diesel and gasoil (28.9 million barrels a day) lead gasoline (27.8),
 Diesel matters out of proportion to its volume. It moves trucks, trains, ships near shore, tractors, mining machines and back-up generators; there is no quick substitute, and demand for it hardly falls when the price rises. That is why a shortage of diesel, rather than of crude, is what turns an oil shock into an economic one.
 
 {: .da-bridge}
-Between the producers and the consumers sits a cost: what it takes to get a barrel out of the ground.
+Between the producers and the consumers sits a cost: what it takes to get a barrel out of the ground. That depends first on the rock.
 
-<h2 id="cost"><span class="num">07</span>What a barrel costs</h2>
+<h2 id="upstream"><span class="num">08</span>Three ways out of the ground</h2>
+
+Oil does not sit in underground lakes. It sits in the pores of rock, a few per cent to a third of the rock's volume, and it flows to a well only as fast as the rock lets it. That property, **permeability**, spans more orders of magnitude than any other number in this article, and it decides how a field is built, how fast its wells die and what its barrels cost. Three kinds of field supply most of the world's growth and most of its argument.
+
+**The onshore giant.** Ghawar in eastern Saudi Arabia, discovered in 1948 and producing since 1951, is a fold of Jurassic limestone about 280 kilometres long, with the Arab-D reservoir 1.8 to 2.3 kilometres down, about 15 per cent porosity and a permeability of hundreds of millidarcies to several darcies {% include oil-ref.html k="geoexpro-ghawar" %}. Since 1965 seawater has been injected along the field's flanks, below the oil, so that the water pushes the oil up toward the producers on the crest and keeps the pressure from falling. Gas–oil separation plants next to the well groups strip out gas and water before the crude goes by pipe to Abqaiq. Modern wells are "maximum reservoir contact" wells with three or four horizontal branches: at Haradh 32 producers make 300,000 barrels a day, about 9,400 each {% include oil-ref.html k="mrc-haradh" %}. Ghawar peaked at 5.7 million barrels a day in 1981 and its sustainable capacity was 3.8 million in 2018 {% include oil-ref.html k="geoexpro-ghawar" %} {% include oil-ref.html k="worldoil-ghawar" %}. Aramco's fields deplete by 1 to 2 per cent a year.
+
+**Offshore.** Johan Sverdrup, 160 kilometres west of Stavanger, is a sandstone 1,900 metres under the seabed in 115 metres of water, with a permeability of 5 to 30 darcies {% include oil-ref.html k="np-sverdrup" %}. Four steel-jacket platforms joined by bridges carry the drilling, process, riser and living quarters, power comes from shore by cable, and water injection holds the pressure. In 2020 nine wells made more than 430,000 barrels a day, about 48,000 each; the field held a plateau of 755,000 from 2023 to early 2025, and Equinor expects it to fall by more than 10 per cent in 2026 {% include oil-ref.html k="equinor-sverdrup" %} {% include oil-ref.html k="jpt-sverdrup" %}. It took nine years from discovery to first oil. In deeper water there is no platform on legs but a **floating production, storage and offloading vessel** (FPSO): wells on the seabed 1.5 to 2 kilometres down, flexible risers up to a ship that separates and stores the oil and hands it to shuttle tankers. Guyana's Stabroek block went from discovery in 2015 to first oil in 2019 and now runs several such ships of 120,000 to 250,000 barrels a day each {% include oil-ref.html k="exxon-guyana" %}.
+
+**Shale.** In the Permian Basin of west Texas the oil sits in mudstone and siltstone with a permeability of 1 to 60 *nano*darcies, a million times tighter than Sverdrup. It does not flow to a well by itself. The well is drilled down about 2 to 3 kilometres, turned horizontal and run on through the layer for an average of 3,310 metres in 2025 {% include oil-ref.html k="eia-lateral" %}; then the horizontal section is fractured in 45 to 50 stages with water, sand and chemicals pumped at high pressure, so that the rock cracks and the sand props the cracks open {% include oil-ref.html k="usgs-frac" %}. A well costs about $7 million, roughly 40 per cent drilling and 60 per cent fracturing {% include oil-ref.html k="diamondback" %}, takes a week to drill and flows within a few months. Then it dies quickly: in Rystad's example a new well starts at 730 barrels a day and makes 200 after a year {% include oil-ref.html k="api-decline" %}. Published decline fits for the Midland Basin lose about 76 per cent in the first year {% include oil-ref.html k="ogj-arps" %}.
+
+{% include oil-anat.html name="fields" title="Three fields, <em>cut open</em>" h=1240 caption="Pick a field for its rock, its wells, its decline and the cost of its barrel. Sources and approximations are in the drawing’s own caption." %}
+
+The consequence is that a shale field is a treadmill. One good Ghawar well flows like 13 new Permian wells, a Sverdrup well like 66, and the Permian well loses most of its rate within a year. American wells that were producing at the end of 2023 fell from 11.0 to 6.7 million barrels a day during 2024; about 11,700 new horizontal wells filled the gap {% include oil-ref.html k="eia-legacy" %}. The IEA puts the first-year decline of tight oil, as a whole, above 35 per cent, against under 2 per cent for the onshore supergiants of the Middle East and about 10 per cent for deep offshore fields {% include oil-ref.html k="iea-decline" %}. That is why shale answers prices within months, and why it stops growing within months when prices fall.
+
+{% include oil.html kind="wells" title="Wells that <em>run down</em>" caption="One Permian well modelled with an Arps hyperbolic curve through the published 730 → 200 barrels a day first year (b = 1.4; illustrative, not a measured well); wells needed for 100,000 barrels a day at the per-well rates in the text; and the output of four fields in the years the sources give (Ghawar: GeoExpro and the 2019 prospectus; Forties and Brent: Wikipedia; Sverdrup: Sodir, 2026 is January to August)." %}
+
+What a barrel costs comes in four kinds, and they must not be mixed. **Lifting cost** is only the cost of running the wells: Aramco reported $3.51 per barrel of oil equivalent in 2025, plus $8.0 of upstream capital spending per barrel {% include oil-ref.html k="aramco-ar25" %}; Sverdrup runs below $2 {% include oil-ref.html k="equinor-sverdrup" %}; Petrobras's pre-salt fields about $4.2 to 4.5 (as reported) {% include oil-ref.html k="petrobras-20f" %}; a Permian operator about $5.91 {% include oil-ref.html k="diamondback" %}. **Capital cost per barrel** spreads the cost of building over the barrels a project will produce: about $6 to 7 for Sverdrup and about $13 of oil for a $7 million shale well that yields some 550,000 barrels (both my arithmetic on the sources). A **breakeven** adds royalties, taxes, transport and a return on capital: below $20 for Sverdrup, $25 to 35 for Guyana (as reported) {% include oil-ref.html k="oilnow-be" %}, $27 for new onshore Middle East projects and $68.57 WTI for a new well in the Midland Basin in March 2026 {% include oil-ref.html k="rystad" %} {% include oil-ref.html k="dallasfed" %}. The fourth kind, a state's fiscal breakeven, comes in the next section.
+
+{% include oil.html kind="upcost" title="The cost of a barrel, <em>by field</em>" caption="Operating (lifting) cost and capital cost per barrel, and the breakeven: Aramco annual report 2025 with Rystad's new-project breakeven; Equinor's Johan Sverdrup figures; Petrobras pre-salt lifting cost with Guyana capital cost and breakevens (as reported); Diamondback's operating cost, a $7 million well over about 550,000 barrels, and the Dallas Fed's March 2026 new-well breakeven. Capital cost per barrel for Sverdrup and the shale well is my arithmetic. Hover a bar for the state's share." %}
+
+The gap between building cost and breakeven is mostly the state. Saudi Arabia takes a royalty of 15 per cent of the value up to $70 Brent, 45 per cent of the part between $70 and $100 and 80 per cent above, plus 50 per cent income tax (as reported); Norway taxes the profit of a field at 78 per cent {% include oil-ref.html k="np-tax" %}; Guyana's share of Stabroek oil rose to 39.8 per cent in 2026 as the companies' cost recovery fell {% include oil-ref.html k="dpi-guyana" %}; a Texas well pays a private royalty of 20 to 25 per cent and a production tax of 4.6 per cent {% include oil-ref.html k="tx-tax" %}. Cheap rock does not make cheap oil for the buyer. It makes rich states.
+
+{: .da-bridge}
+Those are the costs of single kinds of field. The market price is set by the most expensive barrel the world still needs.
+
+<h2 id="cost"><span class="num">09</span>What a barrel costs</h2>
 
 The cost of a barrel varies by a factor of three. Rystad Energy's breakeven prices for new projects, the Brent price at which a project returns its cost of capital, were $27 a barrel for onshore Middle East fields, $37 offshore on the shelf, $43 in deep water, $45 for North American shale and $57 for oil sands in 2024 {% include oil-ref.html k="rystad" %}. American operators asked directly in March 2026 said they needed $66 WTI on average to drill a new well profitably, and $43 to keep existing wells running; the survey number has risen from $50 in 2019 as the best shale locations were drilled out {% include oil-ref.html k="dallasfed" %}.
 
@@ -176,7 +241,7 @@ States have a second breakeven: the price at which the government budget balance
 {: .da-bridge}
 The cheapest barrels in the world are also the ones that keep the market's insurance policy: spare capacity.
 
-<h2 id="opec"><span class="num">08</span>OPEC+ and the spare barrels</h2>
+<h2 id="opec"><span class="num">10</span>OPEC+ and the spare barrels</h2>
 
 OPEC was founded in 1960; since 2016 it has coordinated output with ten other producers led by Russia as OPEC+, which together supply about 40 per cent of the world's oil. The group sets production levels by country and has used three layers of cuts since 2022; the largest, a voluntary 2.2 million barrels a day by eight members, was unwound by September 2025, a year early {% include oil-ref.html k="worldoil-opec" %}. On 28 April 2026 the UAE announced that it was leaving OPEC and OPEC+ after 59 years, effective 1 May {% include oil-ref.html k="aj-uae" %}.
 
@@ -191,7 +256,7 @@ Which brings us to geography: the routes oil takes from the wells to the refiner
 
 <p class="da-part">Part III<strong>Moving it</strong></p>
 
-<h2 id="lanes"><span class="num">09</span>Sea lanes and chokepoints</h2>
+<h2 id="lanes"><span class="num">11</span>Sea lanes and chokepoints</h2>
 
 About 44 million barrels a day of crude cross a border, and about 80 million barrels a day of crude and products move by sea, 76 per cent of world supply {% include oil-ref.html k="eia-choke" %} {% include oil-ref.html k="ei-sr" %}. The routes are few. The Middle East sends 19.1 million barrels a day of crude abroad, 86 per cent of it to Asia: 6.6 to China, 4.4 to Korea, Taiwan and the rest of Asia, 2.5 to India, 2.2 to Japan {% include oil-ref.html k="ei-sr" %}. Russia sends 79 per cent of its crude exports to China and India, Canada sends 88 per cent of its exports to the United States, and the United States sends 45 per cent of its crude exports to Europe (2025, Energy Institute data converted from tonnes) {% include oil-ref.html k="ei-sr" %}.
 
@@ -204,7 +269,7 @@ Hormuz is the one without an alternative. About 20 million barrels a day passed 
 {: .da-bridge}
 What carries all of this is a fleet of about 6,300 tankers above 25,000 tonnes {% include oil-ref.html k="safety4sea" %}, and in 2026 their price became the story.
 
-<h2 id="tanker"><span class="num">10</span>The tanker and the price of a voyage</h2>
+<h2 id="tanker"><span class="num">12</span>The tanker and the price of a voyage</h2>
 
 Tankers come in classes set by the ports and canals they must fit. The **VLCC** (very large crude carrier), about 330 metres long and 60 wide, draws 22 metres loaded and carries about 2 million barrels; it is the ship of the long hauls from the Gulf, West Africa, Brazil and the US Gulf to China. The **Suezmax** carries about 1 million barrels and is the largest that passes the Suez Canal loaded; the **Aframax**, 0.6 to 0.75 million, works the North Sea, the Baltic and the route from Houston to Rotterdam. Product tankers (LR2, LR1, MR) carry refined fuels.
 
@@ -223,7 +288,7 @@ Freight rose everywhere, not just in the Gulf, because the fleet is one pool. Sh
 {: .da-bridge}
 Not every tanker on the sea sails in the open market. Some carry oil that the West has sanctioned.
 
-<h2 id="sanctions"><span class="num">11</span>Sanctions and the dark fleet</h2>
+<h2 id="sanctions"><span class="num">13</span>Sanctions and the dark fleet</h2>
 
 Part of the world's oil moves outside the rules of the rest. Since December 2022 the G7 and the EU have allowed Western shipping and insurance to carry Russian crude only if it is sold below a price cap. The EU and the UK lowered the cap to $47.60 in September 2025 and, under a rule that resets it every six months to 15 per cent below the average Urals price, to **$44.10** from 1 February 2026 {% include oil-ref.html k="ec-cap" %}; when the war lifted Urals, the EU froze the cap at that level in July (logistics research note, snippet). Russia's answer is a fleet of older tankers with opaque owners and insurers: in August 2026 Urals sold at about $66 a barrel, far above the cap, Russia exported 4.9 million barrels a day by sea, India took 2.0 million barrels a day and China 1.65, and 168 loaded shadow-fleet tankers left Russian ports, 92 per cent of them older than fifteen years {% include oil-ref.html k="kse" %}. S&P counts about 980 such tankers, close to a fifth of the world's tanker fleet (logistics research note, snippet).
 
@@ -232,9 +297,30 @@ Iran ran its own version. Its exports, almost all to independent refiners in Chi
 Sanctioned oil matters to everyone else for two reasons. It is cheaper, so the refiners that can buy it (in India, China and Turkey) have an edge over those that cannot. And it uses tankers: every ship in the dark fleet is a ship missing from the ordinary market, which is one more reason freight rose so far in 2026.
 
 {: .da-bridge}
-On land, oil moves by pipe, and one place in the American pipe network matters to the whole world.
+On land, oil moves by pipe.
 
-<h2 id="cushing"><span class="num">12</span>Pipes, hubs and the tank in Oklahoma</h2>
+<h2 id="pipelines"><span class="num">14</span>The pipelines of the world</h2>
+
+A crude pipeline is a steel tube of 24 to 48 inches, welded from 12-metre joints with walls about a centimetre thick, buried a metre or two down and run at 80 to 100 bar {% include oil-ref.html k="alyeska" %} {% include oil-ref.html k="sdpuc-dapl" %}. Friction takes that pressure away along the line, so a pump station every 100 to 250 kilometres lifts it again; downhill the problem reverses and valves have to throttle the pressure gravity adds. The oil moves at walking to cycling pace, one to two and a half metres a second. On the Trans-Alaska Pipeline in 2024 it took 19.5 days to travel the 1,288 kilometres from Prudhoe Bay to Valdez, and the line holds 9.06 million barrels before the first one comes out at the other end {% include oil-ref.html k="alyeska" %}. That linefill is money lying in the ground.
+
+Grades travel one behind the other in batches, with no wall between them; where two meet they mix, and the mixed zone is cut into the cheaper grade. "Pigs", plugs pushed by the oil, scrape wax off the wall every two weeks on the Alaska line, and instrumented pigs measure the wall thickness every three years. A polymer injected at a few parts per million damps the turbulence at the wall and lets the same pipe carry about a third more {% include oil-ref.html k="alyeska" %}. Waxy crude must be kept warm: the East African line from Uganda to Tanzania is insulated and electrically heated so the oil stays above 50 °C {% include oil-ref.html k="eacop" %}. A control room watches pressures and flows along the whole line, but a meter-based leak detector cannot see a leak smaller than its meters' error: on 197 American incidents in 2010 to 2012, the public found more leaks than the computers did {% include oil-ref.html k="kiefner" %}.
+
+Over land a pipeline is the cheapest way to move oil, at roughly $3 to $5 a barrel per 1,000 kilometres: the Alaska tariff from 1 July 2026 is $5.92 a barrel {% include oil-ref.html k="taps-tariff" %}, Trans Mountain charges C$10.84 to 14.06 from Edmonton to Vancouver {% include oil-ref.html k="tm-tariff" %}, and rail costs two or three times a pipeline {% include oil-ref.html k="eia-rail" %} (the per-kilometre comparison is my arithmetic). A supertanker is cheaper still, under a dollar per 1,000 kilometres, which is why oil goes to sea as soon as it can.
+
+{% include oil.html kind="pipes" title="The pipelines <em>of the world</em>" caption="Sixty-two major crude and product lines, drawn through the towns and stations Wikipedia gives coordinates for (schematic between them, not surveyed routes); line width by design capacity, the Alaska line by its 2025 flow. Dots are dated attacks, thefts, failures and political shutdowns from 2021 to October 2026, from operators, Reuters, Al Jazeera, Wikipedia and regional press (see the reference list). Pick a region." %}
+
+**Russia and Europe.** Druzhba, "friendship", built from 1964, runs from the Volga to Belarus and splits there: the northern branch to Poland and Germany, the southern one through Ukraine to Slovakia, Hungary and Czechia. Germany and Poland stopped buying Russian crude through it in 2023; Germany's Schwedt refinery now runs on oil from Rostock and Gdańsk, and the Kazakh crude it still took through Druzhba, about 43,000 barrels a day in 2025, was stopped by Russia from 1 May 2026 {% include oil-ref.html k="bundestag-pck" %}. Southern Germany, Austria and, since April 2025, Czechia depend on the Transalpine line from Trieste, which carried 41.6 million tonnes in 2025, near its capacity {% include oil-ref.html k="wiki-tal" %}. The war put the pipes on the target list. Ukraine's drones went for pumping stations, which are point targets full of tanks and transformers and stop a whole line: in February 2026 a strike at Kaleykino in Tatarstan burned two 50,000-tonne tanks and Transneft cut intake by 250,000 barrels a day {% include oil-ref.html k="kaleykino" %}. A Russian strike on the Brody hub in western Ukraine on 27 January 2026 destroyed pumps and stopped Druzhba oil to Hungary and Slovakia until 23 April {% include oil-ref.html k="wiki-druzhba26" %}. The Caspian Pipeline Consortium, which carries most of Kazakhstan's exports to the Black Sea, lost a loading buoy to a sea drone in November 2025, had tankers hit through 2026 and in July stopped taking Kazakh crude for a time {% include oil-ref.html k="cpc-attacks" %}.
+
+**The Middle East.** The 1,200-kilometre East–West line from Abqaiq to Yanbu was Saudi Arabia's way around Hormuz, rated at 5 million barrels a day and converted to 7 million in March 2026. It was hit on 9 April, on 25 July (claimed by the Houthis) and on 10–11 September by drones that Baghdad says were launched from Iraq, after which the whole line was shut until 22 September {% include oil-ref.html k="aj-ew" %} {% include oil-ref.html k="wiki-ew" %}; on 24 and 26 October the Houthis claimed new strikes on its pumping stations {% include oil-ref.html k="houthi-ew" %}. Iraq's Kirkuk–Ceyhan line to Türkiye, closed from March 2023 to September 2025 by an arbitration ruling, was restarted after the Hormuz closure and carried about 130,000 barrels a day in August {% include oil-ref.html k="shafaq-itp" %}.
+
+**The Americas.** Canada sends almost all its exports south through Enbridge's Mainline, about 3 million barrels a day, and since May 2024 west through the expanded Trans Mountain line, 890,000 {% include oil-ref.html k="wiki-tmx" %}. The Permian's lines to Corpus Christi and Houston carry most of the American export barrel to the docks. The American incidents were failures, not attacks: Keystone spilled about 13,000 barrels in Kansas in December 2022 from a cracked weld and 3,500 in North Dakota in April 2025 {% include oil-ref.html k="wiki-keystone" %}.
+
+**Africa.** The lines are fewer and the risk is theft and war: Nigeria's Trans Niger Pipeline had 460 illegal taps removed before its 2023 restart, Sudan's civil war cut South Sudan's export line in 2024, and the heated East African line was 92.7 per cent built in September 2026, with first oil at Tanga expected in 2027 {% include oil-ref.html k="eacop-tz" %}.
+
+{: .da-bridge}
+Pipelines end at hubs, and one hub in the American network matters to the whole world.
+
+<h2 id="cushing"><span class="num">15</span>Pipes, hubs and the tank in Oklahoma</h2>
 
 Cushing, a small town in Oklahoma, is the delivery point of the NYMEX WTI futures contract: whoever holds a contract at expiry must take or deliver crude into a tank there. Pipelines from the Permian Basin in Texas, from the Midcontinent and from Canada meet at Cushing, and others run from it to the refineries and export docks of the Gulf Coast. Working storage at the hub is about 76 to 78 million barrels, out of a shell capacity of about 98 (EIA estimates, as summarised in the research note).
 
@@ -247,7 +333,7 @@ That tie, coast to coast and ocean to ocean, is how the benchmarks are built.
 
 <p class="da-part">Part IV<strong>The price</strong></p>
 
-<h2 id="benchmarks"><span class="num">13</span>Brent, WTI and Dubai</h2>
+<h2 id="benchmarks"><span class="num">16</span>Brent, WTI and Dubai</h2>
 
 Almost every barrel in the world is sold at a **differential** to one of three benchmarks: Brent for the Atlantic Basin, Africa and much of Asia; WTI for the Americas; Dubai and Oman for Middle East crude going to Asia. The benchmarks themselves are assessed by price reporting agencies, Platts and Argus, from the trades made in a short window at the end of each day, or settled on an exchange.
 
@@ -262,7 +348,7 @@ Almost every barrel in the world is sold at a **differential** to one of three b
 {: .da-bridge}
 A benchmark is not one price but a line of prices, one for each delivery month. Its shape tells you whether the market has too much oil or too little.
 
-<h2 id="curve"><span class="num">14</span>The curve: contango and backwardation</h2>
+<h2 id="curve"><span class="num">17</span>The curve: contango and backwardation</h2>
 
 The futures curve is the set of prices for delivery one, two, three and more months ahead. Whether it slopes up or down follows from an arbitrage. Someone who buys a barrel today at spot price $$S$$, stores it and sells it forward pays interest $$r$$ and storage $$u$$; someone who holds a barrel also has the "convenience" $$y$$ of having it when it is needed, which is large when oil is scarce. In equilibrium
 
@@ -277,7 +363,7 @@ The Brent curve has been in backwardation since the war began on 28 February, wi
 {: .da-bridge}
 The curve explains the price of time. The spread between the two big benchmarks explains the price of distance.
 
-<h2 id="gap"><span class="num">15</span>Brent minus WTI is a voyage</h2>
+<h2 id="gap"><span class="num">18</span>Brent minus WTI is a voyage</h2>
 
 For most of its history WTI traded within a few dollars of Brent. The two diverged when one of them could not reach the other. In 2011 to 2013 the shale boom filled Cushing before pipelines to the coast existed, and Brent spot traded up to $29.59 above WTI (23 September 2011); the gap closed as pipelines were built and the export ban was lifted in 2015 {% include oil-ref.html k="eia-spot" %}.
 
@@ -294,7 +380,7 @@ The same arithmetic split the world's refiners. An American refinery bought WTI 
 {: .da-bridge}
 With the machinery in place, the long history of the price reads differently.
 
-<h2 id="history"><span class="num">16</span>Forty years of the price</h2>
+<h2 id="history"><span class="num">19</span>Forty years of the price</h2>
 
 {% include oil.html kind="prices" title="Forty years <em>of oil</em>" caption="Brent and WTI spot prices, weekly means 1986–2024 and daily since 2025, in dollars of the day (not adjusted for inflation). The lettered markers are explained on hover; the 2025–2026 view shows the war year in daily detail. Data: EIA via FRED." range="all" %}
 
@@ -305,7 +391,7 @@ Here is that year, month by month.
 
 <p class="da-part">Part V<strong>2026</strong></p>
 
-<h2 id="war"><span class="num">17</span>2026: the strait closes</h2>
+<h2 id="war"><span class="num">20</span>2026: the strait closes</h2>
 
 The year began with too much oil. In February the IEA expected supply to grow by 2.4 million barrels a day in 2026 and demand by only 0.85, and global stocks stood at 8.2 billion barrels, the highest since 2021 {% include oil-ref.html k="iea-feb" %}. Brent futures closed at $72.48 on 27 February {% include oil-ref.html k="wiki-chron" %}.
 
@@ -329,7 +415,7 @@ One thing the chart makes plain is that the crude price did not stay high. Brent
 {: .da-bridge}
 Why diesel, of all the products, ran away from crude is the subject of the next section.
 
-<h2 id="diesel"><span class="num">18</span>The diesel crisis</h2>
+<h2 id="diesel"><span class="num">21</span>The diesel crisis</h2>
 
 Four things removed diesel from the market at once.
 
@@ -345,7 +431,7 @@ Diesel futures in New York crossed $100 a barrel over WTI for the first time on 
 {: .da-bridge}
 A shortage shows up first in the tanks, and the tanks were drawn harder in 2026 than ever before.
 
-<h2 id="stocks"><span class="num">19</span>The tanks run down</h2>
+<h2 id="stocks"><span class="num">22</span>The tanks run down</h2>
 
 Between the end of February and the end of September the world drew about 509 million barrels from its observed stocks {% include oil-ref.html k="iea-oct" %}. Governments released about 330 of the 426 million barrels pledged in March by mid-October, and on 2 October the G7 agreed to release up to 100 million more, diesel first {% include oil-ref.html k="globaloilshock" %} {% include oil-ref.html k="npr-g7" %}. The US Strategic Petroleum Reserve, which held 415 million barrels at the end of February, held 282.7 million on 16 October, its lowest level since 1982 {% include oil-ref.html k="eia-wpsr" %}. China, which had added about 111 million barrels to its crude stocks in 2025, drew 162 million barrels from its May peak by 19 October, acting as a second, uncoordinated strategic reserve {% include oil-ref.html k="boe-china" %}.
 
@@ -356,7 +442,7 @@ US distillate stocks fell to 100.8 million barrels on 22 May and stood at 104.3 
 {: .da-bridge}
 All of this arrives, in the end, at a pump.
 
-<h2 id="litre"><span class="num">20</span>What a litre costs</h2>
+<h2 id="litre"><span class="num">23</span>What a litre costs</h2>
 
 German diesel set an all-time record of €2.453 a litre on 16 September 2026, according to the ADAC daily average {% include oil-ref.html k="zdf-diesel" %}. On 1 October a temporary tax cut of 14.04 cents a litre on both fuels took effect until the end of the year, bringing the diesel energy tax down to the EU minimum of 33.00 cents {% include oil-ref.html k="kpmg-tax" %}. On 21 October diesel cost €2.255 and E10 €2.110 {% include oil-ref.html k="adac" %}.
 
@@ -367,7 +453,7 @@ Taken apart, the German litre is about 36 cents of VAT, 33 of energy tax, 17 of 
 {: .da-bridge}
 That is the chain from the well to the pump. What the figures and numbers above cannot show deserves a list of its own.
 
-<h2 id="limits"><span class="num">21</span>What this article cannot tell you</h2>
+<h2 id="limits"><span class="num">24</span>What this article cannot tell you</h2>
 
 - **Two Brents.** The EIA's Brent spot series, plotted here, is a physical price close to Dated Brent; news reports usually quote ICE futures. They differed by up to $35 in 2026. Every Brent–WTI number in the text says which it is.
 - **Flows in 2026 are uncertain.** Most tankers around the Gulf sailed dark from March, and Kpler and Vortexa disagreed by up to 6 million barrels a day of Gulf crude in a single week in October {% include oil-ref.html k="gcaptain-flows" %}. The Hormuz figure gives one tracker per month.
@@ -379,7 +465,7 @@ That is the chain from the well to the pump. What the figures and numbers above 
 {: .da-bridge}
 The sources behind every statement follow, with how much of each I saw.
 
-<h2 id="sources"><span class="num">22</span>Sources</h2>
+<h2 id="sources"><span class="num">25</span>Sources</h2>
 
 <div class="da-note" markdown="1">
 **Data and software.** Spot prices are the EIA's, republished by the Federal Reserve Bank of St. Louis (FRED); weekly stocks, production, exports and retail prices are from the EIA's Weekly Petroleum Status Report; both are public domain. Country borders are Natural Earth (public domain). The figures are plain SVG computed in the browser (`assets/js/oil-explorer.js`); the isometric drawings are standalone pages made with the *anatomy* figure kit. The headline font is Barlow Condensed (SIL Open Font License), self-hosted like everything else on this site. The pipeline that builds the data is in `bin/oil_article/` in the site's repository. The look of the figures follows the reel by Crude & Conflict that prompted this article {% include oil-ref.html k="reel" %}.

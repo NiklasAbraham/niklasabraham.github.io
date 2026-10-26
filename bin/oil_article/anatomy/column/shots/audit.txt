@@ -1,0 +1,16 @@
+wrote /home/niklas/code/niklasabraham.github.io/assets/oil-article/anatomy/column-light.html 757 KB 214 items 160 solids scale 1.621 H 577
+clearance: 0 problems
+clearance apart: 0 problems
+terminals: 0 ends not on a mount
+loose ends: 0
+screen folds: 0
+support: 0 unsupported solids · 0 hanging tubes · 0 sunk pairs
+depth order: 0 problems
+through in mid-flight: 0 pairs
+self-overlap: 0 chunks whose outline crosses itself on screen
+wobble: 0 smoothed profiles whose slope turns between its ends
+saddles off their host apart: 0
+stand-in shapes: 0 items whose recorded shape covers too little of what it draws
+crowding: 0 pairs where a bend or end touches another line on screen
+audit · 31 tubes · 160 solids · 214 items · 1 depth states · 417 overlaps · 417 order rules · 3.9 s
+audit passed
