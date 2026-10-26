@@ -1,7 +1,7 @@
 ---
 layout: default
 title: PaperManager
-description: A self-hosted second brain for research papers. Drop in a PDF and get a summary, figures, references, interactive concept visualisations, a guided tour and a concept map across your projects, all in one Neo4j knowledge graph you can chat with.
+description: A self-hosted second brain for research papers. Drop in a PDF and get a summary, figures, references, interactive concept visualisations, a guided tour and a concept map across your projects, all in one Neo4j knowledge graph you can search and chat with, plus a conference explorer for who publishes what at 22 conference series.
 importance: 0
 category: software
 permalink: /projects/papermanager/
@@ -262,9 +262,26 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
       alt="Library dashboard with paper, author, topic and tag counts, papers by year, top topics, recently added papers and venues"></a></figure>
   </div>
 
+  <div class="pm-feature" id="search">
+    <div class="pm-feature-text"><div class="pm-feature-head">
+      <p class="pm-kicker">2 · Search</p>
+      <h3>Find a paper by whatever you remember of it</h3></div>
+      <div class="pm-feature-body">
+      <p>One search box covers titles, authors, topics, tags, abstracts and summaries, your notes, your PDF highlights and their comments, extracted claims and the full text. A DOI or arXiv id goes straight to its paper. Words match as prefixes and tolerate one typo; case and accents do not matter.</p>
+      <p>Every hit says where it matched, with the matching words marked in a passage. While you type, suggestions list papers, authors, topics, tags and projects. <em>Exact</em> matches words, <em>Meaning</em> ranks by what the title and abstract mean, <em>Hybrid</em> combines the two; the library's embeddings (bge-small-en-v1.5) are kept in sync in the background.</p>
+      <p>On 26 realistic queries the expected paper is in the top 3 for all 26. The previous search managed 17.</p>
+    </div></div>
+    <div class="pm-pair">
+      <figure class="pm-shot"><a href="{{ img }}search.webp"><img src="{{ img }}search.webp" width="1600" height="1000" loading="lazy"
+        alt="Library search for flow matching: 160 results in hybrid mode, each with chips saying where it matched (title, topic, abstract, summary, claim, full text, meaning score) and passages with the query words marked"></a></figure>
+      <figure class="pm-shot"><a href="{{ img }}search-suggest.webp"><img src="{{ img }}search-suggest.webp" width="1600" height="1000" loading="lazy"
+        alt="Type-ahead after typing karr: the authors Brian Karrer and Tero Karras are suggested with their paper counts, above papers matched by author and full text"></a></figure>
+    </div>
+  </div>
+
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">2 · Read with help</p>
+      <p class="pm-kicker">3 · Read with help</p>
       <h3>Understand a paper next to its PDF</h3></div>
       <div class="pm-feature-body">
       <p>The summary splits the paper into contribution, methods, inputs and outputs, with the maths typeset. Highlight in five colours, keep notes that link <code>@people</code> and <code>#topics</code> into the graph, and ask about the paper or a single figure.</p>
@@ -279,7 +296,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
 
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">3 · Concepts</p>
+      <p class="pm-kicker">4 · Concepts</p>
       <h3>See the idea instead of decoding it</h3></div>
       <div class="pm-feature-body">
       <p>Every page is scanned for ideas a picture explains better than prose: a sampler, a loss, a scaling law. Each becomes an animation, a formula broken into its parts, or a plot of the paper's own numbers, marked on the PDF where it belongs.</p>
@@ -291,7 +308,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
 
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">4 · Quick tour</p>
+      <p class="pm-kicker">5 · Quick tour</p>
       <h3>Skim a long paper without getting lost</h3></div>
       <div class="pm-feature-body">
       <p>An overview, a list of what you can safely skip, then 6 to 12 stops: the problem, the key equation, the main result. Each stop jumps the PDF to a verbatim passage. Step through with the arrow keys.</p>
@@ -302,7 +319,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
 
   <div class="pm-feature">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">5 · Project concept map</p>
+      <p class="pm-kicker">6 · Project concept map</p>
       <h3>See how a whole field fits together</h3></div>
       <div class="pm-feature-body">
       <p>Group papers into a project and every paper's key concepts are mapped and shared across papers: methods, models, datasets, metrics. Size counts papers, colour is the kind of concept, citations are drawn in.</p>
@@ -314,7 +331,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
 
   <div class="pm-feature pm-feature-chat" id="chat">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">6 · Knowledge chat</p>
+      <p class="pm-kicker">7 · Knowledge chat</p>
       <h3>Ask your whole library</h3></div>
       <div class="pm-feature-body">
       <p>
@@ -360,11 +377,32 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     </p>
   </div>
 
+  <div class="pm-feature" id="conferences">
+    <div class="pm-feature-text"><div class="pm-feature-head">
+      <p class="pm-kicker">8 · Conference explorer</p>
+      <h3>See who publishes what, at every major conference</h3></div>
+      <div class="pm-feature-body">
+      <p>The Conferences tab reads the accepted papers of 22 conference series two ways. By institution: rank, full and fractional paper counts, the research-area mix against the whole conference, the main collaborators and every paper. By topic: type one or paste an abstract, and see which universities and companies publish most on it and which papers are closest.</p>
+      <p>One search box covers every loaded conference at once. Papers are found by title and by meaning; an author comes back with all their papers per conference and the institution given on each; a topic shows papers per 1,000 at each conference, the change from one year to the next (NeurIPS 2025 → 2026) and the top universities and companies pooled. Case and accents do not matter.</p>
+      <p>On "diffusion models for protein structure", ICLR 2026 and NeurIPS 2025 hold about 12 close papers per 1,000, ACL and CoRL none; MIT and Tsinghua lead the universities, Google the companies.</p>
+      <p>Papers already in your library are marked. One click adds a paper with its authors and their affiliations.</p>
+      <p class="pm-fine">NeurIPS, ICML, ICLR, AISTATS, UAI, COLT · CVPR, ICCV, ECCV, WACV · ACL, EMNLP, NAACL, COLM · AAAI, IJCAI · CoRL, RSS, ICRA, IROS · KDD, WWW. Paper lists come from the official conference sites, author institutions included, and from <a href="https://github.com/papercopilot/paperlists">Paper Copilot</a>. Embeddings (<a href="https://huggingface.co/BAAI/bge-small-en-v1.5">bge-small-en-v1.5</a>) are computed on your own server; no API key is involved.</p>
+    </div></div>
+    <figure class="pm-shot"><a href="{{ img }}conferences.webp"><img src="{{ img }}conferences.webp" width="1600" height="1000" loading="lazy"
+      alt="NeurIPS 2026 in the conference explorer: 6,024 accepted papers, the research-area mix of the conference as one bar, and the top universities and top companies by paper count"></a></figure>
+    <div class="pm-pair" style="margin-top:1rem">
+      <figure class="pm-shot"><a href="{{ img }}conferences-topic.webp"><img src="{{ img }}conferences-topic.webp" width="1600" height="1000" loading="lazy"
+        alt="Search across all loaded conferences for diffusion models for protein structure: papers per 1,000 at each conference and the change from NeurIPS 2025 to 2026"></a></figure>
+      <figure class="pm-shot"><a href="{{ img }}conferences-institution.webp"><img src="{{ img }}conferences-institution.webp" width="1600" height="1000" loading="lazy"
+        alt="Institution card for the University of Oxford at NeurIPS 2026: rank, full and fractional paper counts, research areas against the conference and co-authoring institutions"></a></figure>
+    </div>
+  </div>
+
   <div class="pm-grid">
     <div class="pm-card">
       <i class="fas fa-plug pm-icon"></i>
       <h3>MCP server</h3>
-      <p>35 tools for Claude Desktop and Claude Code: search the library, read a paper, add notes and tags, upload PDFs, merge duplicates.</p>
+      <p>40 tools for Claude Desktop and Claude Code: search the library, read a paper, add notes and tags, upload PDFs, merge duplicates, ask who publishes on a topic at a conference.</p>
     </div>
     <div class="pm-card">
       <i class="fas fa-project-diagram pm-icon"></i>
@@ -374,7 +412,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     <div class="pm-card">
       <i class="fas fa-search pm-icon"></i>
       <h3>Discovery</h3>
-      <p>Literature search across arXiv, Semantic Scholar and PubMed, author tracking, RSS blogs and related-paper suggestions.</p>
+      <p>Literature search across arXiv, Semantic Scholar and PubMed, author tracking, RSS blogs, related-paper suggestions and the <a href="#conferences">conference explorer</a>.</p>
     </div>
     <div class="pm-card">
       <i class="fas fa-lightbulb pm-icon"></i>
@@ -446,7 +484,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
   <div class="pm-grid" style="margin-top:1rem">
     <div class="pm-card">
       <h3>Models where they fit</h3>
-      <p>Claude writes summaries, answers chats and builds tours. A smaller model through LiteLLM handles bulk work such as the concept map. Without a GPU, Docling runs on the CPU inside the container.</p>
+      <p>Claude writes summaries, answers chats and builds tours. A smaller model through LiteLLM handles bulk work such as the concept map. Without a GPU, Docling runs on the CPU inside the container, and so does bge-small-en-v1.5, which embeds your library for search by meaning and the conference papers.</p>
     </div>
     <div class="pm-card">
       <h3>Your data stays yours</h3>
@@ -525,7 +563,7 @@ https://github.com/NiklasAbraham/PaperManager/blob/main/DEPLOY.md</code></pre>
   <div class="pm-chips">
     <span>Python 3.11</span><span>FastAPI</span><span>Neo4j 5</span><span>React 19</span><span>TypeScript</span>
     <span>Vite</span><span>Tailwind CSS</span><span>react-force-graph</span><span>Anthropic SDK</span><span>Claude Code</span>
-    <span>LiteLLM</span><span>OpenAI SDK</span><span>Docling</span><span>FastMCP</span><span>Google Drive API</span><span>Docker</span><span>MkDocs</span>
+    <span>LiteLLM</span><span>OpenAI SDK</span><span>Docling</span><span>bge-small-en-v1.5</span><span>FastMCP</span><span>Google Drive API</span><span>Docker</span><span>MkDocs</span>
   </div>
 </section>
 
