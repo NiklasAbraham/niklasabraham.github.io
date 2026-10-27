@@ -402,7 +402,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     <div class="pm-card">
       <i class="fas fa-plug pm-icon"></i>
       <h3>MCP server</h3>
-      <p>40 tools for Claude Desktop and Claude Code: search the library, read a paper, add notes and tags, upload PDFs, merge duplicates, ask who publishes on a topic at a conference.</p>
+      <p>41 tools for Claude Desktop and Claude Code: search the library, check a list of cited DOIs or titles against it in one cheap call, read a paper, add notes and tags, upload PDFs, merge duplicates, ask who publishes on a topic at a conference.</p>
     </div>
     <div class="pm-card">
       <i class="fas fa-project-diagram pm-icon"></i>
