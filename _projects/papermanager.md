@@ -591,6 +591,41 @@ https://github.com/NiklasAbraham/PaperManager/blob/main/DEPLOY.md</code></pre>
   </p>
 </section>
 
+<!-- ============================================================ contributions -->
+<section class="pm-section" id="contributions">
+  <div class="pm-section-head">
+    <p class="pm-kicker">Contributions</p>
+    <h2>Built with help from others</h2>
+    <p>
+      PaperManager is open source, and parts of it come from other people's pull requests.
+      Thank you to everyone who has contributed.
+    </p>
+  </div>
+
+  <ul class="pm-contrib">
+    <li>
+      <p class="pm-contrib-who">
+        <a href="https://github.com/AntoineLuciano">Antoine Luciano</a>
+        <span>· <a href="{{ repo }}/pull/36">pull request #36</a>, October 2026</span>
+      </p>
+      <h3>People: surname order, researcher CVs, duplicate finder</h3>
+      <p>
+        The People page now sorts by surname. A new <strong>CV</strong> tab builds a researcher's
+        profile from OpenAlex, ORCID, Wikidata and their homepage (position, education, h-index,
+        most cited works, photo), and checks it against the papers in your library, so a namesake
+        is not mistaken for the author. A <strong>duplicate finder</strong> groups people listed
+        more than once ("C. P. Robert" and "Christian P. Robert") and merges them, keeping the
+        other spellings as aliases.
+      </p>
+    </li>
+  </ul>
+
+  <p class="pm-agent-lede">
+    Want to add something? Open an issue or a pull request on
+    <a href="{{ repo }}">GitHub</a>; merged work is credited here.
+  </p>
+</section>
+
 <!-- ============================================================ stack -->
 <section class="pm-section">
   <div class="pm-section-head">
