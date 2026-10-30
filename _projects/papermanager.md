@@ -230,6 +230,26 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
   <p class="pm-solve"><strong>PaperManager puts it in one place.</strong> A single knowledge graph holds your papers, notes, concepts and citations, and every feature below reads from it.</p>
 </section>
 
+<!-- ============================================================ AI that knows your papers -->
+<section class="pm-section pm-knows" id="knows" style="max-width:72ch">
+  <div class="pm-section-head">
+    <p class="pm-kicker">AI is everywhere</p>
+    <h2>This one already knows your papers</h2>
+  </div>
+  <p>
+    Every app has a chat box now, and every one of them starts from zero: you upload the PDF again, explain your
+    project again, and get a wall of text back. PaperManager's chat already has your library. Ask what your highlight
+    on page 1 of a paper means, with no file attached, and it finds the paper, reads your highlight and the note you
+    left on it, and answers in a few lines with the page cited; click the citation and the paper opens beside the
+    conversation.
+  </p>
+  <p>
+    Where a picture explains better than prose, the answer comes with a <a href="#concepts">concept card</a>: the
+    formula taken apart term by term, or an animation of the idea you can pause where it gets interesting. Notes,
+    highlights, concepts and citations live in one graph, so the next question starts where the last one ended.
+  </p>
+</section>
+
 <!-- ============================================================ what it does to a paper -->
 <section class="pm-section pm-paper-demo" id="paper">
   <div class="pm-section-head">
@@ -242,6 +262,22 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     <canvas class="pm-canvas" data-scene="annotate" role="img"
       aria-label="A paper's PDF page is read and annotated: colour-coded highlights sweep across lines, concept marks appear in the margin, a summary types itself beside the page, figures and tables are lifted into a side panel, references are collected, and quick-tour stops are pinned to the page."></canvas>
   </div>
+</section>
+
+<!-- ============================================================ teardown film (reel 424, ConceptsPlots 110_reel_editor/epic_teardown_v.py) -->
+<section class="pm-section pm-teardown" id="teardown">
+  <div class="pm-teardown-text">
+    <p class="pm-kicker">One paper, start to finish</p>
+    <h2>AlphaFold&nbsp;3, taken apart and tied into the library</h2>
+    <p>This is what happened to the AlphaFold&nbsp;3 paper when it went in: its 24 pages split, the 16 figures cut out, ten claims and the 48 authors pulled from the text, and the whole put back together as one card with its topics.</p>
+    <p>Then the card goes where it belongs. Twenty papers already in the library cite it and tie on one by one; the eight that belong to a thesis project light up; 27 more on protein structure prediction line up behind the topic. Every title, count and link in the film comes from the real library.</p>
+  </div>
+  <figure class="pm-film">
+    <video src="{{ img }}teardown-af3.mp4" poster="{{ img }}teardown-af3-poster.webp" width="720" height="1280"
+      controls playsinline preload="none"
+      aria-label="Film, 36 seconds: the AlphaFold 3 paper is split into pages, figures, claims and authors, reassembled as a card, and then connected to the 20 library papers that cite it and 27 more on its topic"></video>
+    <figcaption>36 s, with sound. Rendered from PaperManager's own data.</figcaption>
+  </figure>
 </section>
 
 <!-- ============================================================ features -->
@@ -294,7 +330,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     </div>
   </div>
 
-  <div class="pm-feature">
+  <div class="pm-feature" id="concepts">
     <div class="pm-feature-text"><div class="pm-feature-head">
       <p class="pm-kicker">4 · Concepts</p>
       <h3>See the idea instead of decoding it</h3></div>

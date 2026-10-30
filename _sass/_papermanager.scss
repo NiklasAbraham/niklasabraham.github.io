@@ -1324,3 +1324,37 @@ $pm-themes: (
   max-width: 860px;
   margin: 0 auto 1.2rem !important;
 }
+
+// ---------------------------------------------------------------- teardown film (vertical reel beside its text)
+
+.pm-teardown {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+  gap: 3rem;
+  align-items: center;
+  max-width: 62rem;
+  margin-left: auto;
+  margin-right: auto;
+
+  .pm-teardown-text h2 { margin-bottom: 1rem; }
+}
+
+.pm-film {
+  margin: 0;
+  video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    border-radius: 14px;
+    border: 1px solid var(--pm-border);
+    background: #e9e7e2;
+    box-shadow: var(--pm-shadow);
+  }
+  figcaption { font-size: 0.82rem; color: var(--pm-muted); text-align: center; margin-top: 0.6rem; }
+}
+
+@media (max-width: 760px) {
+  .pm-teardown { grid-template-columns: 1fr; gap: 1.6rem; }
+  .pm-film { max-width: 320px; margin: 0 auto; }
+}
