@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Diffusion Architecture Gallery
-description: Seventeen diffusion models, from DDPM to AlphaFold 3 and BioEmu, drawn in one visual language.
+description: Twenty diffusion models, from DDPM to AlphaFold 3 and BioEmu, drawn in one visual language.
 importance: 1
 category: research
 permalink: /projects/diffusion-architectures/
@@ -14,8 +14,8 @@ permalink: /projects/diffusion-architectures/
   <p class="dg-eyebrow">Project · Architecture gallery · companion to the <a href="{{ longread }}">long read</a></p>
   <h1 class="dg-title">Diffusion models, drawn the same way</h1>
   <p class="dg-lede">
-    Seventeen denoisers, from the DDPM U-Net to AlphaFold 3, its open reproductions and the BioEmu ensemble
-    emulators, drawn in one visual language. A block that does the same job looks the same in every drawing, so what changes from card to card
+    Twenty denoisers, from the DDPM U-Net to AlphaFold 3, its open reproductions and the BioEmu ensemble
+    emulators, drawn in one visual language. Among the biomolecular ones the task differs and is named on each card: AlphaFold 3, Boltz-2 and their kin <em>predict</em> the structure of a given sequence, the BioEmu models sample its ensemble, and RFdiffusion and its successors <em>design</em> a new molecule for a target. A block that does the same job looks the same in every drawing, so what changes from card to card
     is what changed between the models. The drawings show <em>what</em> each network is made of; the
     <a href="{{ longread }}">long read</a> explains <em>why</em>, with the ablations behind each choice.
   </p>
@@ -98,9 +98,9 @@ permalink: /projects/diffusion-architectures/
 <section class="dg-grid dg-wide" data-view-panel="grid">
   {%- for m in models %}
   <article class="dg-card" id="{{ m.id }}" data-id="{{ m.id }}" data-domain="{{ m.domain }}" data-n="{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}" data-name="{{ m.name }}" data-year="{{ m.year }}"
-           data-search="{{ m.name }} {{ m.org }} {{ m.backbone }} {{ m.conditioning }} {{ m.objective }} {{ m.space }} {{ m.novelty }} {{ m.notes | join: ' ' }}">
+           data-search="{{ m.name }} {{ m.task }} {{ m.org }} {{ m.backbone }} {{ m.conditioning }} {{ m.objective }} {{ m.space }} {{ m.novelty }} {{ m.notes | join: ' ' }}">
     <header class="dg-cardhead">
-      <span class="dg-kind{% if m.domain == 'bio' %} warm{% endif %}">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }} · {% if m.domain == "bio" %}biomolecules{% else %}images{% endif %} · {{ m.year }}</span>
+      <span class="dg-kind{% if m.domain == 'bio' %} warm{% endif %}">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }} · {% if m.domain == "bio" %}biomolecules · {{ m.task }}{% else %}images{% endif %} · {{ m.year }}</span>
       <h2>{{ m.name }}</h2>
       <button class="dg-btn" type="button" data-zoom aria-label="Enlarge the {{ m.name }} drawing">⤢ enlarge</button>
     </header>
@@ -133,13 +133,13 @@ permalink: /projects/diffusion-architectures/
 <section class="dg-table-wrap dg-wide" data-view-panel="table" hidden>
   <table class="dg-table">
     <thead>
-      <tr><th>Model</th><th>Year</th><th>Works on</th><th>Backbone</th><th>Parameters</th><th>Conditioning</th><th>Objective</th><th>Steps</th></tr>
+      <tr><th>Model</th><th>Task</th><th>Year</th><th>Works on</th><th>Backbone</th><th>Parameters</th><th>Conditioning</th><th>Objective</th><th>Steps</th></tr>
     </thead>
     <tbody>
       {%- for m in models %}
       <tr data-id="{{ m.id }}" data-domain="{{ m.domain }}">
         <th scope="row"><a href="#{{ m.id }}">{{ m.name }}</a></th>
-        <td>{{ m.year }}</td><td>{{ m.space }}</td><td>{{ m.backbone }}</td><td>{{ m.params }}</td>
+        <td>{{ m.task | default: "image generation" }}</td><td>{{ m.year }}</td><td>{{ m.space }}</td><td>{{ m.backbone }}</td><td>{{ m.params }}</td>
         <td>{{ m.conditioning }}</td><td>{{ m.objective }}</td><td>{{ m.steps }}</td>
       </tr>
       {%- endfor %}

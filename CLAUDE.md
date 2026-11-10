@@ -53,6 +53,19 @@ scrolls into view); styles `_sass/_food_article.scss` on top of the budget post'
 
 `_posts/2026-10-19-ai-money.md` (`/blog/2026/ai-money/`): who funds whom in the AI build-out, bonds and rates, bubble tests, sovereign yields. Pipeline in `bin/ai_article/` (README there): FRED series + hand-curated `curated.py` → `assets/ai-article/ai.json`. Figures are `{% include ai.html kind=… %}` read by `assets/js/ai-explorer.js` (capex, labs, web, commit, curves, ladder, deals, rates, calc, nasdaq, sov); styles `_sass/_ai_article.scss` on top of the budget post's `.bx-*`. **Every claim carries a source tag** `{% include ai-ref.html k="key" %}` resolved from `_data/ai_article/refs.yml` (status opened / snippet / primary / data); add the entry before using a key. Prices of bonds and swaps are stamped with their date; refresh them (and `build.py`) before republishing.
 
+## Diffusion gallery: preview one card
+
+`bin/diffusion_gallery/build.py` writes every drawing to `_includes/diffusion-gallery/` and `_data/`. While editing a
+drawing, use `python3 bin/diffusion_gallery/build.py --preview-card rfd4 [rfd3 …] --shot` instead of waiting for the
+Jekyll preview: it draws only those cards into `bin/diffusion_gallery/preview/index.html` (gitignored, open as a file,
+`?theme=dark` or the toggle), warns about detail keys with no block, and with `--shot` writes
+`MasterThesis/050_system/shots/gallery_<id>_{light,dark}.png` at 2× via `preview_shot.mjs` (Playwright from
+`~/code/Website/node_modules`), printing console errors and text that leaves its box. About 2 s. Its CSS is the real
+`main.css`, compiled from `assets/css/main.scss` + `_sass/` by the dart-sass 1.69.5 of the `nab-site-dev` image
+(extracted once to `~/.cache/nab-site/dart-sass/`; `DG_SASS` overrides), byte-identical to Jekyll's; without it, the
+preview server's `main.css` is used and an SCSS file newer than it is warned about. The live site has dark mode off
+(`enable_darkmode: false`), so the dark shots show the SCSS dark tokens, not anything a visitor sees.
+
 ## Fold walkthrough
 
 `_projects/diffusion-walkthrough.md` (`/projects/diffusion-architectures/walkthrough/`): engine `assets/js/fw-core.js`,
@@ -78,3 +91,7 @@ Niklas wanted the physics-first post *and* the biology with 3D, so section 00 "T
 ## Oil-market post
 
 `_posts/2026-10-26-oil-market.md` (`/blog/2026/oil-market/`): the whole oil market (crude, refining, crack spread, producers, demand, costs, OPEC+, chokepoints, tankers, Cushing, benchmarks, curve, Brent−WTI, the 2026 Hormuz war, diesel, stocks, pump price). Pipeline `bin/oil_article/` (README there): EIA/FRED → `assets/oil-article/oil.json`, Natural Earth → `geo.json`, hand-curated `curated.py` (series colours live there too, in the site palette). Figures are `{% include oil.html kind=… %}` from `assets/js/oil-explorer.js`, drawn in the site's `.concept.bx` card (restyled 26 Oct 2026 from the first version's navy blueprint sheets, which Niklas rejected; styles `_sass/_oil_article.scss`). The four isometric drawings are iframes `{% include oil-anat.html name=… %}` of the `-light` pages in `assets/oil-article/anatomy/`, each patched with a `<style id="oil-site-light">` block that forces the light variables on every `.iso` and a white page: re-add it if the drawings are rebuilt from `bin/oil_article/anatomy/`. Source tags `{% include oil-ref.html k=… %}` from `_data/oil_article/refs.yml`. "Brent spot" in the post always means the EIA series; ICE futures are named as such. Check with `node bin/oil_article/shots.mjs [--phone]`. Second round (26 Oct 2026): sections "Why each product leaves at its own height" (#column: figures boil, tbp, stages, drawing `column`), "Three ways out of the ground" (#upstream: wells, upcost, drawing `fields`) and "The pipelines of the world" (#pipelines: pipes map with regions and attack dots); research notes 060/070/080. New drawings are light-only (`bin/oil_article/anatomy/BRIEF-2.md`), carry no drawing letter, and post their height from `document.body` (posting `documentElement.scrollHeight` never lets the iframe shrink). Section numbers are renumbered by script after inserting a section. Build with `~/miniconda3/envs/conceptsplots/bin/python build.py` (needs xlrd). Thumbnail: `oil()` in `bin/thumbs/build.py` (crude flows on a pale map).
+
+## Irrawaddy rice boat post
+
+`_posts/2026-11-07-irrawaddy-rice-boat.md` (`/blog/2026/irrawaddy-rice-boat/`): a Burmese laung-zat from a Pitt Rivers model photo, part by part. Procedural three.js model in `assets/js/boat-model.js` (two rigs: six sails after Talbot Kelly 1908 is the default, one 130 ft yard after Yule 1858; sweeps out for "coming down"), figures in `assets/js/boat-figs.js` (`rb.html kind=boat|river`), refs `_data/rice_boat_article/refs.yml`, dev preview and notes in `bin/rice_boat/`. Report: `~/code/ConceptsPlots/070_research/html_reports/130_irrawaddy_rice_boat/`.

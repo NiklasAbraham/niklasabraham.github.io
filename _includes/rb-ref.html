@@ -1,0 +1,2 @@
+{%- comment -%} A source tag: {% include rb-ref.html k="kelly1908" %} (entries in _data/rice_boat_article/refs.yml). {%- endcomment -%}
+{%- assign r = site.data.rice_boat_article.refs | where: "key", include.k | first -%}<sup class="ai-ref"><a href="#r-{{ include.k }}" title="{{ r.title | escape }}">[{{ r.short | default: include.k }}]</a></sup>

@@ -1,0 +1,24 @@
+// Irrawaddy rice boat long read (/blog/2026/irrawaddy-rice-boat/): figures built by assets/js/boat-figs.js (3D with three.js, map in SVG).
+// Frame, controls and chips are the budget article's (.concept.bx, .bx-*); reference tags reuse .ai-ref / .ai-refs.
+
+.concept.rb { .bx-stage { padding: 0.3rem 0.5rem 0.6rem; } .bx-legend { display: block; } }
+.rb-3d { position: relative; width: 100%; aspect-ratio: 16 / 9; min-height: 320px; background: #f8f6f1; border-radius: 10px; overflow: hidden; touch-action: pan-y;
+  canvas { display: block; width: 100% !important; height: 100% !important; cursor: grab; touch-action: none; &:active { cursor: grabbing; } } }
+.rb-ov { font-family: 'Inter', system-ui, sans-serif; .rb-lt { paint-order: stroke; stroke: #fff; stroke-width: 3.5px; stroke-linejoin: round; } }
+.rb-svg { display: block; width: 100%; height: auto; background: #fff; }
+.rb-bar { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; padding: 0.3rem 0.4rem; .bx-seg { flex-wrap: wrap; } }
+.rb-steer { display: inline-flex; align-items: center; gap: 0.4rem; .bx-range { width: 9rem; } }
+.rb-info { font-size: 0.88rem; line-height: 1.5; padding: 0.55rem 0.3rem 0.3rem; min-height: 3.2em; font-family: 'Inter', system-ui, sans-serif; color: var(--global-text-color); b { color: #b4552f; } }
+.rb-chips { display: flex; flex-wrap: wrap; gap: 0.25rem 0.35rem; padding: 0.2rem 0 0.4rem; }
+.rb-read { display: flex; flex-wrap: wrap; gap: 0.2rem 1.3rem; font-size: 0.78rem; line-height: 1.5; color: var(--global-text-color-light); font-family: 'Inter', system-ui, sans-serif; b { color: var(--global-text-color); font-weight: 600; } i { font-style: normal; color: #b4552f; } }
+.rb-photo { margin: 1.4rem 0; img { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--global-card-border); } figcaption { font-size: 0.82rem; color: var(--global-text-color-light); margin-top: 0.45rem; line-height: 1.45; } }
+.rb-photo.narrow img { max-width: 520px; margin: 0 auto; }
+.rb-key { display: grid; grid-template-columns: 11rem 1fr; gap: 0.35rem 1rem; font-size: 0.92rem; margin: 1rem 0; dt { font-weight: 700; } dd { margin: 0; } }
+@media (min-width: 1100px) {
+  .concept.rb-wide {
+    margin-left: calc(-1 * clamp(0px, calc((100vw - 1300px) / 2), 220px));
+    margin-right: calc(-1 * clamp(0px, calc((100vw - 1300px) / 2 + 215px), 220px));
+  }
+}
+@media (max-width: 640px) { .rb-ov { display: none; } .rb-3d { aspect-ratio: 4 / 3; } .rb-key { grid-template-columns: 1fr; } }
+.ai-refs .st.photo { border-color: #138374; color: #138374; } .ai-refs .st.model { border-color: #b4552f; color: #b4552f; }

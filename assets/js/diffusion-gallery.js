@@ -247,7 +247,7 @@
     const links = m.links.length ? m.links : m.url ? [{ label: m.paper, url: m.url }] : [];
     body.innerHTML =
       `<h2>${esc(m.name)}</h2>` +
-      `<p class="dg-org"><span class="dg-dom ${m.domain}">${m.domain === 'bio' ? 'biomolecules' : 'images'}</span>${esc(m.org)} · ${m.year}</p>` +
+      `<p class="dg-org"><span class="dg-dom ${m.domain}">${m.domain === 'bio' ? 'biomolecules · ' + esc(m.task) : 'images'}</span>${esc(m.org)} · ${m.year}</p>` +
       (links.length ? `<p class="dg-linkrow">${links.map((l) => ext(l.url, esc(l.label))).join('')}</p>` : '') +
       `<p class="dg-novelty">${esc(m.novelty)}</p>` +
       (m.vs ? `<p class="dg-vs"><i aria-hidden="true"></i>Magenta outlines: new relative to ${esc(m.vs)}.</p>` : '') +

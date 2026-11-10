@@ -57,8 +57,16 @@ R = dict(
     boltz1=("Wohlwend et al. 2024 · Boltz-1", "https://doi.org/10.1101/2024.11.19.624167"),
     boltz2=("Passaro et al. 2025 · Boltz-2", "https://doi.org/10.1101/2025.06.14.659707"),
     protenix=("Protenix technical report 2025", "https://doi.org/10.1101/2025.01.08.631967"),
+    mol1=("Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+          "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"),
+    mol1_code=("Code · molence/Mol-1 (commit e6e6486)", "https://github.com/molence/Mol-1"),
+    protenix_code=("Code · bytedance/Protenix (upstream revision bd54a05)", "https://github.com/bytedance/Protenix"),
+    esmfold2=("Candido et al. 2026 · ESMFold2", "https://doi.org/10.64898/2026.06.03.729735"),
     flash=("Dao et al. 2022 · FlashAttention", "https://arxiv.org/abs/2205.14135"),
     rfd3=("Butcher, Krishna, Mitra et al. 2026 · RFdiffusion3", "https://doi.org/10.1126/science.aeh2982"),
+    rfd4=("Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina", "https://github.com/RosettaCommons/RFD4-Proteina"),
+    laproteina=("Geffner et al. 2026 · La-Proteina (partially latent flow matching)", "https://arxiv.org/abs/2507.09466"),
+    swiglu=("Shazeer 2020 · GLU variants (SwiGLU)", "https://arxiv.org/abs/2002.05202"),
     pallatom=("Qu et al. 2025 · P(all-atom)", "https://openreview.net/forum?id=xeZmxOBvW9"),
     blt=("Pagnoni et al. 2025 · Byte Latent Transformer (cross-attention pooling)",
          "https://arxiv.org/abs/2412.09871"),
@@ -73,6 +81,9 @@ R = dict(
     rsgm=("De Bortoli et al. 2022 · Riemannian score-based generative modelling", "https://arxiv.org/abs/2202.02763"),
     dpmsolver=("Lu et al. 2022 · DPM-Solver", "https://arxiv.org/abs/2206.00927"),
     hpacker=("Visani et al. · H-Packer", "https://arxiv.org/abs/2311.09312"),
+    pearl=("Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+           "https://arxiv.org/abs/2510.24670"),
+    decaf=("2026 · Few-step cofolding with all-atom flow maps (DECAF)", "https://arxiv.org/abs/2606.08375"),
     pairmixer=("Ouyang-Zhang et al. 2025 · Triangle multiplication is all you need (PairMixer)",
                "https://arxiv.org/abs/2510.18870"),
     ito=("Schreiner, Winther & Olsson 2023 · Implicit transfer operator learning",
@@ -818,6 +829,160 @@ DETAILS["esmfold2"] = _cofold_details(
      ("token transformer", "12 blocks, N_{tok} × 768"),
      ("atom decoder", "→ N_{atom} × 3")])
 
+
+KEY_GLOSS["eqt"] = (
+    "An SO(3)-equivariant transformer block. Each position carries invariant scalar features and 3-D "
+    "vector features; attention weights are built only from rotation-invariant quantities (scalar "
+    "products, dot products of vectors, the pair representation), and the vectors are mixed only by "
+    "linear combinations, so rotating the input rotates the output and leaves the scalars unchanged.")
+
+DETAILS["pearl"] = _cofold_details(
+    {"input": P("protein sequence · ligand topology · optional MSA, templates, pocket residues",
+                "Unconditional mode: sequence and ligand topology only, from which MSAs and templates may be "
+                "searched as in AF3. Conditional mode: an apo or holo reference structure or a hypothesised "
+                "pocket is given as well.", R["pearl"]),
+     "emb": P("not described", "The report does not describe the input embedder; the drawing assumes the "
+              "AF3 one.", R["pearl"]),
+     "tmpl": P("multi-chain template: protein chains + non-polymers",
+               "AF3 templates one protein chain at a time, which misses cross-chain contacts. Pearl's template "
+               "holds several chains and the non-polymeric parts too (cofactors, related ligands), so the "
+               "model sees a coherent holo-like pocket. Templates are also used in training, from the later "
+               "curriculum stages on.", R["pearl"], R["af3"]),
+     "msa": P("optional", "The report says MSAs may be used 'similarly to AF3' in the unconditional mode and "
+              "gives no further detail.", R["pearl"]),
+     "trimul": P("depth and widths not reported",
+                 "A rotation- and translation-invariant trunk 'featuring a lightweight triangle multiplication "
+                 "(trimul) module for efficiency', citing PairMixer from the same group: triangle "
+                 "multiplication and pair transitions, no triangle attention. Its pair representation conditions "
+                 "the diffusion module and is computed once per target. The trimul kernels come from NVIDIA "
+                 "cuEquivariance.", R["pearl"], R["pairmixer"]),
+     "c": P("s, z: invariant", "The trunk sees no coordinates of the sample, so c carries no frame; all "
+            "orientation is handled by the equivariant diffusion module.", R["pearl"]),
+     "cond": P("not described", "How s, z, the noise level and the pocket residues enter the diffusion module "
+               "is not described. The report's Fig. 2 shows the pair representation feeding the attention "
+               "weights of every EqT block.", R["pearl"]),
+     "eqlift": P("scalar channels · vector channels",
+                 "The EqT blocks take a scalar input and a vector input (report Fig. 2). How atoms, tokens and "
+                 "the noisy coordinates are mapped onto them is not described.", R["pearl"]),
+     "eqt": P("block count, heads and widths not reported",
+              "Scalar queries and keys and vector queries and keys together with the pair representation give "
+              "the attention weights; the same weights then aggregate scalar values and vector values "
+              "(equivariant self-attention), followed by an equivariant mixing between the two. The only "
+              "SO(3)-equivariant denoiser among the co-folding models here: AF3, Boltz and Protenix "
+              "learn rotations from random augmentation only.", R["pearl"], R["af3"]),
+     "eqtr": P("feed-forward on scalars · gated feed-forward on vectors",
+               "The equivariant transition: an ordinary feed-forward layer on the scalars, and a linear layer "
+               "on the vectors multiplied by a gate computed from the scalars, the gated nonlinearity that "
+               "keeps vectors equivariant.", R["pearl"]),
+     "xhat": P("x̂: N_{atom} × 3", "Read off the vector channels, so it rotates with the input. The full model "
+               "is equivariant through 'a combination of data augmentation and equivariant architecture'.",
+               R["pearl"]),
+     "out": P("S poses", "The report evaluates best@k over 20 samples and calls existing confidence models "
+              "'often uninformative' for picking the best pose; it describes no confidence head of its own. "
+              "Guidance and steering terms with a tunable strength can bend the trajectory toward constraints "
+              "or physical priors.", R["pearl"])},
+    [("Technical report · arXiv 2510.24670", R["pearl"][1]),
+     ("PairMixer · arXiv 2510.18870", R["pairmixer"][1]),
+     ("DECAF distillation · arXiv 2606.08375", R["decaf"][1])],
+    ["Pearl is Genesis Molecular AI's protein–ligand co-folding model (technical report, October 2025). It "
+     "keeps the AF3 split into a trunk that runs once per target and a diffusion module that runs at every "
+     "step, but changes both halves: the trunk keeps only triangle multiplication, and the diffusion module "
+     "is built from SO(3)-equivariant transformer blocks on scalar and vector features.",
+     "No weights or code came with it. The report gives the design but no block counts, widths, parameter totals or "
+     "sampler settings, so the drawing shows the structure only. The later DECAF paper distils a 2026 "
+     "development checkpoint and runs the teacher at 200 or more network evaluations per sample.",
+     "Its other two changes are about data and control rather than architecture: a large synthetic set of "
+     "physics-generated protein–ligand complexes, whose share in training raises hold-out success "
+     "monotonically, and templates that hold a whole pocket, ligands included."],
+    [("tokens", "protein residues, ligand atoms"),
+     ("trunk", "s, z: invariant, once per target"),
+     ("noise", "x: N_{atom} × 3"),
+     ("EqT blocks", "scalar + vector features"),
+     ("output", "x̂: N_{atom} × 3, equivariant")])
+
+DETAILS["mol1"] = _cofold_details(
+    {"emb": P("atom single 128 · atom pair 16 → s^{inputs}: N_{tok} × 449 → s: N_{tok} × 384, z: N_{tok}² × 448",
+              "As in Protenix, except that z is built at 448 channels: an outer sum of two projections of s, "
+              "relative-position and bond features. The atom encoder has 1.0 M parameters.", R["mol1"]),
+     "tmpl": P("N_{tok}² × 64 → 448, 2 blocks · 0.3 M",
+               "A template Pairformer with 64 channels, projected into the 448-channel z. Templates are off by "
+               "default at inference (`use_template` is false); the MSA is on.", R["mol1"]),
+     "msa": P("MSA N_{seq} × N_{tok} × 192 → z: N_{tok}² × 448 · 4 blocks · 30.8 M",
+              "Outer-product mean into z, pair-weighted averaging back, then a full Pairformer-style pair stack on z "
+              "with triangle attention, at 448 channels. The MSA channel width is 192 where Protenix's is 64, and "
+              "with the wider z the module is about ten times Protenix's 3 M.", R["mol1"], R["protenix"]),
+     "pmix": P("z: N_{tok}² × 448 · s: N_{tok} × 384 · 8 blocks × 7.3 M = 58.7 M",
+               "Per block: triangle multiplication (outgoing, incoming) with hidden width 448, pair transition, "
+               "single attention with pair bias, single transition. Triangle attention is the only Pairformer part "
+               "left out. These are the first eight of the 48 blocks of one stack; the report cites ESMFold2 and "
+               "Ouyang-Zhang et al. as precedents for dropping it. Unlike BioEmu-2's PairMixer, the single track "
+               "stays.", R["mol1"], R["pairmixer"], R["esmfold2"]),
+     "down": P("z: 448 → 320 · bias-free linear · 0.14 M",
+               "A learned projection between the two stages (`PairformerWidthAdapter` in the code), applied to z "
+               "only; s stays at 384 channels throughout.", R["mol1"]),
+     "pf": P("z: N_{tok}² × 320 · s: N_{tok} × 384 · 40 blocks × 6.0 M = 240.3 M",
+             "Full Pairformer blocks as in AF3: triangle multiplication, triangle attention (start and end node), "
+             "pair transition, single attention with pair bias, single transition. Because the code scales the "
+             "hidden width with the pair width, the triangle multiplication is 320 wide and triangle attention runs "
+             "10 heads of 32; AF3 and Protenix use 128 and 4 heads. Each block has about twice the parameters of a "
+             "Protenix one (6.0 M against 3.1 M).", R["mol1"], R["af3"]),
+     "up": P("z: 320 → 448 · bias-free linear · 0.14 M",
+             "Restores the pair representation to 448 channels at the trunk output, so the denoiser and the "
+             "confidence head see the same width the PairMixer blocks worked at.", R["mol1"]),
+     "c": P("s_i^{trunk}: N_{tok} × 384 · z_{ij}^{trunk}: N_{tok}² × 448",
+            "Everything the denoiser knows about the target. Computed once per target after 20 trunk passes and "
+            "reused for every step and sample; the pair part is 3.5 times wider than in Protenix.",
+            R["mol1"]),
+     "cond": P("z: concat(z^{trunk}, rel. pos.) 896 → 448 · s: concat(s^{trunk}, s^{inputs}) → 384 + Fourier(¼ log(σ / σ_{data})) · 5.1 M",
+               "Two transitions each on s and z, as in AF3 but with a 448-wide z. At inference the z branch and the "
+               "atom pair terms are computed once per target, as in Protenix. Mol-1 goes one stage further: each "
+               "of the 24 token-transformer blocks projects z to its 16-head attention bias once "
+               "(`prepare_projected_pair_biases`), and the 24 tensors of shape 16 × N_{tok} × N_{tok} are reused "
+               "at every step. This is `diffusion_cache_mode=full`, the default; `shared` stops before the "
+               "per-layer projections and `off` recomputes everything at every step. The cached biases are what "
+               "makes a wider z affordable inside the sampling loop.", R["mol1"], R["protenix"]),
+     "tok": P("24 × 16 heads × 768 · 198 M · pair bias from z (448 → 16 per block)",
+              "The Protenix token transformer, with a residual added and the same depth and width. The only "
+              "change is the input width of each block's pair-bias projection, 448 instead of 128 channels, "
+              "which is replaced by the cached projections at inference.", R["protenix"], R["mol1"]),
+     "conf": P("4 Pairformer blocks · z: 448 · s: 384 · 38.4 M",
+               "Full Pairformer blocks at the full 448 channels, with no PairMixer blocks and no width "
+               "adapters: 4 × 9.4 M for the stack, 38.4 M with the heads, about three times Protenix's 13 M. Heads for "
+               "pLDDT, PAE, PDE and experimentally-resolved, as in AF3.", R["mol1"])},
+    [("Technical report · Molence Bio 2026", R["mol1"][1]),
+     ("Code · molence/Mol-1", R["mol1_code"][1]),
+     ("Upstream · bytedance/Protenix", R["protenix_code"][1]),
+     ("Protenix technical report · bioRxiv 2025", R["protenix"][1])],
+    ["Mol-1 is Molence Bio's open co-folding model, released on 30 October 2026 under Apache 2.0 with one "
+     "checkpoint for antibodies, small molecules, peptides and molecular glues. The code is a fork of Protenix "
+     "(upstream revision bd54a05), and the denoiser, the sampler and the confidence head keep the Protenix layout: "
+     "a 3-block atom encoder, a 24-block token transformer at 768 channels, a 3-block atom decoder, 200 steps with "
+     "γ_0 = 0.8, λ = 1.003 and η = 1.5. It has 577 M parameters against Protenix's 368 M.",
+     "What changed is the width of the pair representation and how the trunk pays for it. The pair stream that "
+     "conditions the denoiser and the confidence head is 448 channels wide (Protenix 128). Running a full 48-block "
+     "Pairformer at that width would be expensive, so the trunk is heterogeneous: 8 PairMixer blocks (triangle "
+     "multiplication, no triangle attention) at 448 channels, a learned linear down to 320, 40 Pairformer blocks "
+     "at 320, and a linear back up to 448. The report compares this with complete 48-block Pairformers at 448 and "
+     "256 channels and states that it needs about 60 % of the FLOPs of the full-width one at comparable fitting "
+     "on training data. Counted in the code, the stack is 299 M of the 577 M parameters, the MSA module 31 M (its "
+     "channel width is 192 against Protenix's 64), the denoiser 206 M and the confidence head 38 M.",
+     "Recycling is the second lever. Training draws the number of cycles from a Beta distribution discretised up "
+     "to a maximum depth K, starting at Beta(1, 1) with K = 4 and moving through Beta(2, 2), together with larger "
+     "crops, to Beta(2, 1), and inference runs 20 trunk passes by default, twice Protenix's 10 (the report's peptide "
+     "benchmark uses 10). The report gives 75.0 % success at DockQ > 0.23 on FoldBench-AB (OpenDDE 70.0 %, AF3 "
+     "48.8 %), 54.07 % at DockQ > 0.80 on MolBench-Peptide-26 (172 interface clusters from 150 PDB entries), and "
+     "a mean DockQ on MolBench-AB-26 that rises from 0.359 with one seed to 0.463 with 100. Training structures "
+     "were released before 2021-09-30; the report adds synthetic data it does not describe. A constraint-"
+     "conditioned variant (site, exclusion, contact) is described in the report but is not in the released code, "
+     "which has the base checkpoint only."],
+    [("tokens", "N_{tok}; atoms N_{atom}"),
+     ("input embedder", "s^{inputs}: N_{tok} × 449"),
+     ("trunk, 20 passes", "s: N_{tok} × 384 · z: N_{tok}² × 448"),
+     ("noise", "x: N_{atom} × 3"),
+     ("atom encoder", "N_{atom} × 128 → N_{tok} × 768"),
+     ("token transformer", "N_{tok} × 768"),
+     ("atom decoder", "→ N_{atom} × 3")])
+
 DETAILS["rfd3"] = _cofold_details(
     {"input": P("design conditions: motif atoms, ligands, length, symmetry",
                 "The input is not a sequence. Motifs are given as atoms, without having to say which sequence "
@@ -896,6 +1061,96 @@ DETAILS["rfd3"] = _cofold_details(
      ("downsample", "atoms → tokens, sparse + cross-attention"),
      ("token transformer", "sparse attention over tokens"),
      ("upsample", "→ Δx: N_{atom} × 3")])
+
+# ------------------------------------------------------------------------------------ RFD4-Proteina
+DETAILS["rfd4"] = dict(
+    links=[("Preprint · Biomolecular design through latent reasoning, 2026", "https://github.com/RosettaCommons/RFD4-Proteina"),
+           ("Code and weights · RosettaCommons/RFD4-Proteina", "https://github.com/RosettaCommons/RFD4-Proteina"),
+           ("La-Proteina · arXiv 2507.09466", "https://arxiv.org/abs/2507.09466")],
+    overview=[
+        "RFD4-Proteina designs proteins, nucleic acids, sugars and small-molecule contexts with a flow model that "
+        "does not work on atoms. Each residue, nucleotide or sugar is one token with an anchor coordinate in "
+        "R^3 (Cα for amino acids, C1′ for nucleotides, the anomeric carbon for sugars) and a 32-dimensional "
+        "latent that encodes its identity and local structure. A separately trained autoencoder maps between "
+        "this pair and all atoms.",
+        "The network has no trunk in front of a denoiser. One stack of 14 single-track layers, with a pair "
+        "track updated every other layer, is the whole flow model; it is run up to nine times inside each "
+        "denoising step with the single and pair states of the previous pass added back to the input "
+        "embeddings. RFdiffusion3 also recycles at every step, but around an AF3-style atom U-Net; here the "
+        "recycled object is the trunk itself.",
+        "Anchors and latents are noised on independent clocks. Four heads read the final single representation: "
+        "velocities for each, a 147-class sequence head and a motif-mapping head, the last two on detached "
+        "features. Sampling is a stochastic Euler–Maruyama update in 60 steps, using a temperature-rescaled "
+        "score. The paper adds search across trajectories on top.",
+    ],
+    flow=[("tokens", "N_{tok}: residues, nucleotides, sugars, motif tokens"),
+          ("noised state", "anchors x: N_{tok} × 3 · latents ℓ: N_{tok} × 32"),
+          ("embedder", "s: N_{tok} × 768 · z: N_{tok}² × 384"),
+          ("trunk layers", "14 layers, repeated R_t times"),
+          ("heads", "v_x, v_ℓ, 147 logits, motif scores"),
+          ("decoder", "→ atoms")],
+    parts={
+        "xt": P("N_{tok} × 3 · clock t_x",
+                                "One anchor per token in a shared global frame: Cα, C1′ or the anomeric carbon. "
+                                "Coordinates and latents are sampled at independent times in training, with "
+                                "different time distributions.", R["rfd4"], R["laproteina"]),
+        "lt": P("N_{tok} × 32 · clock t_ℓ",
+                                "The autoencoder's latent for each token: residue identity and local structure, "
+                                "with a KL penalty toward a standard normal. It is what lets one model cover "
+                                "amino acids, nucleotides, sugars and modified residues.", R["rfd4"],
+                                R["laproteina"]),
+        "conds": P("in-context motif tokens · ligand and partner tokens · task modifiers",
+                        "Motifs are extra tokens in the sequence that need not say where they land. Sequence "
+                        "constraints may also be given as probability masses per position that need not sum to "
+                        "one, and are applied while the model reasons rather than afterwards.", R["rfd4"]),
+        "emb": P("s_i: N_{tok} × 768 · z_{ij}: N_{tok}² × 384 · conditioning 256",
+                            "Single and pair input features are concatenated and projected to initialise the "
+                            "token and token-pair representations.", R["rfd4"]),
+        "hadamard": P("z_{ij} ← z_{ij} + a_i ⊙ b_j, bias-free projections to 384",
+                                  "An elementwise product rather than a sum, so each token can gate the other's "
+                                  "contribution: setting b_{jk} = 0 switches the update off for any a_{ik}. The "
+                                  "paper's ablation favours it over the additive update.", R["rfd4"]),
+        "trimult": P("outgoing + incoming · hidden 256 · pair track every other layer",
+                                     "As in AlphaFold 2 and 3 but without triangle attention, followed by a pair "
+                                     "transition. The ablation without them loses backbone agreement and design "
+                                     "success.", R["rfd4"], R["af2"]),
+        "ptrans": P("per pair MLP", "", R["rfd4"]),
+        "attn": P("12 heads × 64 · normalised queries and keys",
+                            "Pair features are normalised and projected to an additive bias per head, so the "
+                            "pair track decides which tokens attend to which. The attention output is gated, "
+                            "projected and added to s.", R["rfd4"], R["af2"]),
+        "trans": P("SwiGLU · hidden 3072",
+                              "Token-wise feed-forward with adaptive RMSNorm supplying the conditioning.",
+                              R["rfd4"], R["swiglu"]),
+        "adaln": P("256 channels for each of the single and pair paths",
+                            "The noise times of both clocks and the molecular conditions enter through adaptive "
+                            "normalisation in both attention and transition.", R["rfd4"]),
+        "vx": P("N_{tok} × 3",
+                                 "Trained on the squared clean-state error with time weight 1/((1 − t)² + 10⁻⁵), "
+                                 "summed over dimensions. Tokens of nonstandard chemistry get a higher weight.",
+                                 R["rfd4"]),
+        "vl": P("N_{tok} × 32", "Same loss on the latents, with its own time distribution.", R["rfd4"]),
+        "seqhead": P("N_{tok} × 147 classes, detached",
+                           "Predicts residue identities. It receives stop-gradient features, so its loss trains "
+                           "the head without changing the trunk. Its predictions condition the decoder where the "
+                           "user gave no sequence; without that the decoder may alter residues the user fixed.",
+                           R["rfd4"]),
+        "mapping": P("scores m_{ij} between motif tokens and generated tokens, detached",
+                           "For motifs whose position in the chain is not given, a bilinear score between motif "
+                           "and generated tokens is turned into an assignment by a per-chain Hungarian matching.",
+                           R["rfd4"]),
+        "dec": P("12 transformer layers · 768 · 12 heads · no pair track",
+                     "A shared decoder maps anchors, latents and sequence to atomic coordinates, residue "
+                     "identity and which atoms exist. It is the counterpart of an encoder trained with a "
+                     "reconstruction loss and a KL term, and an energy-supervised decoder is also released.",
+                     R["rfd4"], R["laproteina"]),
+        "out": P("backbone, side-chain rotamers, ligand pose, sequence",
+                             "The one-model claim: structure, sequence and the conformation of the surrounding "
+                             "molecules come out of the same pass. Search across trajectories can be added at "
+                             "inference: branches are pruned at checkpoints against a user-given criterion.",
+                             R["rfd4"]),
+    },
+)
 
 # ------------------------------------------------------------------------------------ BioEmu
 DETAILS["bioemu"] = _cofold_details(

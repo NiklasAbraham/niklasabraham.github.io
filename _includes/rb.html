@@ -1,0 +1,2 @@
+{%- comment -%} An interactive figure of the Irrawaddy rice boat long read: kind= (boat|river), title=, caption=, wide=1 to break out of the text column (read by assets/js/boat-figs.js) {%- endcomment -%}
+<figure data-rb="{{ include.kind }}" data-title="{{ include.title }}" data-caption="{{ include.caption }}"{% if include.wide %} class="rb-wide"{% endif %}{% if include.id %} id="{{ include.id }}"{% endif %}></figure>

@@ -21,6 +21,7 @@
    "Linear β schedule from 10⁻⁴ to 0.02 over T = 1000 steps."
   ],
   "vs": null,
+  "task": "",
   "blocks": {
    "noisy-image-x-t": {
     "title": "noisy image x<sub>t</sub>",
@@ -211,6 +212,7 @@
    "A separate noise-aware classifier steers sampling by ∇ log p(y | x_t)."
   ],
   "vs": "DDPM",
+  "task": "",
   "blocks": {
    "noisy-image-x-t": {
     "title": "noisy image x<sub>t</sub>",
@@ -449,6 +451,7 @@
    "Classifier-free guidance replaces the separate classifier."
   ],
   "vs": "ADM",
+  "task": "",
   "blocks": {
    "image-x": {
     "title": "image x",
@@ -691,6 +694,7 @@
    "A second refiner model polishes the last noise levels (SDEdit-style)."
   ],
   "vs": "SD 1",
+  "task": "",
   "blocks": {
    "image-x": {
     "title": "image x",
@@ -909,6 +913,7 @@
    "Quality tracks GFLOPs: the scaling argument that moved the field to transformers."
   ],
   "vs": "the latent U-Net of SD 1",
+  "task": "",
   "blocks": {
    "noisy-latent-z-t": {
     "title": "noisy latent z<sub>t</sub>",
@@ -1119,6 +1124,7 @@
    "An optional 3×3 convolution after unpatchify smooths patch borders; the ImageNet-256 U-ViT-H/2 model runs without it."
   ],
   "vs": "DiT",
+  "task": "",
   "blocks": {
    "time-t": {
     "title": "time t",
@@ -1282,6 +1288,7 @@
    "RMSNorm on Q and K keeps the attention logits bounded; the paper adds it for stable mixed-precision training at high resolution."
   ],
   "vs": "DiT",
+  "task": "",
   "blocks": {
    "text-tokens": {
     "title": "text tokens",
@@ -1507,6 +1514,7 @@
    "[dev] takes the guidance scale as an input instead of running CFG twice."
   ],
   "vs": "SD3",
+  "task": "",
   "blocks": {
    "text-tokens": {
     "title": "text tokens",
@@ -1787,6 +1795,7 @@
    "Conditioning is mostly by fixing parts of the input (motifs) rather than by a separate encoder."
   ],
   "vs": null,
+  "task": "design",
   "blocks": {
    "noised-residue-frames-x-t": {
     "title": "noised residue frames x<sub>t</sub>",
@@ -2002,6 +2011,7 @@
    "Atom attention is local: blocks of 32 query × 128 key atoms."
   ],
   "vs": null,
+  "task": "structure prediction",
   "blocks": {
    "input": {
     "title": "sequences + ligand SMILES",
@@ -2274,9 +2284,11 @@
   "notes": [
    "Pairformer 64 blocks (197 M), confidence 8 blocks (25 M).",
    "Token transformer 283 M (checkpoint) vs 198 M in OpenFold3 and Protenix: AdaLN on a 768-ch s adds 42 M, a wider SwiGLU gate 28 M (269 M by code); 14 M unexplained.",
-   "Same denoiser as Boltz-1; per-layer pair biases are computed once per target; x is Kabsch-aligned onto x̂ before every step."
+   "Same denoiser as Boltz-1; per-layer pair biases are computed once per target; x is Kabsch-aligned onto x̂ before every step.",
+   "Prediction, not design: the input is a given sequence (plus ligand or partner), the output its structure, a confidence score and, for a ligand, an affinity. A design model such as RFdiffusion3 or RFD4-Proteina starts from a target and returns a new molecule; in a design pipeline a predictor like this is the filter that refolds the result."
   ],
   "vs": "AlphaFold 3",
+  "task": "structure prediction",
   "blocks": {
    "input": {
     "title": "sequences + ligand SMILES",
@@ -2528,6 +2540,7 @@
    "A use_conditioning flag can drop the trunk input entirely."
   ],
   "vs": "AlphaFold 3",
+  "task": "structure prediction",
   "blocks": {
    "input": {
     "title": "sequences + ligand SMILES",
@@ -2782,6 +2795,7 @@
    "10 recycling passes by default."
   ],
   "vs": "AlphaFold 3",
+  "task": "structure prediction",
   "blocks": {
    "input": {
     "title": "sequences + ligand SMILES",
@@ -3015,6 +3029,256 @@
   ]
  },
  {
+  "id": "pearl",
+  "name": "Pearl",
+  "year": 2025,
+  "org": "Genesis Molecular AI",
+  "domain": "bio",
+  "paper": "Genesis Research Team · arXiv 2025",
+  "url": "https://arxiv.org/abs/2510.24670",
+  "space": "all-atom coordinates",
+  "backbone": "invariant trimul trunk + SO(3)-equivariant diffusion module",
+  "params": "not stated in the report",
+  "params_m": null,
+  "conditioning": "invariant trunk features s, z; multi-chain templates with ligands and cofactors; pocket residues",
+  "objective": "x̂ (diffusion; details not reported)",
+  "steps": "≥ 200 (DECAF, Pearl-2026.1.dev)",
+  "novelty": "The only all-atom co-folding denoiser here that is SO(3)-equivariant by construction; the trunk keeps only triangle multiplication.",
+  "notes": [
+   "Trunk: rotation- and translation-invariant, with 'a lightweight triangle multiplication (trimul) module for efficiency', citing PairMixer (Ouyang-Zhang et al. 2025, same group). Depth and widths are not given.",
+   "Diffusion module: equivariant transformer (EqT) blocks on scalar and vector features. Attention weights come from scalar and vector queries and keys plus the pair representation; a feed-forward layer gates the vector channels (report Fig. 2). Equivariance comes from the architecture and data augmentation together; AF3's denoiser relies on augmentation alone.",
+   "Templates cover several chains and non-polymers at once (cofactors, related ligands), to give a holo-like pocket. Two modes: unconditional (sequence and ligand topology, optional MSA and templates) and pocket-conditional.",
+   "Training data: PDB before 2021-09-30, monomer distillation (OpenFold, AFDB) and a large synthetic set of physics-generated protein–ligand complexes; success on a hold-out set rises monotonically with the synthetic share (582,065 structures in the scaling run). Five-stage curriculum.",
+   "No weights or code were released with the report. Runs N' Poses (RMSD < 2 Å and PB-valid, best@5): 85.2 % against 74.4 % for AF3. A few-step DECAF distillation (2026) matches a later checkpoint at 40 NFE."
+  ],
+  "vs": "AlphaFold 3",
+  "task": "structure prediction",
+  "blocks": {
+   "input": {
+    "title": "sequences + ligand topology",
+    "sub": "+ templates · pocket residues",
+    "role": "io",
+    "dims": "protein sequence · ligand topology · optional MSA, templates, pocket residues",
+    "text": "Unconditional mode: sequence and ligand topology only, from which MSAs and templates may be searched as in AF3. Conditional mode: an apo or holo reference structure or a hypothesised pocket is given as well.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "atoms → tokens",
+    "role": "embed",
+    "dims": "not described",
+    "text": "The report does not describe the input embedder; the drawing assumes the AF3 one.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "tmpl": {
+    "title": "template module",
+    "sub": "multi-chain · protein + ligands · + cofactors in one template",
+    "role": "pair",
+    "dims": "multi-chain template: protein chains + non-polymers",
+    "text": "AF3 templates one protein chain at a time, which misses cross-chain contacts. Pearl&#x27;s template holds several chains and the non-polymeric parts too (cofactors, related ligands), so the model sees a coherent holo-like pocket. Templates are also used in training, from the later curriculum stages on.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "msa": {
+    "title": "MSA module",
+    "sub": "optional, as in AF3",
+    "role": "pair",
+    "dims": "optional",
+    "text": "The report says MSAs may be used &#x27;similarly to AF3&#x27; in the unconditional mode and gives no further detail.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "trimul": {
+    "title": "trimul trunk",
+    "sub": "PairMixer-style, invariant · no triangle attention",
+    "role": "pair",
+    "dims": "depth and widths not reported",
+    "text": "A rotation- and translation-invariant trunk &#x27;featuring a lightweight triangle multiplication (trimul) module for efficiency&#x27;, citing PairMixer from the same group: triangle multiplication and pair transitions, no triangle attention. Its pair representation conditions the diffusion module and is computed once per target. The trimul kernels come from NVIDIA cuEquivariance.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     },
+     {
+      "label": "Ouyang-Zhang et al. 2025 · Triangle multiplication is all you need (PairMixer)",
+      "url": "https://arxiv.org/abs/2510.18870"
+     }
+    ]
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sub>i</sub>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "s, z: invariant",
+    "text": "The trunk sees no coordinates of the sample, so c carries no frame; all orientation is handled by the equivariant diffusion module.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, σ<sub>0</sub> = 160 σ<sub>data</sub> = 2560 Å",
+    "text": "Karras ρ-schedule with ρ = 7, s<sub>max</sub> = 160, s<sub>min</sub> = 4 · 10<sup>−4</sup>, σ<sub>data</sub> = 16 Å.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "s, z from the trunk · + pocket residues, if given",
+    "role": "cond",
+    "dims": "not described",
+    "text": "How s, z, the noise level and the pocket residues enter the diffusion module is not described. The report&#x27;s Fig. 2 shows the pair representation feeding the attention weights of every EqT block.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "eqlift": {
+    "title": "scalar + vector features",
+    "sub": "invariants · 3-D vectors from x",
+    "role": "embed",
+    "dims": "scalar channels · vector channels",
+    "text": "The EqT blocks take a scalar input and a vector input (report Fig. 2). How atoms, tokens and the noisy coordinates are mapped onto them is not described.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "eqt": {
+    "title": "equivariant transformer",
+    "sub": "EqT blocks · scalar + vector Q/K · pair bias from z · mixing",
+    "role": "attn",
+    "dims": "block count, heads and widths not reported",
+    "text": "Scalar queries and keys and vector queries and keys together with the pair representation give the attention weights; the same weights then aggregate scalar values and vector values (equivariant self-attention), followed by an equivariant mixing between the two. The only SO(3)-equivariant denoiser among the co-folding models here: AF3, Boltz and Protenix learn rotations from random augmentation only.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "eqtr": {
+    "title": "equivariant transition",
+    "sub": "gated nonlinearity on vectors",
+    "role": "mlp",
+    "dims": "feed-forward on scalars · gated feed-forward on vectors",
+    "text": "The equivariant transition: an ordinary feed-forward layer on the scalars, and a linear layer on the vectors multiplied by a gate computed from the scalars, the gated nonlinearity that keeps vectors equivariant.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "structure x̂",
+    "sub": "vector output · SO(3)-equivariant",
+    "role": "io",
+    "dims": "x̂: N<sub>atom</sub> × 3",
+    "text": "Read off the vector channels, so it rotates with the input. The full model is equivariant through &#x27;a combination of data augmentation and equivariant architecture&#x27;.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   },
+   "out": {
+    "title": "S protein–ligand poses",
+    "sub": "no confidence head described",
+    "role": "io",
+    "dims": "S poses",
+    "text": "The report evaluates best@k over 20 samples and calls existing confidence models &#x27;often uninformative&#x27; for picking the best pose; it describes no confidence head of its own. Guidance and steering terms with a tunable strength can bend the trajectory toward constraints or physical priors.",
+    "refs": [
+     {
+      "label": "Genesis Research Team 2025 · Pearl: placing every atom in the right location",
+      "url": "https://arxiv.org/abs/2510.24670"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "Pearl is Genesis Molecular AI&#x27;s protein–ligand co-folding model (technical report, October 2025). It keeps the AF3 split into a trunk that runs once per target and a diffusion module that runs at every step, but changes both halves: the trunk keeps only triangle multiplication, and the diffusion module is built from SO(3)-equivariant transformer blocks on scalar and vector features.",
+   "No weights or code came with it. The report gives the design but no block counts, widths, parameter totals or sampler settings, so the drawing shows the structure only. The later DECAF paper distils a 2026 development checkpoint and runs the teacher at 200 or more network evaluations per sample.",
+   "Its other two changes are about data and control rather than architecture: a large synthetic set of physics-generated protein–ligand complexes, whose share in training raises hold-out success monotonically, and templates that hold a whole pocket, ligands included."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "protein residues, ligand atoms"
+   },
+   {
+    "stage": "trunk",
+    "shape": "s, z: invariant, once per target"
+   },
+   {
+    "stage": "noise",
+    "shape": "x: N<sub>atom</sub> × 3"
+   },
+   {
+    "stage": "EqT blocks",
+    "shape": "scalar + vector features"
+   },
+   {
+    "stage": "output",
+    "shape": "x̂: N<sub>atom</sub> × 3, equivariant"
+   }
+  ],
+  "links": [
+   {
+    "label": "Technical report · arXiv 2510.24670",
+    "url": "https://arxiv.org/abs/2510.24670"
+   },
+   {
+    "label": "PairMixer · arXiv 2510.18870",
+    "url": "https://arxiv.org/abs/2510.18870"
+   },
+   {
+    "label": "DECAF distillation · arXiv 2606.08375",
+    "url": "https://arxiv.org/abs/2606.08375"
+   }
+  ]
+ },
+ {
   "id": "bioemu",
   "name": "BioEmu",
   "year": 2025,
@@ -3038,6 +3302,7 @@
    "Diversity comes from the data: models pretrained on the PDB or on high-pLDDT AFDB instead were 'worse in their ability to sample diverse conformations' (Fig. S8)."
   ],
   "vs": null,
+  "task": "ensemble sampling",
   "blocks": {
    "input": {
     "title": "protein sequence",
@@ -3283,6 +3548,7 @@
    "No trunk single representation enters the denoiser; x is Kabsch-aligned onto x̂ before every step, as in Boltz."
   ],
   "vs": "AlphaFold 3",
+  "task": "structure prediction",
   "blocks": {
    "input": {
     "title": "sequences + ligand SMILES",
@@ -3492,6 +3758,332 @@
   "links": []
  },
  {
+  "id": "mol1",
+  "name": "Mol-1",
+  "year": 2026,
+  "org": "Molence Bio",
+  "domain": "bio",
+  "paper": "Mol-1: Open Frontier Biomolecular Intelligence · Molence Bio technical report 2026",
+  "url": "https://github.com/molence/Mol-1",
+  "space": "all-atom coordinates",
+  "backbone": "Protenix fork: 8 PairMixer + 40 Pairformer blocks, then the AF3 denoiser",
+  "params": "577 M (denoiser 206 M)",
+  "params_m": 577,
+  "conditioning": "AF3 layout; 448-channel pair conditioning; pair biases of every denoiser layer cached per target",
+  "objective": "x̂ (EDM)",
+  "steps": "200",
+  "novelty": "Protenix with a pair stack that is wide only where it is cheap: 8 triangle-attention-free blocks at 448 channels, 40 Pairformer blocks at 320, and 20 trunk passes.",
+  "notes": [
+   "Trunk: 8 PairMixer blocks at 448 pair channels (59 M), a learned linear 448 → 320, 40 Pairformer blocks at 320 channels (240 M), and a linear 320 → 448 at the output. The report says this needs about 60 % of the FLOPs of a full-width trunk with comparable fitting.",
+   "The PairMixer blocks drop triangle attention but keep the single track: attention on s with a bias from z and a single transition. BioEmu-2's PairMixer never updates s.",
+   "Same sampler constants as Protenix (200 steps, γ_0 = 0.8, λ = 1.003, η = 1.5) and the same denoiser except for the wider z; the 24 layers' pair-bias projections are computed once per request and reused at every step.",
+   "20 trunk passes by default (Protenix 10); training shifts the cycle-depth distribution toward deeper recycling, from Beta(1, 1) capped at 4 cycles to Beta(2, 1).",
+   "One constraint-conditioned variant (site, exclusion, contact) adds zero-initialised conditioning to z and trains it with the last 8 Pairformer blocks: 48.7 M of 577.4 M parameters.",
+   "Trained on PDB structures released before 2021-09-30 plus synthetic data the report does not describe."
+  ],
+  "vs": "Protenix",
+  "task": "structure prediction",
+  "blocks": {
+   "input": {
+    "title": "sequences + ligand SMILES",
+    "sub": "",
+    "role": "io",
+    "dims": "tokens: one per residue / nucleotide, one per ligand atom · atoms with reference conformers",
+    "text": "Proteins, nucleic acids, ligands (SMILES or CCD), ions and modifications are all tokenised. Every atom gets a reference conformer from RDKit.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "atoms → tokens · 3 blocks",
+    "role": "embed",
+    "dims": "atom single 128 · atom pair 16 → s<sup>inputs</sup>: N<sub>tok</sub> × 449 → s: N<sub>tok</sub> × 384, z: N<sub>tok</sub>² × 448",
+    "text": "As in Protenix, except that z is built at 448 channels: an outer sum of two projections of s, relative-position and bond features. The atom encoder has 1.0 M parameters.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     }
+    ]
+   },
+   "tmpl": {
+    "title": "template module",
+    "sub": "2 blocks · 448-ch z",
+    "role": "pair",
+    "dims": "N<sub>tok</sub>² × 64 → 448, 2 blocks · 0.3 M",
+    "text": "A template Pairformer with 64 channels, projected into the 448-channel z. Templates are off by default at inference (<code>use_template</code> is false); the MSA is on.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     }
+    ]
+   },
+   "msa": {
+    "title": "MSA module",
+    "sub": "4 blocks · c<sub>m</sub> = 192 · 31 M",
+    "role": "pair",
+    "dims": "MSA N<sub>seq</sub> × N<sub>tok</sub> × 192 → z: N<sub>tok</sub>² × 448 · 4 blocks · 30.8 M",
+    "text": "Outer-product mean into z, pair-weighted averaging back, then a full Pairformer-style pair stack on z with triangle attention, at 448 channels. The MSA channel width is 192 where Protenix&#x27;s is 64, and with the wider z the module is about ten times Protenix&#x27;s 3 M.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     },
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     }
+    ]
+   },
+   "pmix": {
+    "title": "PairMixer",
+    "sub": "8 blocks · 448-ch z · 59 M · no triangle attention",
+    "role": "pair",
+    "dims": "z: N<sub>tok</sub>² × 448 · s: N<sub>tok</sub> × 384 · 8 blocks × 7.3 M = 58.7 M",
+    "text": "Per block: triangle multiplication (outgoing, incoming) with hidden width 448, pair transition, single attention with pair bias, single transition. Triangle attention is the only Pairformer part left out. These are the first eight of the 48 blocks of one stack; the report cites ESMFold2 and Ouyang-Zhang et al. as precedents for dropping it. Unlike BioEmu-2&#x27;s PairMixer, the single track stays.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     },
+     {
+      "label": "Ouyang-Zhang et al. 2025 · Triangle multiplication is all you need (PairMixer)",
+      "url": "https://arxiv.org/abs/2510.18870"
+     },
+     {
+      "label": "Candido et al. 2026 · ESMFold2",
+      "url": "https://doi.org/10.64898/2026.06.03.729735"
+     }
+    ]
+   },
+   "down": {
+    "title": "linear 448 → 320",
+    "sub": "",
+    "role": "embed",
+    "dims": "z: 448 → 320 · bias-free linear · 0.14 M",
+    "text": "A learned projection between the two stages (<code>PairformerWidthAdapter</code> in the code), applied to z only; s stays at 384 channels throughout.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     }
+    ]
+   },
+   "pf": {
+    "title": "Pairformer",
+    "sub": "40 blocks · 320-ch z · 240 M",
+    "role": "pair",
+    "dims": "z: N<sub>tok</sub>² × 320 · s: N<sub>tok</sub> × 384 · 40 blocks × 6.0 M = 240.3 M",
+    "text": "Full Pairformer blocks as in AF3: triangle multiplication, triangle attention (start and end node), pair transition, single attention with pair bias, single transition. Because the code scales the hidden width with the pair width, the triangle multiplication is 320 wide and triangle attention runs 10 heads of 32; AF3 and Protenix use 128 and 4 heads. Each block has about twice the parameters of a Protenix one (6.0 M against 3.1 M).",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "up": {
+    "title": "linear 320 → 448",
+    "sub": "",
+    "role": "embed",
+    "dims": "z: 320 → 448 · bias-free linear · 0.14 M",
+    "text": "Restores the pair representation to 448 channels at the trunk output, so the denoiser and the confidence head see the same width the PairMixer blocks worked at.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     }
+    ]
+   },
+   "c": {
+    "title": "trunk output c",
+    "sub": "c = (s<sub>i</sub>, z<sub>ij</sub>)",
+    "role": "pair",
+    "dims": "s<sub>i</sub><sup>trunk</sup>: N<sub>tok</sub> × 384 · z<sub>ij</sub><sup>trunk</sup>: N<sub>tok</sub>² × 448",
+    "text": "Everything the denoiser knows about the target. Computed once per target after 20 trunk passes and reused for every step and sample; the pair part is 3.5 times wider than in Protenix.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     }
+    ]
+   },
+   "noise": {
+    "title": "noise at σ<sub>max</sub>",
+    "sub": "atom coordinates x",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3, σ<sub>0</sub> = 160 σ<sub>data</sub> = 2560 Å",
+    "text": "Karras ρ-schedule with ρ = 7, s<sub>max</sub> = 160, s<sub>min</sub> = 4 · 10<sup>−4</sup>, σ<sub>data</sub> = 16 Å.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     }
+    ]
+   },
+   "cond": {
+    "title": "conditioning",
+    "sub": "448-ch z · pair biases of all 24 · layers projected once per target",
+    "role": "cond",
+    "dims": "z: concat(z<sup>trunk</sup>, rel. pos.) 896 → 448 · s: concat(s<sup>trunk</sup>, s<sup>inputs</sup>) → 384 + Fourier(¼ log(σ / σ<sub>data</sub>)) · 5.1 M",
+    "text": "Two transitions each on s and z, as in AF3 but with a 448-wide z. At inference the z branch and the atom pair terms are computed once per target, as in Protenix. Mol-1 goes one stage further: each of the 24 token-transformer blocks projects z to its 16-head attention bias once (<code>prepare_projected_pair_biases</code>), and the 24 tensors of shape 16 × N<sub>tok</sub> × N<sub>tok</sub> are reused at every step. This is <code>diffusion_cache_mode=full</code>, the default; <code>shared</code> stops before the per-layer projections and <code>off</code> recomputes everything at every step. The cached biases are what makes a wider z affordable inside the sampling loop.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     },
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     }
+    ]
+   },
+   "aenc": {
+    "title": "atom encoder",
+    "sub": "3 blocks · as AF3",
+    "role": "attn",
+    "dims": "atoms: 128 ch, pairs 16 ch · 3 blocks · 4 heads · windows of 32 queries × 128 keys → tokens 768",
+    "text": "Local attention over atoms near each other in the token order, then a mean over each token&#x27;s atoms.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "tok": {
+    "title": "token transformer",
+    "sub": "24 × 16 heads · 768 · 198 M · residual added",
+    "role": "attn",
+    "dims": "24 × 16 heads × 768 · 198 M · pair bias from z (448 → 16 per block)",
+    "text": "The Protenix token transformer, with a residual added and the same depth and width. The only change is the input width of each block&#x27;s pair-bias projection, 448 instead of 128 channels, which is replaced by the cached projections at inference.",
+    "refs": [
+     {
+      "label": "Protenix technical report 2025",
+      "url": "https://doi.org/10.1101/2025.01.08.631967"
+     },
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     }
+    ]
+   },
+   "adec": {
+    "title": "atom decoder",
+    "sub": "3 blocks",
+    "role": "attn",
+    "dims": "tokens 768 → broadcast to atoms 128 · 3 blocks → Δx: N<sub>atom</sub> × 3",
+    "text": "Atom-level attention again, then a linear layer to coordinate updates F<sub>θ</sub>.",
+    "refs": [
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "xhat": {
+    "title": "structure x̂",
+    "sub": "S samples",
+    "role": "io",
+    "dims": "N<sub>atom</sub> × 3",
+    "text": "x̂ = c<sub>skip</sub>(σ) x + c<sub>out</sub>(σ) F<sub>θ</sub>, EDM preconditioning. The sampler takes 200 Euler steps with churn γ<sub>0</sub> = 0.8, noise scale λ = 1.003 and step scale η = 1.5, and no alignment between steps.",
+    "refs": [
+     {
+      "label": "Karras et al. 2022 · EDM",
+      "url": "https://arxiv.org/abs/2206.00364"
+     },
+     {
+      "label": "Abramson et al. 2024 · AlphaFold 3",
+      "url": "https://www.nature.com/articles/s41586-024-07487-w"
+     }
+    ]
+   },
+   "conf": {
+    "title": "confidence head",
+    "sub": "Pairformer 4 blocks · 448-ch · 38 M",
+    "role": "pair",
+    "dims": "4 Pairformer blocks · z: 448 · s: 384 · 38.4 M",
+    "text": "Full Pairformer blocks at the full 448 channels, with no PairMixer blocks and no width adapters: 4 × 9.4 M for the stack, 38.4 M with the heads, about three times Protenix&#x27;s 13 M. Heads for pLDDT, PAE, PDE and experimentally-resolved, as in AF3.",
+    "refs": [
+     {
+      "label": "Molence Bio 2026 · Mol-1: Open Frontier Biomolecular Intelligence",
+      "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+     }
+    ]
+   },
+   "out": {
+    "title": "S structures + confidence",
+    "sub": "pLDDT · PAE · pTM",
+    "role": "io",
+    "dims": "S samples, ranked",
+    "text": "Ranking combines pTM / ipTM with clash and disorder penalties.",
+    "refs": []
+   }
+  },
+  "overview": [
+   "Mol-1 is Molence Bio&#x27;s open co-folding model, released on 30 October 2026 under Apache 2.0 with one checkpoint for antibodies, small molecules, peptides and molecular glues. The code is a fork of Protenix (upstream revision bd54a05), and the denoiser, the sampler and the confidence head keep the Protenix layout: a 3-block atom encoder, a 24-block token transformer at 768 channels, a 3-block atom decoder, 200 steps with γ<sub>0</sub> = 0.8, λ = 1.003 and η = 1.5. It has 577 M parameters against Protenix&#x27;s 368 M.",
+   "What changed is the width of the pair representation and how the trunk pays for it. The pair stream that conditions the denoiser and the confidence head is 448 channels wide (Protenix 128). Running a full 48-block Pairformer at that width would be expensive, so the trunk is heterogeneous: 8 PairMixer blocks (triangle multiplication, no triangle attention) at 448 channels, a learned linear down to 320, 40 Pairformer blocks at 320, and a linear back up to 448. The report compares this with complete 48-block Pairformers at 448 and 256 channels and states that it needs about 60 % of the FLOPs of the full-width one at comparable fitting on training data. Counted in the code, the stack is 299 M of the 577 M parameters, the MSA module 31 M (its channel width is 192 against Protenix&#x27;s 64), the denoiser 206 M and the confidence head 38 M.",
+   "Recycling is the second lever. Training draws the number of cycles from a Beta distribution discretised up to a maximum depth K, starting at Beta(1, 1) with K = 4 and moving through Beta(2, 2), together with larger crops, to Beta(2, 1), and inference runs 20 trunk passes by default, twice Protenix&#x27;s 10 (the report&#x27;s peptide benchmark uses 10). The report gives 75.0 % success at DockQ &gt; 0.23 on FoldBench-AB (OpenDDE 70.0 %, AF3 48.8 %), 54.07 % at DockQ &gt; 0.80 on MolBench-Peptide-26 (172 interface clusters from 150 PDB entries), and a mean DockQ on MolBench-AB-26 that rises from 0.359 with one seed to 0.463 with 100. Training structures were released before 2021-09-30; the report adds synthetic data it does not describe. A constraint-conditioned variant (site, exclusion, contact) is described in the report but is not in the released code, which has the base checkpoint only."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "N<sub>tok</sub>; atoms N<sub>atom</sub>"
+   },
+   {
+    "stage": "input embedder",
+    "shape": "s<sup>inputs</sup>: N<sub>tok</sub> × 449"
+   },
+   {
+    "stage": "trunk, 20 passes",
+    "shape": "s: N<sub>tok</sub> × 384 · z: N<sub>tok</sub>² × 448"
+   },
+   {
+    "stage": "noise",
+    "shape": "x: N<sub>atom</sub> × 3"
+   },
+   {
+    "stage": "atom encoder",
+    "shape": "N<sub>atom</sub> × 128 → N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "token transformer",
+    "shape": "N<sub>tok</sub> × 768"
+   },
+   {
+    "stage": "atom decoder",
+    "shape": "→ N<sub>atom</sub> × 3"
+   }
+  ],
+  "links": [
+   {
+    "label": "Technical report · Molence Bio 2026",
+    "url": "https://papermanager.niklas-abraham.de/paper/b594b17e-6972-456c-922a-ece389f520cd"
+   },
+   {
+    "label": "Code · molence/Mol-1",
+    "url": "https://github.com/molence/Mol-1"
+   },
+   {
+    "label": "Upstream · bytedance/Protenix",
+    "url": "https://github.com/bytedance/Protenix"
+   },
+   {
+    "label": "Protenix technical report · bioRxiv 2025",
+    "url": "https://doi.org/10.1101/2025.01.08.631967"
+   }
+  ]
+ },
+ {
   "id": "rfd3",
   "name": "RFdiffusion3",
   "year": 2026,
@@ -3516,6 +4108,7 @@
    "Two inference-time knobs trade adherence against diversity: a higher classifier-free guidance scale raises motif adherence while lowering codesignability (Fig. 2D), and the step scale sets the sampling temperature (fig. S1C)."
   ],
   "vs": "AlphaFold 3",
+  "task": "design",
   "blocks": {
    "input": {
     "title": "design conditions",
@@ -3758,6 +4351,312 @@
   ]
  },
  {
+  "id": "rfd4",
+  "name": "RFD4-Proteina",
+  "year": 2026,
+  "org": "Institute for Protein Design, UW · NVIDIA",
+  "domain": "bio",
+  "paper": "Corley, Didi, Kazman, Brent et al. · preprint 2026",
+  "url": "https://github.com/RosettaCommons/RFD4-Proteina",
+  "space": "token anchors + 32-d latents, decoded to all atoms",
+  "backbone": "14-layer single/pair network with triangle multiplication, recycled inside every step",
+  "params": "not stated in the paper",
+  "params_m": null,
+  "conditioning": "adaLN from noise times and molecular conditions; in-context motif tokens; per-residue sequence-probability constraints",
+  "objective": "clean-state error, flow matching on coordinates and latents",
+  "steps": "60, stochastic TSR sampler",
+  "novelty": "Recycling moved from the trunk into every flow step, on a shared latent space of coordinates and chemistry.",
+  "notes": [
+   "There is no separate trunk: the same 14-layer network is the conditioning module and the denoiser, and it is applied up to 9 times inside every flow step (Poisson(3) clamped to 1–9 in training; at inference the number varies with the step).",
+   "Two flows run side by side with independent clocks: the token anchors (Cα, C1′ or the anomeric carbon) and a 32-dimensional latent per token that encodes residue identity and local structure. A decoder turns both into atoms.",
+   "Triangle multiplication every other layer, a Hadamard single-to-pair update every layer, and adaptive RMSNorm for conditioning; the pair width is 384 and the single width 768.",
+   "Instead of self-conditioning, the previous pass's single and pair states are projected and added to the input embeddings; gradients flow through the final pass only.",
+   "Sampling uses a temperature-rescaled score (TSR) with a stochastic Euler–Maruyama update in 60 steps; a 400-step SDE is slightly better but cannot be shortened.",
+   "Code and weights are released under a permissive licence."
+  ],
+  "vs": "RFdiffusion3",
+  "task": "design",
+  "blocks": {
+   "xt": {
+    "title": "noised anchors x<sub>t</sub>",
+    "sub": "token anchors · clock t<sub>x</sub>",
+    "role": "io",
+    "dims": "N<sub>tok</sub> × 3 · clock t<sub>x</sub>",
+    "text": "One anchor per token in a shared global frame: Cα, C1′ or the anomeric carbon. Coordinates and latents are sampled at independent times in training, with different time distributions.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     },
+     {
+      "label": "Geffner et al. 2026 · La-Proteina (partially latent flow matching)",
+      "url": "https://arxiv.org/abs/2507.09466"
+     }
+    ]
+   },
+   "lt": {
+    "title": "noised latents ℓ<sub>t</sub>",
+    "sub": "32 per token · clock t<sub>ℓ</sub>",
+    "role": "io",
+    "dims": "N<sub>tok</sub> × 32 · clock t<sub>ℓ</sub>",
+    "text": "The autoencoder&#x27;s latent for each token: residue identity and local structure, with a KL penalty toward a standard normal. It is what lets one model cover amino acids, nucleotides, sugars and modified residues.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     },
+     {
+      "label": "Geffner et al. 2026 · La-Proteina (partially latent flow matching)",
+      "url": "https://arxiv.org/abs/2507.09466"
+     }
+    ]
+   },
+   "conds": {
+    "title": "conditions",
+    "sub": "motifs · ligands · tasks",
+    "role": "cond",
+    "dims": "in-context motif tokens · ligand and partner tokens · task modifiers",
+    "text": "Motifs are extra tokens in the sequence that need not say where they land. Sequence constraints may also be given as probability masses per position that need not sum to one, and are applied while the model reasons rather than afterwards.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "emb": {
+    "title": "input embedder",
+    "sub": "s<sub>i</sub>: 768 · z<sub>ij</sub>: 384 · adaLN: 256",
+    "role": "embed",
+    "dims": "s<sub>i</sub>: N<sub>tok</sub> × 768 · z<sub>ij</sub>: N<sub>tok</sub>² × 384 · conditioning 256",
+    "text": "Single and pair input features are concatenated and projected to initialise the token and token-pair representations.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "hadamard": {
+    "title": "single → pair update",
+    "sub": "a<sub>i</sub> ⊙ b<sub>j</sub> · every layer",
+    "role": "pair",
+    "dims": "z<sub>ij</sub> ← z<sub>ij</sub> + a<sub>i</sub> ⊙ b<sub>j</sub>, bias-free projections to 384",
+    "text": "An elementwise product rather than a sum, so each token can gate the other&#x27;s contribution: setting b<sub>jk</sub> = 0 switches the update off for any a<sub>ik</sub>. The paper&#x27;s ablation favours it over the additive update.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "trimult": {
+    "title": "triangle multiplication",
+    "sub": "outgoing + incoming · every other layer",
+    "role": "pair",
+    "dims": "outgoing + incoming · hidden 256 · pair track every other layer",
+    "text": "As in AlphaFold 2 and 3 but without triangle attention, followed by a pair transition. The ablation without them loses backbone agreement and design success.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     },
+     {
+      "label": "Jumper et al. 2021 · AlphaFold 2 (Evoformer, triangle updates)",
+      "url": "https://doi.org/10.1038/s41586-021-03819-2"
+     }
+    ]
+   },
+   "ptrans": {
+    "title": "pair transition",
+    "sub": "",
+    "role": "mlp",
+    "dims": "per pair MLP",
+    "text": "",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "attn": {
+    "title": "self-attention",
+    "sub": "12 heads × 64 · QK-norm · pair bias β<sub>i</sub>j · gated",
+    "role": "attn",
+    "dims": "12 heads × 64 · normalised queries and keys",
+    "text": "Pair features are normalised and projected to an additive bias per head, so the pair track decides which tokens attend to which. The attention output is gated, projected and added to s.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     },
+     {
+      "label": "Jumper et al. 2021 · AlphaFold 2 (Evoformer, triangle updates)",
+      "url": "https://doi.org/10.1038/s41586-021-03819-2"
+     }
+    ]
+   },
+   "trans": {
+    "title": "token transition",
+    "sub": "SwiGLU · hidden 3072",
+    "role": "mlp",
+    "dims": "SwiGLU · hidden 3072",
+    "text": "Token-wise feed-forward with adaptive RMSNorm supplying the conditioning.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     },
+     {
+      "label": "Shazeer 2020 · GLU variants (SwiGLU)",
+      "url": "https://arxiv.org/abs/2002.05202"
+     }
+    ]
+   },
+   "adaln": {
+    "title": "adaLN features",
+    "sub": "t<sub>x</sub>, t<sub>ℓ</sub> · molecular conditions",
+    "role": "norm",
+    "dims": "256 channels for each of the single and pair paths",
+    "text": "The noise times of both clocks and the molecular conditions enter through adaptive normalisation in both attention and transition.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "vx": {
+    "title": "coordinate velocity",
+    "sub": "v<sub>x</sub> · N<sub>tok</sub> × 3",
+    "role": "mlp",
+    "dims": "N<sub>tok</sub> × 3",
+    "text": "Trained on the squared clean-state error with time weight 1/((1 − t)² + 10⁻⁵), summed over dimensions. Tokens of nonstandard chemistry get a higher weight.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "vl": {
+    "title": "latent velocity",
+    "sub": "v<sub>ℓ</sub> · N<sub>tok</sub> × 32",
+    "role": "mlp",
+    "dims": "N<sub>tok</sub> × 32",
+    "text": "Same loss on the latents, with its own time distribution.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "seqhead": {
+    "title": "sequence head",
+    "sub": "147 classes",
+    "role": "attn",
+    "dims": "N<sub>tok</sub> × 147 classes, detached",
+    "text": "Predicts residue identities. It receives stop-gradient features, so its loss trains the head without changing the trunk. Its predictions condition the decoder where the user gave no sequence; without that the decoder may alter residues the user fixed.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "mapping": {
+    "title": "motif mapping",
+    "sub": "motif tokens",
+    "role": "attn",
+    "dims": "scores m<sub>ij</sub> between motif tokens and generated tokens, detached",
+    "text": "For motifs whose position in the chain is not given, a bilinear score between motif and generated tokens is turned into an assignment by a per-chain Hungarian matching.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   },
+   "dec": {
+    "title": "decoder",
+    "sub": "12 layers × 12 heads × 768 · no pair track · anchors + latents + sequence → atoms",
+    "role": "latent",
+    "dims": "12 transformer layers · 768 · 12 heads · no pair track",
+    "text": "A shared decoder maps anchors, latents and sequence to atomic coordinates, residue identity and which atoms exist. It is the counterpart of an encoder trained with a reconstruction loss and a KL term, and an energy-supervised decoder is also released.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     },
+     {
+      "label": "Geffner et al. 2026 · La-Proteina (partially latent flow matching)",
+      "url": "https://arxiv.org/abs/2507.09466"
+     }
+    ]
+   },
+   "out": {
+    "title": "all-atom design",
+    "sub": "backbone · rotamers · ligand pose · sequence",
+    "role": "io",
+    "dims": "backbone, side-chain rotamers, ligand pose, sequence",
+    "text": "The one-model claim: structure, sequence and the conformation of the surrounding molecules come out of the same pass. Search across trajectories can be added at inference: branches are pruned at checkpoints against a user-given criterion.",
+    "refs": [
+     {
+      "label": "Corley, Didi, Kazman, Brent et al. 2026 · RFD4-Proteina",
+      "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+     }
+    ]
+   }
+  },
+  "overview": [
+   "RFD4-Proteina designs proteins, nucleic acids, sugars and small-molecule contexts with a flow model that does not work on atoms. Each residue, nucleotide or sugar is one token with an anchor coordinate in R<sup>3</sup> (Cα for amino acids, C1′ for nucleotides, the anomeric carbon for sugars) and a 32-dimensional latent that encodes its identity and local structure. A separately trained autoencoder maps between this pair and all atoms.",
+   "The network has no trunk in front of a denoiser. One stack of 14 single-track layers, with a pair track updated every other layer, is the whole flow model; it is run up to nine times inside each denoising step with the single and pair states of the previous pass added back to the input embeddings. RFdiffusion3 also recycles at every step, but around an AF3-style atom U-Net; here the recycled object is the trunk itself.",
+   "Anchors and latents are noised on independent clocks. Four heads read the final single representation: velocities for each, a 147-class sequence head and a motif-mapping head, the last two on detached features. Sampling is a stochastic Euler–Maruyama update in 60 steps, using a temperature-rescaled score. The paper adds search across trajectories on top."
+  ],
+  "flow": [
+   {
+    "stage": "tokens",
+    "shape": "N<sub>tok</sub>: residues, nucleotides, sugars, motif tokens"
+   },
+   {
+    "stage": "noised state",
+    "shape": "anchors x: N<sub>tok</sub> × 3 · latents ℓ: N<sub>tok</sub> × 32"
+   },
+   {
+    "stage": "embedder",
+    "shape": "s: N<sub>tok</sub> × 768 · z: N<sub>tok</sub>² × 384"
+   },
+   {
+    "stage": "trunk layers",
+    "shape": "14 layers, repeated R<sub>t</sub> times"
+   },
+   {
+    "stage": "heads",
+    "shape": "v<sub>x</sub>, v<sub>ℓ</sub>, 147 logits, motif scores"
+   },
+   {
+    "stage": "decoder",
+    "shape": "→ atoms"
+   }
+  ],
+  "links": [
+   {
+    "label": "Preprint · Biomolecular design through latent reasoning, 2026",
+    "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+   },
+   {
+    "label": "Code and weights · RosettaCommons/RFD4-Proteina",
+    "url": "https://github.com/RosettaCommons/RFD4-Proteina"
+   },
+   {
+    "label": "La-Proteina · arXiv 2507.09466",
+    "url": "https://arxiv.org/abs/2507.09466"
+   }
+  ]
+ },
+ {
   "id": "bioemu2",
   "name": "BioEmu-2",
   "year": 2026,
@@ -3782,6 +4681,7 @@
    "Training data (model card): 189,745 PDB systems, 7.2 M AFDB monomers, 775 k multi-conformation AFDB dimers, Teddymer, and Microsoft MD of CATH domains, dimers and PDBbind complexes."
   ],
   "vs": "AlphaFold 3",
+  "task": "ensemble sampling",
   "blocks": {
    "input": {
     "title": "sequences + ligands",

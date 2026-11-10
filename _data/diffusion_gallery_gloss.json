@@ -30,6 +30,7 @@
   "pairmixer": "A PairMixer block: triangle multiplication (outgoing, then incoming) and a transition on the pair representation, nothing else. No triangle attention and no attention on the single representation, which is what makes it cheaper than a Pairformer block.",
   "coup": "A coupling step between two residual streams that run at different granularities. Token features are broadcast to their atoms and mixed into the atom stream; the features of each token&#x27;s centre atom are mixed back into the token stream. Both mixes are MLPs gated by the conditioning.",
   "readout": "The output layer: token and atom features are projected to a common width, added per atom, normalised and mapped to a three-dimensional coordinate update.",
-  "mid": "The middle of a U-Net, at the lowest resolution and the widest channels. Attention is affordable here, so this is where the most global reasoning happens."
+  "mid": "The middle of a U-Net, at the lowest resolution and the widest channels. Attention is affordable here, so this is where the most global reasoning happens.",
+  "eqt": "An SO(3)-equivariant transformer block. Each position carries invariant scalar features and 3-D vector features; attention weights are built only from rotation-invariant quantities (scalar products, dot products of vectors, the pair representation), and the vectors are mixed only by linear combinations, so rotating the input rotates the output and leaves the scalars unchanged."
  }
 }

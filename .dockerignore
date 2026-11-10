@@ -8,3 +8,4 @@ vendor
 node_modules
 *.log
 Gemfile.lock
+bin/diffusion_gallery/preview

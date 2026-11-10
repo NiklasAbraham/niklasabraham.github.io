@@ -7,6 +7,15 @@ and once
 
 Run from the repository root:  python3 bin/diffusion_gallery/build.py
 
+Preview while drawing (touches neither _includes/ nor _data/):
+  python3 bin/diffusion_gallery/build.py --preview-card rfd4 [rfd3 …] [--shot]
+draws only those cards into bin/diffusion_gallery/preview/index.html (gitignored, open it as a file;
+?theme=dark or the toggle for dark). Its main.css is compiled from assets/css/main.scss and _sass/ by
+the dart-sass of the nab-site-dev image, extracted once to ~/.cache/nab-site/ (DG_SASS overrides);
+without it, the preview server's main.css is used and a newer SCSS file is warned about.
+--shot renders the cards headless at 2x (preview_shot.mjs, Playwright) to
+<shot dir>/gallery_<id>_{light,dark}.png and prints console errors and text that leaves its box.
+
 Every drawing uses the same vocabulary: boxes are coloured by what they do (role), never by
 model, so the same block looks the same in every card. Colours live in
 _sass/_diffusion_gallery.scss as CSS variables; the SVG carries only class names.
@@ -14,10 +23,17 @@ Flow runs bottom to top (input at the bottom, prediction at the top), except in 
 which run down the encoder and back up the decoder.
 """
 
+import argparse
+import email.utils
 import json
+import os
 import pathlib
 import re
+import shutil
+import subprocess
 import sys
+import time
+import urllib.request
 from html import escape
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -27,6 +43,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT_SVG = ROOT / "_includes" / "diffusion-gallery"
 OUT_DATA = ROOT / "_data" / "diffusion_gallery.json"
 OUT_GLOSS = ROOT / "_data" / "diffusion_gallery_gloss.json"
+PREVIEW = ROOT / "bin" / "diffusion_gallery" / "preview"
+SHOTS = pathlib.Path("/home/niklas/code/MasterThesis/050_system/shots")
+SASS_IMAGE = "nab-site-dev"
+SASS_CACHE = pathlib.Path.home() / ".cache" / "nab-site"
+SERVED_CSS = "http://127.0.0.1:4000/assets/css/main.css"
 
 W = 520  # every drawing is 520 user units wide; height varies
 
@@ -667,9 +688,10 @@ def _cofold(f, spec):
     for i, item in enumerate(spec["trunk"]):
         t, s, role, key = item[:4]
         opt = item[4] if len(item) > 4 else {}
-        h = 46 if role == "pair" else 40
+        h = opt.get("h", 46 if role == "pair" else 40)
         y -= h
-        f.box(xl + 16, y, wl - 16, h, t, s, role=role, diff=key in d, key=key, dash=opt.get("dash", False))
+        f.box(xl + 16, y, wl - 16, h, t, s, role=role, diff=key in d, key=key, dash=opt.get("dash", False),
+              small=opt.get("small", False))
         if i < len(spec["trunk"]) - 1:
             f.arrow([(cl + 8, y), (cl + 8, y - 12)])
             y -= 12
@@ -814,6 +836,32 @@ def draw_protenix(mid):
                           diff={"cond", "tok"}, bus_label="c, pair terms cached once"))
 
 
+def draw_pearl(mid):
+    """AF3 layout with an SO(3)-equivariant denoiser: the trunk stays invariant (triangle
+    multiplication without triangle attention), the diffusion module carries vector features.
+    The report gives no block counts, widths or parameters, so the card names none."""
+    f = Fig(mid, 1000, crop=True)
+    trunk = [("template module", "multi-chain · protein + ligands\n+ cofactors in one template", "pair", "tmpl"),
+             ("MSA module", "optional, as in AF3", "pair", "msa", dict(dash=True)),
+             ("trimul trunk", "PairMixer-style, invariant\nno triangle attention", "pair", "trimul")]
+    diff = [("conditioning", "s, z from the trunk\n+ pocket residues, if given", "cond", "cond"),
+            ("scalar + vector features", "invariants · 3-D vectors from x", "embed", "eqlift"),
+            ("equivariant transformer", "EqT blocks · scalar + vector Q/K\npair bias from z · mixing",
+             "attn", "eqt"),
+            ("equivariant transition", "gated nonlinearity on vectors", "mlp", "eqtr")]
+    return cofold(f, dict(trunk_pre=[("input embedder", "atoms → tokens", "embed", "emb")], trunk=trunk,
+                          diffusion=diff, tok_key="eqt",
+                          input="sequences + ligand topology", input_sub="+ templates · pocket residues",
+                          recycle=None, steps="× ≥ 200 steps", conf=None,
+                          xhat=("structure x̂", "vector output · SO(3)-equivariant"),
+                          out=("S protein–ligand poses", "no confidence head described"),
+                          diff={"input", "tmpl", "trimul", "cond", "eqlift", "eqt", "eqtr"},
+                          absent=("not in the report", ["block counts and widths", "parameter count",
+                                                        "confidence head"]),
+                          bus_label="c is invariant, x̂ equivariant",
+                          step_label="x̂ → next x · + guidance, steering"))
+
+
 def draw_esmfold2(mid):
     f = Fig(mid, 1000, crop=True)
     trunk_pre = [("ESM C protein LM", "6 B parameters, frozen", "cond", "lm")]
@@ -829,6 +877,26 @@ def draw_esmfold2(mid):
                           diff={"lm", "msa", "pair", "cond", "aenc", "tok", "conf"},
                           bus_label="c: no trunk single, only z",
                           step_label="x̂ → next x · Kabsch · from σ = 256 Å"))
+
+
+def draw_mol1(mid):
+    """Protenix with a heterogeneous-width trunk: 8 PairMixer blocks at 448 channels, a learned
+    down-projection, 40 Pairformer blocks at 320 channels, an up-projection back to 448."""
+    f = Fig(mid, 1000, crop=True)
+    trunk = [("template module", "2 blocks · 448-ch z", "pair", "tmpl"),
+             ("MSA module", "4 blocks · c_m = 192 · 31 M", "pair", "msa"),
+             ("PairMixer", "8 blocks · 448-ch z · 59 M\nno triangle attention", "pair", "pmix"),
+             ("linear 448 → 320", None, "embed", "down", dict(h=26, small=True)),
+             ("Pairformer", "40 blocks · 320-ch z · 240 M", "pair", "pf"),
+             ("linear 320 → 448", None, "embed", "up", dict(h=26, small=True))]
+    diff = [("conditioning", "448-ch z · pair biases of all 24\nlayers projected once per target", "cond", "cond"),
+            ("atom encoder", "3 blocks · as AF3", "attn", "aenc"),
+            ("token transformer", "24 × 16 heads · 768 · 198 M\nresidual added", "attn", "tok"),
+            ("atom decoder", "3 blocks", "attn", "adec")]
+    return cofold(f, dict(trunk_pre=AF3_TRUNK_PRE, trunk=trunk, diffusion=diff, recycle="× 20 passes",
+                          steps="× 200 steps · 206 M", conf=("confidence head", "Pairformer 4 blocks · 448-ch · 38 M"),
+                          diff={"tmpl", "msa", "pmix", "down", "pf", "up", "cond", "conf"},
+                          bus_label="c, pair biases cached once"))
 
 
 def draw_rfd3(mid):
@@ -853,6 +921,114 @@ def draw_rfd3(mid):
                           absent=("what AF3 has here", ["MSA module", "template module", "confidence head"]),
                           bus_label="c from 2 layers, not 48",
                           step_label="x̂ → next x · step scale · recycled every step"))
+
+
+def draw_rfd4(mid):
+    """RFD4-Proteina: no trunk/denoiser split. One 14-layer single/pair network is the denoiser and is
+    re-run R_t times inside every flow step; two flow heads and two detached heads read the single track;
+    a decoder turns anchors + latents into atoms."""
+    f = Fig(mid, 1100, crop=True)
+    H = f.h
+    xl, xr = 56, 446
+    cx = (xl + xr) / 2
+    # --- inputs: two noised states on their own clocks, and the design conditions
+    y0 = H - 50
+    bw, bg = 124, 9
+    xs0 = [xl, xl + bw + bg, xl + 2 * (bw + bg)]
+    f.box(xs0[0], y0, bw, 38, "noised anchors x_t", "token anchors · clock t_x", role="io", key="xt", small=True)
+    f.box(xs0[1], y0, bw, 38, "noised latents ℓ_t", "32 per token · clock t_ℓ", role="io", key="lt", small=True,
+          diff=True)
+    f.box(xs0[2], y0, bw, 38, "conditions", "motifs · ligands · tasks", role="cond", key="conds", small=True)
+    y = y0 - 14
+    for k, x in enumerate(xs0):
+        f.arrow([(x + bw / 2, y0), (x + bw / 2, y)], "w" if k == 2 else "f")
+    y -= 40
+    f.box(xl, y, xr - xl, 40, "input embedder", "s_i: 768 · z_{ij}: 384 · adaLN: 256", role="embed", key="emb")
+    y_emb = y
+    f.arrow([(cx, y), (cx, y - 58)])
+    # --- one trunk layer, drawn once: single lane left, pair lane right
+    ly_bot = y - 58
+    lw = 170
+    xs, xp = xl + 14, xr - 14 - lw
+    cs, cp = xs + lw / 2, xp + lw / 2
+    yp = ly_bot - 6 - 34
+    f.box(xp, yp, lw, 34, "single → pair update", "a_i ⊙ b_j · every layer", role="pair", key="hadamard",
+          small=True, diff=True)
+    yp_h = yp
+    f.arrow([(cp, yp), (cp, yp - 10)])
+    yp -= 10 + 44
+    f.box(xp, yp, lw, 44, "triangle multiplication", "outgoing + incoming\nevery other layer", role="pair",
+          key="trimult", small=True, diff=True)
+    f.arrow([(cp, yp), (cp, yp - 10)])
+    yp -= 10 + 26
+    f.box(xp, yp, lw, 26, "pair transition", None, role="mlp", key="ptrans", small=True)
+    yp_top = yp
+    ys = ly_bot - 6 - 44
+    f.box(xs, ys, lw, 44, "self-attention", "12 heads × 64 · QK-norm\npair bias β_ij · gated", role="attn",
+          key="attn", small=True)
+    ys_a = ys
+    f.arrow([(cs, ys), (cs, ys - 10)])
+    ys -= 10 + 36
+    f.box(xs, ys, lw, 36, "token transition", "SwiGLU · hidden 3072", role="mlp", key="trans", small=True)
+    # s_i feeds the Hadamard update; the pair track biases the attention logits
+    f.arrow([(xs + lw, ys_a + 38), (xp, yp_h + 17)], "w")
+    xm = (xs + lw + xp) / 2
+    f.arrow([(xp, yp_top + 13), (xm, yp_top + 13), (xm, ys_a + 10), (xs + lw, ys_a + 10)], "w dsh")
+    # adaLN feeds both lanes
+    ytop_lane = min(ys, yp_top)
+    ya = ytop_lane - 22
+    f.box(xl + 14, ya - 28, xr - xl - 28, 28, "adaLN features", "t_x, t_ℓ · molecular conditions", role="norm",
+          key="adaln", small=True)
+    lg_top = ya - 28 - 34
+    f.group(xl, lg_top, xr - xl, (ly_bot + 6) - lg_top + 4, "trunk layer", "× 14", rep_left=True, label_dy=24)
+    # --- recycling: the whole stack, same weights, read out after the last pass
+    rg_bot = (ly_bot + 6) + 4 + 28
+    rg_top = lg_top - 58
+    f.group(xl - 24, rg_top, xr - xl + 48, rg_bot - rg_top, None)
+    f.text(cx, rg_bot - 10, "recycled: s, z projected and added back to the input embeddings", "lab", "middle")
+    f.curve(f"M{xl - 4:.1f},{rg_top + 62:.1f} C{xl - 30:.1f},{rg_top + 82:.1f} {xl - 30:.1f},{rg_bot - 40:.1f} "
+            f"{xl - 6:.1f},{rg_bot - 22:.1f}", "f dsh")
+    # --- heads, fanned out of the final single representation
+    hw, hg = 92, 7
+    hx0 = xl + (xr - xl - 4 * hw - 3 * hg) / 2
+    jy = rg_top + 24                       # the junction, just inside the recycling frame
+    f.arrow([(cx, lg_top), (cx, jy)], head=False)
+    yh = rg_top - 24
+    f.raw(f'<path class="ln f" d="M{hx0 + hw / 2:.1f},{jy:.1f} H{hx0 + 3 * (hw + hg) + hw / 2:.1f}"/>')
+    heads = [("coordinate\nvelocity", "v_x · N_{tok} × 3", "mlp", "vx", False),
+             ("latent\nvelocity", "v_ℓ · N_{tok} × 32", "mlp", "vl", False),
+             ("sequence\nhead", "147 classes", "attn", "seqhead", True),
+             ("motif\nmapping", "motif tokens", "attn", "mapping", True)]
+    for i, (t, sub, role, key, dash) in enumerate(heads):
+        x = hx0 + i * (hw + hg)
+        f.box(x, yh - 54, hw, 54, t, sub, role=role, key=key, dash=dash, small=True, diff=i >= 2)
+        f.arrow([(x + hw / 2, jy), (x + hw / 2, yh)], "f dsh" if i >= 2 else "f")
+    f.text(cx - 8, jy + 17, "final s_i", "lab halo", "end", late=True)
+    f.badge(hx0 + 1.5 * (hw + hg) + hw / 2, rg_top, "× 1–9 passes", "rep ink", "middle")
+    y_heads_top = yh - 54
+    # --- the flow step: everything above, repeated for 60 steps
+    st_bot = y0 + 38 + 38
+    st_top = y_heads_top - 46
+    f.group(xl - 38, st_top, xr - xl + 76, st_bot - st_top, "flow step at times t_x, t_ℓ", "× 60 steps",
+            rep_left=True, label_dy=24)
+    yr = y0 + 38 + 12                     # the return line under the inputs
+    f.curve(f"M{xr + 38:.1f},{st_top + 40:.1f} C{xr + 64:.1f},{st_top + 70:.1f} {xr + 64:.1f},{yr - 30:.1f} "
+            f"{xr + 30:.1f},{yr:.1f}", "w dsh", head=False)
+    f.arrow([(xr + 30, yr), (xs0[0] + bw / 2, yr)], "w dsh", head=False)
+    for k in (0, 1):
+        f.arrow([(xs0[k] + bw / 2, yr), (xs0[k] + bw / 2, y0 + 38 + 3)], "w dsh")
+    f.text(cx, yr + 16, "next x_t, ℓ_t: stochastic TSR update, both clocks advance", "lab w", "middle")
+    # --- decoder and output
+    yd = st_top - 30
+    f.arrow([(hx0 + hw + hg + hw / 2, st_top), (hx0 + hw + hg + hw / 2, yd)])
+    f.arrow([(hx0 + 2 * (hw + hg) + hw / 2, y_heads_top), (hx0 + 2 * (hw + hg) + hw / 2, yd)], "f dsh")
+    f.text(hx0 + hw + hg + hw / 2 - 8, st_top - 20, "x_0, ℓ_0 after the last step", "lab halo", "end", late=True)
+    f.box(xl + 20, yd - 46, xr - xl - 40, 46, "decoder", "12 layers × 12 heads × 768 · no pair track\n"
+          "anchors + latents + sequence → atoms", role="latent", key="dec", diff=True)
+    f.arrow([(cx, yd - 46), (cx, yd - 46 - 22)])
+    f.box(xl + 20, yd - 46 - 22 - 40, xr - xl - 40, 40, "all-atom design",
+          "backbone · rotamers · ligand pose · sequence", role="io", key="out")
+    return f
 
 
 def draw_bioemu(mid):
@@ -1117,7 +1293,10 @@ MODELS = [
          novelty="AF3 layout with a deeper trunk, an affinity head and inference-time steering.",
          notes=["Pairformer 64 blocks (197 M), confidence 8 blocks (25 M).",
                 "Token transformer 283 M (checkpoint) vs 198 M in OpenFold3 and Protenix: AdaLN on a 768-ch s adds 42 M, a wider SwiGLU gate 28 M (269 M by code); 14 M unexplained.",
-                "Same denoiser as Boltz-1; per-layer pair biases are computed once per target; x is Kabsch-aligned onto x̂ before every step."],
+                "Same denoiser as Boltz-1; per-layer pair biases are computed once per target; x is Kabsch-aligned onto x̂ before every step.",
+                "Prediction, not design: the input is a given sequence (plus ligand or partner), the output its structure, a confidence "
+                "score and, for a ligand, an affinity. A design model such as RFdiffusion3 or RFD4-Proteina starts from a target "
+                "and returns a new molecule; in a design pipeline a predictor like this is the filter that refolds the result."],
          vs='AlphaFold 3', draw=draw_boltz2),
     dict(id="openfold3", name="OpenFold3", year=2025, org="OpenFold consortium", domain="bio",
          paper="OpenFold3 preview · 2025", url="https://github.com/aqlaboratory/openfold-3",
@@ -1137,6 +1316,30 @@ MODELS = [
                 "Custom LayerNorm and triangle kernels in the trunk; denoiser attention through PyTorch SDPA; samples in chunks of 5.",
                 "10 recycling passes by default."],
          vs='AlphaFold 3', draw=draw_protenix),
+    dict(id="pearl", name="Pearl", year=2025, org="Genesis Molecular AI", domain="bio",
+         paper="Genesis Research Team · arXiv 2025", url="https://arxiv.org/abs/2510.24670",
+         space="all-atom coordinates", backbone="invariant trimul trunk + SO(3)-equivariant diffusion module",
+         params="not stated in the report", params_m=None,
+         conditioning="invariant trunk features s, z; multi-chain templates with ligands and cofactors; pocket residues",
+         objective="x̂ (diffusion; details not reported)", steps="≥ 200 (DECAF, Pearl-2026.1.dev)",
+         novelty="The only all-atom co-folding denoiser here that is SO(3)-equivariant by construction; the trunk keeps only "
+                 "triangle multiplication.",
+         notes=["Trunk: rotation- and translation-invariant, with 'a lightweight triangle multiplication (trimul) "
+                "module for efficiency', citing PairMixer (Ouyang-Zhang et al. 2025, same group). Depth and widths "
+                "are not given.",
+                "Diffusion module: equivariant transformer (EqT) blocks on scalar and vector features. Attention "
+                "weights come from scalar and vector queries and keys plus the pair representation; a feed-forward "
+                "layer gates the vector channels (report Fig. 2). Equivariance comes from the architecture and data "
+                "augmentation together; AF3's denoiser relies on augmentation alone.",
+                "Templates cover several chains and non-polymers at once (cofactors, related ligands), to give a "
+                "holo-like pocket. Two modes: unconditional (sequence and ligand topology, optional MSA and "
+                "templates) and pocket-conditional.",
+                "Training data: PDB before 2021-09-30, monomer distillation (OpenFold, AFDB) and a large synthetic "
+                "set of physics-generated protein–ligand complexes; success on a hold-out set rises monotonically "
+                "with the synthetic share (582,065 structures in the scaling run). Five-stage curriculum.",
+                "No weights or code were released with the report. Runs N' Poses (RMSD < 2 Å and PB-valid, best@5): 85.2 % "
+                "against 74.4 % for AF3. A few-step DECAF distillation (2026) matches a later checkpoint at 40 NFE."],
+         vs='AlphaFold 3', draw=draw_pearl),
     dict(id="bioemu", name="BioEmu", year=2025, org="Microsoft Research AI for Science", domain="bio",
          paper="Lewis, Hempel, Jiménez-Luna, Gastegger et al. · Science 2025",
          url="https://doi.org/10.1126/science.adv9817",
@@ -1170,6 +1373,29 @@ MODELS = [
                 "Atom attention: sliding window of 128 with FlashAttention and 3D RoPE from the reference conformer.",
                 "No trunk single representation enters the denoiser; x is Kabsch-aligned onto x̂ before every step, as in Boltz."],
          vs='AlphaFold 3', draw=draw_esmfold2),
+    dict(id="mol1", name="Mol-1", year=2026, org="Molence Bio", domain="bio",
+         paper="Mol-1: Open Frontier Biomolecular Intelligence · Molence Bio technical report 2026",
+         url="https://github.com/molence/Mol-1",
+         space="all-atom coordinates", backbone="Protenix fork: 8 PairMixer + 40 Pairformer blocks, then the AF3 denoiser",
+         params="577 M (denoiser 206 M)", params_m=577,
+         conditioning="AF3 layout; 448-channel pair conditioning; pair biases of every denoiser layer cached per target",
+         objective="x̂ (EDM)", steps="200",
+         novelty="Protenix with a pair stack that is wide only where it is cheap: 8 triangle-attention-free blocks at "
+                 "448 channels, 40 Pairformer blocks at 320, and 20 trunk passes.",
+         notes=["Trunk: 8 PairMixer blocks at 448 pair channels (59 M), a learned linear 448 → 320, 40 Pairformer blocks "
+                "at 320 channels (240 M), and a linear 320 → 448 at the output. The report says this needs about 60 % "
+                "of the FLOPs of a full-width trunk with comparable fitting.",
+                "The PairMixer blocks drop triangle attention but keep the single track: attention on s with a "
+                "bias from z and a single transition. BioEmu-2's PairMixer never updates s.",
+                "Same sampler constants as Protenix (200 steps, γ_0 = 0.8, λ = 1.003, η = 1.5) and the same "
+                "denoiser except for the wider z; the 24 layers' pair-bias projections are computed once per request "
+                "and reused at every step.",
+                "20 trunk passes by default (Protenix 10); training shifts the cycle-depth distribution toward deeper "
+                "recycling, from Beta(1, 1) capped at 4 cycles to Beta(2, 1).",
+                "One constraint-conditioned variant (site, exclusion, contact) adds zero-initialised conditioning to z "
+                "and trains it with the last 8 Pairformer blocks: 48.7 M of 577.4 M parameters.",
+                "Trained on PDB structures released before 2021-09-30 plus synthetic data the report does not describe."],
+         vs='Protenix', draw=draw_mol1),
     dict(id="rfd3", name="RFdiffusion3", year=2026, org="Baker lab, UW", domain="bio",
          paper="Butcher, Krishna, Mitra et al. · Science 2026",
          url="https://doi.org/10.1126/science.aeh2982",
@@ -1195,6 +1421,32 @@ MODELS = [
                 "scale raises motif adherence while lowering codesignability (Fig. 2D), and the step scale sets "
                 "the sampling temperature (fig. S1C)."],
          vs='AlphaFold 3', draw=draw_rfd3),
+    dict(id="rfd4", name="RFD4-Proteina", year=2026, org="Institute for Protein Design, UW · NVIDIA", domain="bio",
+         paper="Corley, Didi, Kazman, Brent et al. · preprint 2026",
+         url="https://github.com/RosettaCommons/RFD4-Proteina",
+         space="token anchors + 32-d latents, decoded to all atoms",
+         backbone="14-layer single/pair network with triangle multiplication, recycled inside every step",
+         params="not stated in the paper", params_m=None,
+         conditioning="adaLN from noise times and molecular conditions; in-context motif tokens; "
+                      "per-residue sequence-probability constraints",
+         objective="clean-state error, flow matching on coordinates and latents",
+         steps="60, stochastic TSR sampler",
+         novelty="Recycling moved from the trunk into every flow step, on a shared latent space of "
+                 "coordinates and chemistry.",
+         notes=["There is no separate trunk: the same 14-layer network is the conditioning module and the "
+                "denoiser, and it is applied up to 9 times inside every flow step (Poisson(3) clamped to 1–9 in "
+                "training; at inference the number varies with the step).",
+                "Two flows run side by side with independent clocks: the token anchors (Cα, C1′ or the "
+                "anomeric carbon) and a 32-dimensional latent per token that encodes residue identity and "
+                "local structure. A decoder turns both into atoms.",
+                "Triangle multiplication every other layer, a Hadamard single-to-pair update every layer, and "
+                "adaptive RMSNorm for conditioning; the pair width is 384 and the single width 768.",
+                "Instead of self-conditioning, the previous pass's single and pair states are projected and "
+                "added to the input embeddings; gradients flow through the final pass only.",
+                "Sampling uses a temperature-rescaled score (TSR) with a stochastic Euler–Maruyama update in "
+                "60 steps; a 400-step SDE is slightly better but cannot be shortened.",
+                "Code and weights are released under a permissive licence."],
+         vs='RFdiffusion3', draw=draw_rfd4),
     dict(id="bioemu2", name="BioEmu-2", year=2026, org="Microsoft Research AI for Science", domain="bio",
          paper="bioemu2-preview · code and weights, October 2026 (no paper yet)",
          url="https://github.com/microsoft/bioemu2",
@@ -1225,17 +1477,23 @@ MODELS = [
 ]
 
 
+def check_details(m, fig):
+    """Warn about detail keys (details.py) with no block in the drawing."""
+    det = DETAILS.get(m["id"], {})
+    for k in dict.fromkeys(map(slug, det.get("parts", {}))):
+        if k not in fig.blocks and k not in det.get("inherited", ()):
+            print(f"  warning: {m['id']}: no block '{k}' in the drawing", file=sys.stderr)
+
+
 def main():
     OUT_SVG.mkdir(parents=True, exist_ok=True)
     data = []
     for m in MODELS:
         fig = m["draw"](m["id"])
         (OUT_SVG / f"{m['id']}.svg").write_text(fig.svg())
+        check_details(m, fig)
         det = DETAILS.get(m["id"], {})
         parts = {slug(k): v for k, v in det.get("parts", {}).items()}
-        for k in parts:
-            if k not in fig.blocks and k not in det.get("inherited", ()):
-                print(f"  warning: {m['id']}: no block '{k}' in the drawing", file=sys.stderr)
         blocks = {}
         for k, b in fig.blocks.items():
             p = dict(fig.auto.get(k, {}), **{a: v for a, v in parts.get(k, {}).items() if v})
@@ -1246,7 +1504,7 @@ def main():
                              dims=hfmt(p.get("dims", "")), text=hfmt(text),
                              refs=[dict(label=l, url=u) for l, u in p.get("refs", [])])
         row = {k: v for k, v in m.items() if k != "draw"}
-        row.update(blocks=blocks,
+        row.update(task=task_of(m), blocks=blocks,
                    overview=[hfmt(t) for t in det.get("overview", [])],
                    flow=[dict(stage=hfmt(a), shape=hfmt(b)) for a, b in det.get("flow", [])],
                    links=[dict(label=l, url=u) for l, u in det.get("links", [])])
@@ -1263,5 +1521,158 @@ def main():
           f"and {OUT_GLOSS.relative_to(ROOT)}")
 
 
+# ----------------------------------------------------------------------------------------
+# Preview: a few cards on a standalone page, without Jekyll
+# ----------------------------------------------------------------------------------------
+
+def sass_bin():
+    """dart-sass as Jekyll runs it (the sass-embedded gem of the preview image), cached once."""
+    if os.environ.get("DG_SASS"):
+        return os.environ["DG_SASS"]
+    exe = SASS_CACHE / "dart-sass" / "sass"
+    if not exe.exists() and shutil.which("docker"):
+        print(f"  extracting dart-sass from the {SASS_IMAGE} image to {SASS_CACHE} (once)")
+        SASS_CACHE.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["docker", "run", "--rm", "--user", f"{os.getuid()}:{os.getgid()}",
+                        "-v", f"{SASS_CACHE}:/out", "--entrypoint", "sh", SASS_IMAGE, "-c",
+                        "cp -r /usr/local/bundle/gems/sass-embedded-*/ext/sass/dart-sass /out/"],
+                       capture_output=True)
+    return str(exe) if exe.exists() else None
+
+
+def site_css(dst):
+    """Write the site's main.css to dst: compiled from _sass, else the preview server's copy."""
+    src = re.sub(r"\A---\n.*?---\n", "", (ROOT / "assets/css/main.scss").read_text(), flags=re.S)
+    width = re.search(r"^max_width:\s*(\S+)", (ROOT / "_config.yml").read_text(), re.M).group(1)
+    src = src.replace("{{ site.max_width }}", width)
+    if "{{" in src or "{%" in src:
+        sys.exit("main.scss has Liquid the preview does not know; teach site_css() about it")
+    exe = sass_bin()
+    if exe:
+        r = subprocess.run([exe, "--stdin", f"--load-path={ROOT / '_sass'}", "--style=compressed",
+                            "--no-source-map"], input=src, capture_output=True, text=True)
+        if r.returncode:
+            sys.exit(f"sass failed:\n{r.stderr}")
+        dst.write_text(r.stdout)
+        return "compiled from _sass"
+    try:
+        with urllib.request.urlopen(SERVED_CSS, timeout=5) as r:
+            css, stamp = r.read(), r.headers.get("Last-Modified")
+    except OSError as e:
+        sys.exit(f"no dart-sass (image {SASS_IMAGE} or DG_SASS) and no preview server at {SERVED_CSS}: {e}")
+    dst.write_bytes(css)
+    newest = max(f.stat().st_mtime for f in [ROOT / "assets/css/main.scss", *(ROOT / "_sass").glob("*.scss")])
+    if not stamp or newest > email.utils.parsedate_to_datetime(stamp).timestamp():
+        print("  warning: an SCSS file is newer than the served main.css; the preview may be stale",
+              file=sys.stderr)
+    return f"from {SERVED_CSS}"
+
+
+# What a biomolecule model is for: the input decides it. Prediction takes a sequence (plus ligands, partners)
+# and returns its structure; design takes a target or site and returns a new sequence and structure; the
+# ensemble emulators return many structures of one sequence.
+TASK = {"predicts": "structure prediction", "ensemble": "ensemble sampling", "design": "design"}
+TASK_OF = {"rfdiffusion": "design", "rfd3": "design", "rfd4": "design",
+           "bioemu": "ensemble", "bioemu2": "ensemble",
+           "af3": "predicts", "boltz2": "predicts", "openfold3": "predicts", "protenix": "predicts",
+           "esmfold2": "predicts", "mol1": "predicts", "pearl": "predicts"}
+
+
+def task_of(m):
+    return TASK[TASK_OF[m["id"]]] if m["domain"] == "bio" else ""
+
+
+def card_html(n, m, fig):
+    """One gallery card, as _projects/diffusion-architectures.md renders it."""
+    bio = m["domain"] == "bio"
+    paper = f'<a href="{m["url"]}" target="_blank" rel="noopener">{m["paper"]}</a>' if m.get("url") else m["paper"]
+    facts = [("Backbone", m["backbone"]), ("Parameters", m["params"]), ("Conditioning", m["conditioning"]),
+             ("Objective · steps", f'{m["objective"]} · {m["steps"]}')]
+    vs = f'<p class="dg-vs"><i aria-hidden="true"></i>Magenta outlines: new relative to {m["vs"]}.</p>' if m.get("vs") else ""
+    links = "".join(f'<a href="{u}" target="_blank" rel="noopener">{l.split(" · ")[0]} <span aria-hidden="true">↗</span></a>'
+                    for l, u in DETAILS.get(m["id"], {}).get("links", [])[:2])
+    return f"""<article class="dg-card" id="{m['id']}" data-id="{m['id']}" data-domain="{m['domain']}">
+  <header class="dg-cardhead">
+    <span class="dg-kind{' warm' if bio else ''}">{n:02d} · {'biomolecules · ' + task_of(m) if bio else 'images'} · {m['year']}</span>
+    <h2>{m['name']}</h2>
+    <button class="dg-btn" type="button">⤢ enlarge</button>
+  </header>
+  <button class="dg-figure" aria-label="{m['name']}">
+{fig.svg()}  </button>
+  <div class="dg-body">
+    <p class="dg-org">{m['org']} · {paper}</p>
+    <p class="dg-novelty">{m['novelty']}</p>
+    <dl class="dg-facts">{''.join(f'<div><dt>{a}</dt><dd>{b}</dd></div>' for a, b in facts)}</dl>
+    {vs}
+    <div class="dg-cardlinks"><button class="dg-explore" type="button">Explore {len(fig.blocks)} blocks <span aria-hidden="true">→</span></button>{links}</div>
+  </div>
+</article>
+"""
+
+
+def preview(ids, shot=False, shot_dir=SHOTS):
+    """Draw only the given cards into PREVIEW/index.html; with shot, PNGs light and dark."""
+    t0 = time.time()
+    by_id = {m["id"]: (n, m) for n, m in enumerate(MODELS, 1)}
+    if unknown := [i for i in ids if i not in by_id]:
+        sys.exit(f"unknown id(s) {unknown}; known: {' '.join(by_id)}")
+    PREVIEW.mkdir(exist_ok=True)
+    how = site_css(PREVIEW / "main.css")
+    cards = []
+    for i in ids:
+        n, m = by_id[i]
+        fig = m["draw"](m["id"])
+        check_details(m, fig)
+        if missing := {b["role"] for b in fig.blocks.values()} - set(ROLE_GLOSS):
+            print(f"  warning: {i}: no glossary for role(s) {sorted(missing)}", file=sys.stderr)
+        cards.append(card_html(n, m, fig))
+    rel = lambda f: os.path.relpath(ROOT / f, PREVIEW)
+    css = ["assets/vendor/bootstrap/bootstrap.min.css", "assets/vendor/mdb/css/mdb.min.css",
+           "assets/vendor/fonts/inter/inter.css", "assets/vendor/fonts/jetbrains-mono/jetbrains-mono.css"]
+    page = PREVIEW / "index.html"
+    page.write_text(f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gallery preview · {' '.join(ids)}</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+{''.join(f'<link rel="stylesheet" href="{rel(f)}">' for f in css)}
+<link rel="stylesheet" href="main.css">
+<style>.pv-bar {{ font: 12px 'JetBrains Mono', monospace; color: var(--global-text-color-light); display: flex; gap: 1rem; }}
+.pv-bar button {{ font: inherit; }} .dg-grid {{ align-items: start; }}</style>
+</head>
+<body>
+<div class="container mt-5"><div class="dg">
+<p class="pv-bar">preview · {time.strftime('%H:%M:%S')} · css {how}
+<button type="button" onclick="const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+document.documentElement.dataset.theme = t; history.replaceState(null, '', '?theme=' + t)">light / dark</button></p>
+<section class="dg-grid dg-wide">
+{''.join(cards)}</section>
+</div></div>
+</body>
+</html>
+""")
+    print(f"wrote {page.relative_to(ROOT)} ({len(ids)} card(s), css {how}) in {time.time() - t0:.1f} s", flush=True)
+    if shot:
+        node = shutil.which("node") or sys.exit("--shot needs node on PATH")
+        shot_dir.mkdir(parents=True, exist_ok=True)
+        subprocess.run([node, str(pathlib.Path(__file__).with_name("preview_shot.mjs")), str(page),
+                        str(shot_dir), *ids], check=True)
+        print(f"done in {time.time() - t0:.1f} s")
+
+
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser(description="Build the diffusion gallery, or preview a few cards without Jekyll.")
+    ap.add_argument("--preview-card", nargs="+", metavar="ID",
+                    help="draw only these models into bin/diffusion_gallery/preview/index.html; "
+                         "_includes/ and _data/ are left alone")
+    ap.add_argument("--shot", action="store_true",
+                    help="with --preview-card: PNGs at 2x, light and dark, gallery_<id>_{light,dark}.png")
+    ap.add_argument("--shot-dir", type=pathlib.Path, default=SHOTS, help=f"where --shot writes (default {SHOTS})")
+    a = ap.parse_args()
+    if a.preview_card:
+        preview(a.preview_card, a.shot, a.shot_dir)
+    elif a.shot:
+        ap.error("--shot needs --preview-card")
+    else:
+        main()
