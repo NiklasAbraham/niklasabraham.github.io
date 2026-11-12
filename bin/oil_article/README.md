@@ -5,11 +5,11 @@ Everything behind `/blog/2026/oil-market/` (`_posts/2026-10-26-oil-market.md`). 
 
 | Script | What it does | Output |
 |---|---|---|
-| `fetch.py` | EIA daily spot prices via FRED (WTI, Brent, NYH/USGC gasoline, ULSD, jet, heating oil) and EIA history workbooks (Cushing, US crude, SPR, distillate, gasoline stocks; utilisation; exports; production; retail gasoline and diesel) with curl, no key. `--force` re-downloads | `cache/*.csv`, `cache/*.xls` (gitignored) |
+| `fetch.py` | EIA daily spot prices via FRED (WTI, Brent, NYH/USGC gasoline, ULSD, jet, heating oil) and EIA history workbooks (Cushing, US crude, SPR, distillate, gasoline stocks; utilisation; exports; production; retail gasoline and diesel) with curl, no key. `--force` re-downloads | `cache/*.csv`, `cache/*.xls` (tracked, unlike the other posts: the downloads behind the prose numbers) |
 | `build.py` | Products to $/bbl, crack spreads (3-2-1 NYH vs WTI = the reel's, USGC vs WTI, NYH vs Brent; diesel and gasoline cracks; Brent−WTI), weekly history to 2024 + daily 2025–26 + monthly; weekly stocks; adds `curated.py` | `assets/oil-article/oil.json` (420 kB) |
 | `curated.py` | Every number that is not a downloaded series (yields, events, chokepoints, sea lanes, flows, places, Hormuz stages, countries, products, per-capita, breakevens, spare capacity, shut-ins, assays, North Sea basket, curve points, pump breakdowns), each sourced in a comment | → `oil.json["curated"]` |
 | `geo.py` | Natural Earth admin-0 (50m world in Equal Earth; 10m Gulf and North Sea, 50m Atlantic in scaled equirectangular) as SVG paths plus projection parameters | `assets/oil-article/geo.json` (440 kB) |
-| `shots.mjs` | Headless Playwright on the running preview: console errors, overflow, one screenshot per figure (`--phone` for 390 px, `--only=kind,…`) | `cache/shots/` |
+| `shots.mjs` | Headless Playwright on the running preview: console errors, overflow, one screenshot per figure (`--phone` for 390 px, `--only=kind,…`) | `cache/shots/` (gitignored) |
 | `anatomy/` | The isometric drawings made with the `anatomy` skill (refinery, crack-balance, vlcc, cushing-tank; light-only since 26 Oct 2026: column, fields, see `BRIEF-2.md`): each folder has `build.mjs`, `model.mjs`, README and shots; `BRIEF.md` is the shared brief | `assets/oil-article/anatomy/<name>.html` (+ `-light`) |
 
 Figures: `{% include oil.html kind=… %}` read by `assets/js/oil-explorer.js` (barrel, assay, boil, tbp, stages, crack, producers, us, demand,
