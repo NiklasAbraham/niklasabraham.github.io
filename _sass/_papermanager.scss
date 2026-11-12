@@ -1381,3 +1381,50 @@ $pm-themes: (
     span { font-weight: 400; color: var(--pm-muted); font-size: 0.92em; }
   }
 }
+
+// ---------------------------------------------------------------- reels row (1 to 3 vertical 720x1280 films)
+
+.pm-teardown { display: block; max-width: 62rem; }
+.pm-reels {
+  display: flex;
+  justify-content: center;
+  gap: 1.4rem;
+  margin: 0 auto;
+  .pm-film { flex: 0 1 300px; min-width: 0; margin: 0; }
+}
+.pm-teardown > .pm-caption { text-align: center; }
+
+@media (max-width: 860px) {
+  .pm-reels {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 0.6rem;
+    .pm-film { flex: 0 0 min(72vw, 300px); max-width: none; margin: 0; scroll-snap-align: center; }
+    // a single reel stays centred
+    .pm-film:only-child { margin: 0 auto; }
+  }
+}
+
+// ---------------------------------------------------------------- feature extras: definition list, bullets, 3-up
+
+.pm-defs {
+  margin: 0.9rem 0 0;
+  dt { font-weight: 600; color: var(--pm-ink); margin-top: 0.7rem; }
+  dd { margin: 0.1rem 0 0; font-size: 0.95em; color: inherit; }
+}
+.pm-list {
+  margin: 0.6rem 0 0.6rem !important;
+  padding-left: 1.1rem !important;
+  li { margin-bottom: 0.45rem !important; }
+}
+.pm-trio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  figcaption { font-size: 0.85rem; line-height: 1.45; }
+}
+@media (max-width: 860px) {
+  .pm-trio { grid-template-columns: 1fr; }
+}

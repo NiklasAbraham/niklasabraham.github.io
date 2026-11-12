@@ -1,7 +1,7 @@
 ---
 layout: default
 title: PaperManager
-description: A self-hosted second brain for research papers. Drop in a PDF and get a summary, figures, references, interactive concept visualisations, a guided tour and a concept map across your projects, all in one Neo4j knowledge graph you can search and chat with, plus a conference explorer for who publishes what at 22 conference series.
+description: A self-hosted second brain for research papers. Drop in a PDF and get a summary, figures, interactive concept visualisations and a guided tour; then filter, search and chat with your whole library (the chat shows its searches, cites its sources and draws figures and 3D structures), write cited long-read reports, track costs, and explore who publishes what at 22 conference series. One Neo4j graph, your own keys.
 importance: 0
 category: software
 permalink: /projects/papermanager/
@@ -224,104 +224,87 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     <div class="pm-card">
       <span class="pm-pn">3</span>
       <h3>Chatbots do not know your library</h3>
-      <p>A PDF pasted into a chat covers one paper, is forgotten afterwards, and cannot say how it relates to the two hundred before it.</p>
+      <p>A PDF pasted into a chat covers one paper, is forgotten afterwards, and cannot say how it relates to the two hundred before it. You upload, explain and start again every time.</p>
     </div>
   </div>
-  <p class="pm-solve"><strong>PaperManager puts it in one place.</strong> A single knowledge graph holds your papers, notes, concepts and citations, and every feature below reads from it.</p>
+  <p class="pm-solve"><strong>PaperManager puts it in one place.</strong> A single knowledge graph holds your papers, notes, highlights, concepts and citations. The chat, the search and the reports all read from it, so the next question starts where the last one ended.</p>
 </section>
 
-<!-- ============================================================ AI that knows your papers -->
-<section class="pm-section pm-knows" id="knows" style="max-width:72ch">
-  <div class="pm-section-head">
-    <p class="pm-kicker">AI is everywhere</p>
-    <h2>This one already knows your papers</h2>
-  </div>
-  <p>
-    Every app has a chat box now, and every one of them starts from zero: you upload the PDF again, explain your
-    project again, and get a wall of text back. PaperManager's chat already has your library. Ask what your highlight
-    on page 1 of a paper means, with no file attached, and it finds the paper, reads your highlight and the note you
-    left on it, and answers in a few lines with the page cited; click the citation and the paper opens beside the
-    conversation.
-  </p>
-  <p>
-    Where a picture explains better than prose, the answer comes with a <a href="#concepts">concept card</a>: the
-    formula taken apart term by term, or an animation of the idea you can pause where it gets interesting. Notes,
-    highlights, concepts and citations live in one graph, so the next question starts where the last one ended.
-  </p>
-</section>
-
-<!-- ============================================================ what it does to a paper -->
-<section class="pm-section pm-paper-demo" id="paper">
-  <div class="pm-section-head">
-    <p class="pm-kicker">What it does to a paper</p>
-    <h2>Read, marked up, summarised, pinned</h2>
-    <p>Highlights sweep the lines, concept marks land in the margin, the summary writes itself, figures and references are lifted out, and the tour pins its stops.</p>
-  </div>
-  <div class="pm-f-stage pm-demo-stage">
-    <div class="pm-f-bar" aria-hidden="true"><span></span><span></span><span></span><em>what PaperManager does to a page</em></div>
-    <canvas class="pm-canvas" data-scene="annotate" role="img"
-      aria-label="A paper's PDF page is read and annotated: colour-coded highlights sweep across lines, concept marks appear in the margin, a summary types itself beside the page, figures and tables are lifted into a side panel, references are collected, and quick-tour stops are pinned to the page."></canvas>
-  </div>
-</section>
-
-<!-- ============================================================ teardown film (reel 424, ConceptsPlots 110_reel_editor/epic_teardown_v.py) -->
+<!-- ============================================================ see it work: reels (teardown reel 424, ConceptsPlots 110_reel_editor/epic_teardown_v.py) -->
 <section class="pm-section pm-teardown" id="teardown">
-  <div class="pm-teardown-text">
-    <p class="pm-kicker">One paper, start to finish</p>
-    <h2>AlphaFold&nbsp;3, taken apart and tied into the library</h2>
-    <p>This is what happened to the AlphaFold&nbsp;3 paper when it went in: its 24 pages split, the 16 figures cut out, ten claims and the 48 authors pulled from the text, and the whole put back together as one card with its topics.</p>
-    <p>Then the card goes where it belongs. Twenty papers already in the library cite it and tie on one by one; the eight that belong to a thesis project light up; 27 more on protein structure prediction line up behind the topic. Every title, count and link in the film comes from the real library.</p>
+  <div class="pm-section-head">
+    <p class="pm-kicker">See it work</p>
+    <h2>One paper, taken apart and tied into the library</h2>
+    <p>The AlphaFold&nbsp;3 paper goes in: 24 pages split, 16 figures cut out, ten claims and 48 authors pulled from the text, all put back together as one card. Then twenty papers that cite it tie on, eight join a thesis project and 27 more on structure prediction line up behind its topic. Every title, count and link comes from the real library.</p>
   </div>
-  <figure class="pm-film">
-    <video src="{{ img }}teardown-af3.mp4" poster="{{ img }}teardown-af3-poster.webp" width="720" height="1280"
-      controls playsinline preload="none"
-      aria-label="Film, 36 seconds: the AlphaFold 3 paper is split into pages, figures, claims and authors, reassembled as a card, and then connected to the 20 library papers that cite it and 27 more on its topic"></video>
-    <figcaption>36 s, with sound. Rendered from PaperManager's own data.</figcaption>
-  </figure>
+  <div class="pm-reels">
+    <figure class="pm-film">
+      <video src="{{ img }}teardown-af3.mp4" poster="{{ img }}teardown-af3-poster.webp" width="720" height="1280"
+        controls playsinline preload="none"
+        aria-label="Film, 36 seconds: the AlphaFold 3 paper is split into pages, figures, claims and authors, reassembled as a card, and then connected to the 20 library papers that cite it and 27 more on its topic"></video>
+      <figcaption>Ingest and connect. 36 s, with sound.</figcaption>
+    </figure>
+    <figure class="pm-film">
+      <video src="{{ img }}reel-chat.mp4" poster="{{ img }}reel-chat-poster.webp" width="1080" height="1920"
+        controls playsinline preload="none"
+        aria-label="Screen recording, 41 seconds: the PaperManager chat answers a question about AlphaFold 3. Tool calls find the paper, 28 library papers cite it and 16 figures are pulled in. A 3D structure of the SARS-CoV-2 spike spins, then the sources open."></video>
+      <figcaption>Ask the library: graph queries, figures, a 3D structure and every source linked. 41 s, with sound.</figcaption>
+    </figure>
+    <figure class="pm-film">
+      <video src="{{ img }}reel-search.mp4" poster="{{ img }}reel-search-poster.webp" width="1080" height="1920"
+        controls playsinline preload="none"
+        aria-label="Screen recording, 40 seconds: a search for protein binder design gives 83 results; filters for 2024, unread, with PDF and the tag de-novo-design narrow it to five papers."></video>
+      <figcaption>1,173 papers, one query, four filters: the five you need. 40 s, with sound.</figcaption>
+    </figure>
+  </div>
+  <p class="pm-caption">Rendered from PaperManager's own data and recorded in its own interface. Music in the two screen recordings: Kevin MacLeod (incompetech.com), CC BY 4.0.</p>
 </section>
 
 <!-- ============================================================ features -->
 <section class="pm-section" id="features">
   <div class="pm-section-head">
-    <p class="pm-kicker">Features</p>
-    <h2>What it does</h2>
+    <p class="pm-kicker">What it does</p>
+    <h2>Add, find, read, ask, write</h2>
   </div>
 
-  <div class="pm-feature">
+  <div class="pm-feature" id="library">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">1 · Get papers in</p>
+      <p class="pm-kicker">Add</p>
       <h3>Add a paper in seconds</h3></div>
       <div class="pm-feature-body">
       <p>Drop a PDF or paste an arXiv, DOI, PubMed or bioRxiv link. Metadata, duplicate check, summary, topics, figures and references are done for you. You check the details once, and nothing is saved before that.</p>
-      <p>Every DOI and arXiv id in an extracted reference list is looked up at doi.org and arXiv before you see it, with no AI involved: ids that do not exist, or that belong to another paper than the title says, are dropped, so a citation is never linked to the wrong paper. A paper's list takes a second or two. Run over the existing library, the same check found 82 bad ids among 5,061 citation stubs, mostly DOIs cut at a line break.</p>
+      <p>Every DOI and arXiv id in a reference list is looked up at doi.org and arXiv before you see it, with no AI involved. Ids that do not exist, or belong to another paper, are dropped, so a citation never links to the wrong paper.</p>
     </div></div>
     <figure class="pm-shot"><a href="{{ img }}library.webp"><img src="{{ img }}library.webp" width="1600" height="1000" loading="lazy"
-      alt="Library dashboard with paper, author, topic and tag counts, papers by year, top topics, recently added papers and venues"></a></figure>
+      alt="Library landing page: one search bar with a filter button, Continue reading, Recently added papers and library counts"></a></figure>
   </div>
 
   <div class="pm-feature" id="search">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">2 · Search</p>
+      <p class="pm-kicker">Find</p>
       <h3>Find a paper by whatever you remember of it</h3></div>
       <div class="pm-feature-body">
-      <p>One search box covers titles, authors, topics, tags, abstracts and summaries, your notes, your PDF highlights and their comments, extracted claims and the full text. A DOI or arXiv id goes straight to its paper. Words match as prefixes and tolerate one typo; case and accents do not matter.</p>
-      <p>Every hit says where it matched, with the matching words marked in a passage. While you type, suggestions list papers, authors, topics, tags and projects. <em>Exact</em> matches words, <em>Meaning</em> ranks by what the title and abstract mean, <em>Hybrid</em> combines the two; the library's embeddings (bge-small-en-v1.5) are kept in sync in the background.</p>
-      <p>On 26 realistic queries the expected paper is in the top 3 for all 26. The previous search managed 17.</p>
+      <p>One search box covers titles, authors, topics, tags, abstracts, summaries, your notes, your highlights, extracted claims and the full text. Every hit says where it matched. <em>Exact</em>, <em>Meaning</em> and <em>Hybrid</em> modes rank by words, by what the abstract means, or both. On 26 realistic queries the expected paper is in the top 3 for all 26.</p>
+      <p>Narrow the list by date added (presets or a range), year, reading status, has PDF, text, note or highlights, rating, type, project, tag, topic and venue, and sort it new ways. The filters sit in the URL, so a filtered view can be bookmarked or shared. Browsing and filtering are two to three times faster than before.</p>
     </div></div>
-    <div class="pm-pair">
-      <figure class="pm-shot"><a href="{{ img }}search.webp"><img src="{{ img }}search.webp" width="1600" height="1000" loading="lazy"
-        alt="Library search for flow matching: 160 results in hybrid mode, each with chips saying where it matched (title, topic, abstract, summary, claim, full text, meaning score) and passages with the query words marked"></a></figure>
-      <figure class="pm-shot"><a href="{{ img }}search-suggest.webp"><img src="{{ img }}search-suggest.webp" width="1600" height="1000" loading="lazy"
-        alt="Type-ahead after typing karr: the authors Brian Karrer and Tero Karras are suggested with their paper counts, above papers matched by author and full text"></a></figure>
-    </div>
+    <figure class="pm-shot"><a href="{{ img }}search-filters.webp"><img src="{{ img }}search-filters.webp" width="1600" height="1000" loading="lazy"
+      alt="Library search with the filter panel open: date added, year range, status, rating, project, tag, topic and venue filters above the result list"></a></figure>
   </div>
 
-  <div class="pm-feature">
+  <div class="pm-feature" id="read">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">3 · Read with help</p>
+      <p class="pm-kicker">Read</p>
       <h3>Understand a paper next to its PDF</h3></div>
       <div class="pm-feature-body">
-      <p>The summary splits the paper into contribution, methods, inputs and outputs, with the maths typeset. Highlight in five colours, keep notes that link <code>@people</code> and <code>#topics</code> into the graph, and ask about the paper or a single figure.</p>
+      <p>The summary splits a paper into contribution, methods, inputs and outputs, with the maths typeset. Highlight in five colours, keep notes that link <code>@people</code> and <code>#topics</code> into the graph, and ask about the paper or a single figure.</p>
+      <dl class="pm-defs" id="concepts">
+        <dt>Concepts</dt>
+        <dd>Every page is scanned for ideas a picture explains better than prose. Each becomes an animation, a formula taken apart, or a plot of the paper's own numbers, marked on the PDF where it belongs. Adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0); animations run in a sandboxed frame.</dd>
+        <dt>Quick tour</dt>
+        <dd>An overview, a list of what to skip, then 6 to 12 stops: the problem, the key equation, the main result. Each stop jumps the PDF to a verbatim passage.</dd>
+        <dt>Concept map</dt>
+        <dd>Group papers into a project and their key concepts are mapped and shared across papers: methods, models, datasets, metrics. The map in the top right shows 210 thesis papers.</dd>
+      </dl>
     </div></div>
     <div class="pm-pair">
       <figure class="pm-shot"><a href="{{ img }}summary.webp"><img src="{{ img }}summary.webp" width="1600" height="1000" loading="lazy"
@@ -331,53 +314,18 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     </div>
   </div>
 
-  <div class="pm-feature" id="concepts">
-    <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">4 · Concepts</p>
-      <h3>See the idea instead of decoding it</h3></div>
-      <div class="pm-feature-body">
-      <p>Every page is scanned for ideas a picture explains better than prose: a sampler, a loss, a scaling law. Each becomes an animation, a formula broken into its parts, or a plot of the paper's own numbers, marked on the PDF where it belongs.</p>
-      <p class="pm-fine">Adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0). Animations run in a sandboxed frame.</p>
-    </div></div>
-    <figure class="pm-shot"><a href="{{ img }}concepts.webp"><img src="{{ img }}concepts.webp" width="1600" height="1000" loading="lazy"
-      alt="Concepts tab: an animated vector field of the probability flow ODE next to the PDF page it explains"></a></figure>
-  </div>
-
-  <div class="pm-feature">
-    <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">5 · Quick tour</p>
-      <h3>Skim a long paper without getting lost</h3></div>
-      <div class="pm-feature-body">
-      <p>An overview, a list of what you can safely skip, then 6 to 12 stops: the problem, the key equation, the main result. Each stop jumps the PDF to a verbatim passage. Step through with the arrow keys.</p>
-    </div></div>
-    <figure class="pm-shot"><a href="{{ img }}tour.webp"><img src="{{ img }}tour.webp" width="1600" height="1000" fetchpriority="high"
-      alt="Tour tab for the Feynman-Kac Correctors paper: overview, what to skip, and stop 2 of 11 opened next to the equations on page 3"></a></figure>
-  </div>
-
-  <div class="pm-feature">
-    <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">6 · Project concept map</p>
-      <h3>See how a whole field fits together</h3></div>
-      <div class="pm-feature-body">
-      <p>Group papers into a project and every paper's key concepts are mapped and shared across papers: methods, models, datasets, metrics. Size counts papers, colour is the kind of concept, citations are drawn in.</p>
-      <p>Here: 210 thesis papers, image diffusion at the top, protein structure at the bottom.</p>
-    </div></div>
-    <figure class="pm-shot"><a href="{{ img }}concept-map.webp"><img src="{{ img }}concept-map.webp" width="1600" height="1000" loading="lazy"
-      alt="Force-directed concept map of 210 papers, with concepts such as Diffusion Models, Flow Matching, Memorization, AlphaFold3 and Protein Folding coloured by kind"></a></figure>
-  </div>
-
   <div class="pm-feature pm-feature-chat" id="chat">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">7 · Knowledge chat</p>
-      <h3>Ask your whole library</h3></div>
+      <p class="pm-kicker">Ask</p>
+      <h3>A chat that already knows your library</h3></div>
       <div class="pm-feature-body">
-      <p>
-        Answers come from your papers and cite them. Every citation is a link: click it and the paper
-        opens beside the conversation. Scope a question with <code>@project:</code>, <code>@topic:</code>,
-        <code>@paper:</code>, <code>@person:</code> or <code>@user:</code> (what a teammate has been reading).
-        It follows the graph, runs its own graph queries and searches the web when the library is not enough.
-      </p>
-      <p>Choose the model per conversation: Claude through the API, Claude Code on a subscription, or any OpenAI-compatible model through LiteLLM.</p>
+      <p>Ask without attaching a file. The chat finds the paper, reads your highlight and the note you left on it, and answers with the page cited. Scope a question with <code>@project:</code>, <code>@topic:</code>, <code>@paper:</code>, <code>@person:</code> or <code>@user:</code>. Pick the model per conversation: Claude through the API or on a subscription, or any OpenAI-compatible model through LiteLLM.</p>
+      <ul class="pm-list">
+        <li><strong>You see the work.</strong> Each search, graph query and paper it reads shows as a row, and answers stream in live. Stop or retry any time.</li>
+        <li><strong>Sources under every answer.</strong> A row of the papers it used, each a link that opens the paper beside the chat.</li>
+        <li><strong>Figures and structures.</strong> Figure strips from the cited papers open in a lightbox. Protein cards load PDB entries, ligands by CCD or PubChem id, alignments and highlighted residues in 3D.</li>
+        <li><strong>Maths you can copy.</strong> Formulas are typeset with KaTeX; one click copies the TeX.</li>
+      </ul>
     </div></div>
     <div class="pm-chat-stage pm-bleed">
       <div class="pm-chat-pitch">
@@ -412,18 +360,35 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
       Concept visualisations are adapted from <a href="https://github.com/beltromatti/get-it">Get It.</a> by beltromatti (Apache-2.0);
       structures are drawn with <a href="https://3dmol.csb.pitt.edu">3Dmol.js</a> (BSD-3-Clause).
     </p>
+
+    <div class="pm-pair" style="margin-top:1.6rem">
+      <figure class="pm-shot"><a href="{{ img }}chat-tools.webp"><img src="{{ img }}chat-tools.webp" width="1600" height="1000" loading="lazy"
+        alt="Knowledge chat answer with tool-call rows showing what it searched and read, and a sources row of linked papers under the answer"></a></figure>
+      <figure class="pm-shot"><a href="{{ img }}chat-structure.webp"><img src="{{ img }}chat-structure.webp" width="1600" height="1000" loading="lazy"
+        alt="Knowledge chat answer with a 3D structure card of a protein with highlighted residues"></a></figure>
+    </div>
+  </div>
+
+  <div class="pm-feature" id="reports">
+    <div class="pm-feature-text"><div class="pm-feature-head">
+      <p class="pm-kicker">Write</p>
+      <h3>Long-read reports from your own papers</h3></div>
+      <div class="pm-feature-body">
+      <p>Pick a project, tag or question and PaperManager writes a long report in the background: a plan, then section by section, drawn from your library, with a citation for each claim. Read it in the app and export it as HTML or Markdown. The citations link back to the papers.</p>
+    </div></div>
+    <figure class="pm-shot"><a href="{{ img }}report-view.webp"><img src="{{ img }}report-view.webp" width="1600" height="1000" loading="lazy"
+      alt="A generated report open in PaperManager: headed sections with citations that link to library papers and export buttons"></a></figure>
   </div>
 
   <div class="pm-feature" id="conferences">
     <div class="pm-feature-text"><div class="pm-feature-head">
-      <p class="pm-kicker">8 · Conference explorer</p>
+      <p class="pm-kicker">Explore</p>
       <h3>See who publishes what, at every major conference</h3></div>
       <div class="pm-feature-body">
-      <p>The Conferences tab reads the accepted papers of 22 conference series two ways. By institution: rank, full and fractional paper counts, the research-area mix against the whole conference, the main collaborators and every paper. By topic: type one or paste an abstract, and see which universities and companies publish most on it and which papers are closest.</p>
-      <p>One search box covers every loaded conference at once. Papers are found by title and by meaning; an author comes back with all their papers per conference and the institution given on each; a topic shows papers per 1,000 at each conference, the change from one year to the next (NeurIPS 2025 → 2026) and the top universities and companies pooled. Case and accents do not matter.</p>
-      <p>On "diffusion models for protein structure", ICLR 2026 and NeurIPS 2025 hold about 12 close papers per 1,000, ACL and CoRL none; MIT and Tsinghua lead the universities, Google the companies.</p>
-      <p>Papers already in your library are marked. One click adds a paper with its authors and their affiliations.</p>
-      <p class="pm-fine">NeurIPS, ICML, ICLR, AISTATS, UAI, COLT · CVPR, ICCV, ECCV, WACV · ACL, EMNLP, NAACL, COLM · AAAI, IJCAI · CoRL, RSS, ICRA, IROS · KDD, WWW. Paper lists come from the official conference sites, author institutions included, and from <a href="https://github.com/papercopilot/paperlists">Paper Copilot</a>. Embeddings (<a href="https://huggingface.co/BAAI/bge-small-en-v1.5">bge-small-en-v1.5</a>) are computed on your own server; no API key is involved.</p>
+      <p>The Conferences tab reads the accepted papers of 22 conference series two ways. By institution: rank, full and fractional paper counts, the research-area mix against the whole conference, main collaborators and every paper. By topic: type one or paste an abstract, and see which universities and companies publish most on it and which papers are closest.</p>
+      <p>One search box covers every loaded conference. Papers are found by title and by meaning; an author comes back with all their papers and the institution given on each; a topic shows papers per 1,000 at each conference and the change from one year to the next. On "diffusion models for protein structure", ICLR 2026 and NeurIPS 2025 hold about 12 close papers per 1,000, ACL and CoRL none; MIT and Tsinghua lead the universities, Google the companies.</p>
+      <p>Papers already in your library are marked. One click adds a paper with its authors and affiliations.</p>
+      <p class="pm-fine">NeurIPS, ICML, ICLR, AISTATS, UAI, COLT · CVPR, ICCV, ECCV, WACV · ACL, EMNLP, NAACL, COLM · AAAI, IJCAI · CoRL, RSS, ICRA, IROS · KDD, WWW. Paper lists come from the official conference sites and from <a href="https://github.com/papercopilot/paperlists">Paper Copilot</a>. Embeddings (<a href="https://huggingface.co/BAAI/bge-small-en-v1.5">bge-small-en-v1.5</a>) are computed on your own server; no API key is involved.</p>
     </div></div>
     <figure class="pm-shot"><a href="{{ img }}conferences.webp"><img src="{{ img }}conferences.webp" width="1600" height="1000" loading="lazy"
       alt="NeurIPS 2026 in the conference explorer: 6,024 accepted papers, the research-area mix of the conference as one bar, and the top universities and top companies by paper count"></a></figure>
@@ -435,36 +400,44 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     </div>
   </div>
 
-  <div class="pm-grid">
-    <div class="pm-card">
-      <i class="fas fa-plug pm-icon"></i>
-      <h3>MCP server</h3>
-      <p>41 tools for Claude Desktop and Claude Code: search the library, check a list of cited DOIs or titles against it in one cheap call, read a paper, add notes and tags, upload PDFs, merge duplicates, ask who publishes on a topic at a conference.</p>
+  <div class="pm-feature" id="graph">
+    <div class="pm-feature-text"><div class="pm-feature-head">
+      <p class="pm-kicker">Go deeper</p>
+      <h3>One graph you can browse, query and script</h3></div>
+      <div class="pm-feature-body">
+      <ul class="pm-list">
+        <li><strong>Graph tool.</strong> Papers, people, topics and projects as a graph, with a query panel for your own Cypher. Results show as a graph and as a table.</li>
+        <li><strong>MCP server.</strong> 42 tools for Claude Desktop and Claude Code: search, read, tag, upload PDFs, merge duplicates, check a list of cited DOIs against the library in one call.</li>
+        <li><strong>Find papers.</strong> Literature search across arXiv, Semantic Scholar and PubMed, with author tracking and related-paper suggestions in the same place.</li>
+        <li><strong>Clean data.</strong> Duplicate detection and a merge manager, so citation stubs and uploaded PDFs resolve to one paper.</li>
+      </ul>
+      <p>Navigation is four entries, Library, Projects, People and Chat, plus Explore, Tools and Account menus.</p>
+    </div></div>
+    <div class="pm-pair">
+      <figure class="pm-shot"><a href="{{ img }}graph-query.webp"><img src="{{ img }}graph-query.webp" width="1600" height="1000" loading="lazy"
+        alt="Graph tool with the query panel open: a Cypher query, its result drawn as a graph and listed as a table"></a></figure>
+      <figure class="pm-shot"><a href="{{ img }}nav-explore.webp"><img src="{{ img }}nav-explore.webp" width="1600" height="1000" loading="lazy"
+        alt="The Explore menu in the top navigation, next to Library, Projects, People and Chat"></a></figure>
     </div>
-    <div class="pm-card">
-      <i class="fas fa-project-diagram pm-icon"></i>
-      <h3>Graph and Cypher</h3>
-      <p>Everything lives in Neo4j. Browse papers, people, topics and projects as a graph, or query it directly in the built-in Cypher editor.</p>
-    </div>
-    <div class="pm-card">
-      <i class="fas fa-search pm-icon"></i>
-      <h3>Discovery</h3>
-      <p>Literature search across arXiv, Semantic Scholar and PubMed, author tracking, RSS blogs, related-paper suggestions and the <a href="#conferences">conference explorer</a>.</p>
-    </div>
-    <div class="pm-card">
-      <i class="fas fa-lightbulb pm-icon"></i>
-      <h3>Synthesis</h3>
-      <p>Cross-paper synthesis, claim extraction and a research-gap finder that reads a whole project or tag at once.</p>
-    </div>
-    <div class="pm-card">
-      <i class="fas fa-users pm-icon"></i>
-      <h3>Teams</h3>
-      <p>Admin-managed accounts, shared projects and per-user API keys, with JWT login and rate limiting.</p>
-    </div>
-    <div class="pm-card">
-      <i class="fas fa-clone pm-icon"></i>
-      <h3>Clean data</h3>
-      <p>Duplicate detection and a merge manager, so citation stubs and uploaded PDFs resolve to one paper.</p>
+  </div>
+
+  <div class="pm-feature pm-feature-team" id="team">
+    <div class="pm-feature-text"><div class="pm-feature-head">
+      <p class="pm-kicker">Run it as a team</p>
+      <h3>Know what it costs, and what to build next</h3></div>
+      <div class="pm-feature-body">
+      <p>Accounts are admin-managed, with shared projects, per-user API keys, JWT login and rate limiting. Three pages keep a shared install honest.</p>
+    </div></div>
+    <div class="pm-trio">
+      <figure class="pm-shot"><a href="{{ img }}tokens.webp"><img src="{{ img }}tokens.webp" width="1600" height="1000" loading="lazy"
+        alt="Tokens page: cost of LLM calls by feature, model and user"></a>
+        <figcaption><strong>Tokens.</strong> Every LLM call is logged, with cost per feature, model and user.</figcaption></figure>
+      <figure class="pm-shot"><a href="{{ img }}suggestions.webp"><img src="{{ img }}suggestions.webp" width="1600" height="1000" loading="lazy"
+        alt="Suggestions page: improvement ideas with vote counts and status"></a>
+        <figcaption><strong>Suggestions.</strong> The chat proposes an improvement as a chip. People vote; status is tracked.</figcaption></figure>
+      <figure class="pm-shot"><a href="{{ img }}health.webp"><img src="{{ img }}health.webp" width="1600" height="1000" loading="lazy"
+        alt="Health page: admin view of the database, providers and background jobs"></a>
+        <figcaption><strong>Health.</strong> An admin view of the database, providers and background jobs.</figcaption></figure>
     </div>
   </div>
 </section>
@@ -475,9 +448,9 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
     <p class="pm-kicker">How it works</p>
     <h2>One graph in the middle</h2>
     <p>
-      A React app talks to a FastAPI backend. Every paper, author, topic, tag, note, concept and
-      citation is a node or relationship in Neo4j; PDFs live in Google Drive; every prompt is a
-      plain text file you can edit.
+      A React app and Claude's MCP tools talk to one FastAPI backend. Every paper, author, topic,
+      note, concept and citation is a node or relationship in Neo4j. PDFs live in local storage or
+      Google Drive. Every prompt is a plain text file you can edit.
     </p>
   </div>
 
@@ -521,11 +494,11 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
   <div class="pm-grid" style="margin-top:1rem">
     <div class="pm-card">
       <h3>Models where they fit</h3>
-      <p>Claude writes summaries, answers chats and builds tours. A smaller model through LiteLLM handles bulk work such as the concept map. Without a GPU, Docling runs on the CPU inside the container, and so does bge-small-en-v1.5, which embeds your library for search by meaning and the conference papers.</p>
+      <p>Claude writes summaries, answers chats and builds tours. A smaller model handles bulk work such as the concept map. Without a GPU, Docling and the search embeddings (bge-small-en-v1.5) run on the CPU inside the container.</p>
     </div>
     <div class="pm-card">
       <h3>Your data stays yours</h3>
-      <p>Self-hosted: your database, your Drive, your API keys. Nothing is shared unless you add teammates.</p>
+      <p>Your database, your storage, your API keys. Every LLM call is logged on the Tokens page. Nothing is shared unless you add teammates.</p>
     </div>
   </div>
 </section>
@@ -535,10 +508,7 @@ Heroes A, B, C, D kept for later; the page shows hero E only.
   <div class="pm-section-head">
     <p class="pm-kicker">Set it up</p>
     <h2>Ask your coding agent to set it up</h2>
-    <p>
-      You don't have to read a setup guide. Open Claude Code, Codex or any other coding agent on
-      your computer and paste this:
-    </p>
+    <p>Open Claude Code, Codex or any coding agent on your computer and paste this:</p>
   </div>
 
   <div class="pm-agent-prompt">
@@ -549,13 +519,13 @@ https://github.com/NiklasAbraham/PaperManager/blob/main/DEPLOY.md</code></pre>
 
   <p class="pm-agent-lede">
     <a href="{{ repo }}/blob/main/DEPLOY.md"><code>DEPLOY.md</code></a> is a runbook written for the
-    agent, not for you. The agent works through it with you:
+    agent. It works through it with you:
   </p>
 
   <ol class="pm-steps">
     <li>
       <h3>It checks your machine</h3>
-      <p>Git and Docker must be present and Docker must be running. If something is missing, the agent explains how to install it and asks before it installs anything.</p>
+      <p>Git and Docker must be installed, and Docker must be running. If not, it explains how to fix that and asks before installing anything.</p>
     </li>
     <li>
       <h3>It asks four questions</h3>
@@ -567,11 +537,10 @@ https://github.com/NiklasAbraham/PaperManager/blob/main/DEPLOY.md</code></pre>
     <li>
       <h3>It writes your settings and starts the app</h3>
       <p>
-        Every answer goes into <code>.env</code>, and the app adapts to it. With an Anthropic key,
-        summaries, topics and the concept map run on Claude Haiku and chat runs on Claude. With an
-        OpenAI key, everything runs on GPT-5 mini. The model menus show the model you actually have,
-        and the interface takes your colour. The agent generates the passwords and secrets itself;
-        you paste your API key into the file, so it never passes through the chat.
+        Every answer goes into <code>.env</code>. With an Anthropic key, summaries, topics and the
+        concept map run on Claude Haiku and chat runs on Claude. With an OpenAI key, everything runs
+        on GPT-5 mini. The agent generates passwords and secrets itself; you paste your API key into
+        the file, so it never passes through the chat.
       </p>
     </li>
     <li>
@@ -585,9 +554,9 @@ https://github.com/NiklasAbraham/PaperManager/blob/main/DEPLOY.md</code></pre>
   </ol>
 
   <p class="pm-agent-lede">
-    You need no GPU, no LLM proxy and no Google account. Plan for about 15 minutes; most of it is the
-    first Docker build. To do it by hand, every step in <code>DEPLOY.md</code> is a plain command.
-    Heroku hosting, servers and Google Drive storage are in the
+    No GPU, LLM proxy or Google account needed. Plan for about 15 minutes, mostly the first Docker
+    build. Every step in <code>DEPLOY.md</code> is also a plain command. Heroku, servers and Google
+    Drive storage are in the
     <a href="{{ docs }}self_hosting/">self-hosting guide</a>.
   </p>
 </section>
