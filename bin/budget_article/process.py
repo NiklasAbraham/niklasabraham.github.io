@@ -195,3 +195,9 @@ for iso in COUNTRIES:
     tot = sum(c["cofog"][ly][k] for k in L1)
     wexp = c["fiscal"]["exp"][c["fiscal"]["years"].index(int(ly))] if int(ly) in c["fiscal"]["years"] else None
     print(f"{iso:4} {ly:6} {c['src'][ly]:9} {c['sector'][ly]:8} {tot:6.1f} {wexp!s:7} {len(ys):4}  {sorted(c['econ'])[-1:]}")
+
+# ------------------------------------------------------------------ central government
+# budget.json is rewritten above without country['central'] (the "Central government only" switch);
+# central.py merges it back from the cached IMF S1311/S1321 files, so a rebuild never drops it.
+import runpy  # noqa: E402
+runpy.run_path(str(pathlib.Path(__file__).with_name("central.py")), run_name="__main__")

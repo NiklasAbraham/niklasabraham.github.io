@@ -6,6 +6,7 @@ Everything behind `/blog/2026/national-budgets/` (`_posts/2026-10-18-national-bu
 |---|---|---|
 | `fetch.py` | Downloads raw data with curl: IMF (GFS_COFOG, GFS_SOO, FM, WEO via api.imf.org SDMX 3.0 CSV), Eurostat (gov_10a_exp, nama_10_gdp), OECD (table 11), World Bank (SIPRI military). `--force` re-downloads. About 600 MB, takes a few minutes | `cache/` (gitignored) |
 | `process.py` | Merges them (Eurostat for the 11 EU members, OECD for Korea and Australia where newer than the IMF, IMF otherwise), builds COFOG % of GDP per year, revenue and economic-type splits, fiscal series, prints checks | `assets/budget-article/budget.json` |
+| `central.py` | Central-government COFOG (IMF S1311, S1321 where missing) merged into `budget.json` as `country.central` for the "Central government only" switch; `process.py` runs it at its end (run it alone after editing it) | `assets/budget-article/budget.json` |
 | `profiles.py` | One generated card per country (every sentence computed; hand-written caveats in `CAVEAT`) | `_includes/budget-article/profiles.html` |
 | `facts.py` | Prints the rankings quoted in the prose | stdout |
 
